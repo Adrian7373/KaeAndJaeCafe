@@ -171,6 +171,18 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Contact Section */}
+      <section className="bg-kae-light p-10 flex flex-col items-center gap-10 ">
+        <h2 className="text-kae-dark text-2xl text-center font-bold">CONTACT US</h2>
+        <form className="flex flex-col items-center gap-2" action="">
+          <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="name" placeholder="Your Name" />
+          <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="email" placeholder="Your Email" />
+          <textarea className="border-1 p-1 w-80 border-gray-500 rounded-sm h-50" name="message" id="message" placeholder="Your Message"></textarea>
+          <button className="mr-auto bg-kae-dark text-kae-light py-2 px-4 rounded-full">Submit</button>
+        </form>
+      </section>
+
     </div>
   )
 }
