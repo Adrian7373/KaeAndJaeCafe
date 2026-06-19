@@ -1,5 +1,6 @@
 import TestimonialSlider from "@/components/TestimonialsSlider"
 import { Clock, Mail, MapPin, Phone } from "lucide-react"
+import { FaFacebook, FaFacebookMessenger } from "react-icons/fa"
 
 export default function Home() {
   return (
@@ -212,6 +213,10 @@ export default function Home() {
 
       <footer className="bg-kae-dark p-5 flex flex-col items-center gap-3">
         <h2 className="text-kae-light font-md font-inter">© 2026 Kae and Jae Cafe</h2>
+        <div className="flex gap-2">
+          <FaFacebook className="w-8 h-8 text-kae-light" />
+          <FaFacebookMessenger className="w-8 h-8 text-kae-light" />
+        </div>
       </footer>
 
     </div>
