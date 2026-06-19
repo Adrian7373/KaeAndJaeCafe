@@ -57,6 +57,9 @@ export default function Home() {
       </section>
 
       {/* Menu Section */}
+      <section>
+
+      </section>
     </div>
   )
 }
