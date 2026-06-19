@@ -145,11 +145,29 @@ export default function Home() {
       </section>
 
       {/* Gallery Section */}
-      <section className="p-6 flex flex-col gap-10">
+      <section className="p-6 flex flex-col gap-10 bg-kae-pink">
         <h2 className="text-kae-light text-2xl text-center font-bold">GALLERY</h2>
-        <div className="grid grid-cols-1">
-          <div className="w-85 h-45 overflow-hidden">
-            <img className="w-full h-full object-cover" src="gallery-1.jpg" alt="" />
+        <div className="grid grid-cols-1 gap-6">
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-1.jpg" alt="Chicken sandwich" />
+          </div>
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-2.jpg" alt="Spicy noodles with egg and spam" />
+          </div>
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-3.jpg" alt="Fish cake" />
+          </div>
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-4.jpg" alt="Chicken poppers with rice" />
+          </div>
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-7.jpg" alt="Corndogs" />
+          </div>
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-6.jpg" alt="Waffles with chocolate and almonds toppings" />
+          </div>
+          <div className="w-85 h-45 overflow-hidden rounded-md">
+            <img className="w-full h-full object-cover" src="gallery-5.jpg" alt="Various beverages" />
           </div>
         </div>
       </section>
