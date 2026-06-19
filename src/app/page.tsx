@@ -1,4 +1,5 @@
 import TestimonialSlider from "@/components/TestimonialsSlider"
+import { Clock, Mail, MapPin, Phone } from "lucide-react"
 
 export default function Home() {
   return (
@@ -173,7 +174,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section className="bg-kae-light p-10 flex flex-col items-center gap-10 ">
+      <section className="bg-kae-light py-10 px-6 flex flex-col items-center gap-10 ">
         <h2 className="text-kae-dark text-2xl text-center font-bold">CONTACT US</h2>
         <form className="flex flex-col items-center gap-2" action="">
           <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="name" placeholder="Your Name" />
@@ -181,7 +182,37 @@ export default function Home() {
           <textarea className="border-1 p-1 w-80 border-gray-500 rounded-sm h-50" name="message" id="message" placeholder="Your Message"></textarea>
           <button className="mr-auto bg-kae-dark text-kae-light py-2 px-4 rounded-full">Submit</button>
         </form>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <MapPin />
+            <p>Zone 3, Camp Tinio, Cabanatuan City, Philippines, 3100</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Mail />
+            <p>kaeandjae@gmail.com</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Phone />
+            <p>0966 632 8432</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock />
+            <p>
+              Monday - Saturday: 10:00 AM - 6:00 PM
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Clock />
+            <p>
+              Sunday: Closed
+            </p>
+          </div>
+        </div>
       </section>
+
+      <footer className="bg-kae-dark p-5 flex flex-col items-center gap-3">
+        <h2 className="text-kae-light font-md font-inter">© 2026 Kae and Jae Cafe</h2>
+      </footer>
 
     </div>
   )
