@@ -1,4 +1,4 @@
-
+import TestimonialSlider from "@/components/TestimonialsSlider"
 
 export default function Home() {
   return (
@@ -59,7 +59,7 @@ export default function Home() {
       {/* Menu Section */}
       <section>
         <div className="flex flex-col items-center p-6 bg-kae-dark">
-          <h2 className="text-kae-light text-xl">OUR MENU</h2>
+          <h2 className="text-kae-light text-xl font-semibold">OUR MENU</h2>
           <div>
             <div className="flex flex-col items-center">
               <img className="w-60 h-60" src="chicken-meals.svg" alt="chicken meals" />
@@ -105,6 +105,51 @@ export default function Home() {
               <img className="w-60 h-60" src="various-beverages.svg" alt="Various Beverages" />
               <p className="text-libertinus-serif text-kae-light text-lg font-medium">Various Beverages</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="flex flex-col items-center bg-kae-light p-6 h-dvh gap-15">
+        <h2 className="text-kae-dark text-2xl text-center font-bold">TESTIMONIALS</h2>
+        {/*
+              <ul className="swiper-wrapper">
+                <li className="swiper-slide flex flex-col items-center gap-6">
+                  <img className="rounded-full object-cover border-1" src="skusta-clee.png" alt="Skusta Clee" />
+                  <h3 className="text-center text-lg font-bold font-roboto">Skusta Clee</h3>
+                  <p className="text-center font-roboto font-semibold">“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”</p>
+                </li>
+                <li className="swiper-slide flex flex-col items-center gap-6">
+                  <img className="rounded-full object-cover border-1" src="skusta-clee.png" alt="Skusta Clee" />
+                  <h3 className="text-center text-lg font-bold font-roboto">Skusta Clee</h3>
+                  <p className="text-center font-roboto font-semibold">“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”</p>
+                </li>
+                <li className="swiper-slide flex flex-col items-center gap-6">
+                  <img className="rounded-full object-cover border-1" src="skusta-clee.png" alt="Skusta Clee" />
+                  <h3 className="text-center text-lg font-bold font-roboto">Skusta Clee</h3>
+                  <p className="text-center font-roboto font-semibold">“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”</p>
+                </li>
+                <li className="swiper-slide flex flex-col items-center gap-6">
+                  <img className="rounded-full object-cover border-1" src="skusta-clee.png" alt="Skusta Clee" />
+                  <h3 className="text-center text-lg font-bold font-roboto">Skusta Clee</h3>
+                  <p className="text-center font-roboto font-semibold">“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”</p>
+                </li>
+                <li className="swiper-slide flex flex-col items-center gap-6">
+                  <img className="rounded-full object-cover border-1" src="skusta-clee.png" alt="Skusta Clee" />
+                  <h3 className="text-center text-lg font-bold font-roboto">Skusta Clee</h3>
+                  <p className="text-center font-roboto font-semibold">“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”</p>
+                </li>
+              </ul>
+              */}
+        <TestimonialSlider />
+      </section>
+
+      {/* Gallery Section */}
+      <section className="p-6 flex flex-col gap-10">
+        <h2 className="text-kae-light text-2xl text-center font-bold">GALLERY</h2>
+        <div className="grid grid-cols-1">
+          <div className="w-85 h-45 overflow-hidden">
+            <img className="w-full h-full object-cover" src="gallery-1.jpg" alt="" />
           </div>
         </div>
       </section>
