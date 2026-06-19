@@ -1,46 +1,48 @@
 import TestimonialSlider from "@/components/TestimonialsSlider"
-import { Clock, Mail, MapPin, Phone } from "lucide-react"
+import { Clock, Mail, MapPin, Menu, Phone } from "lucide-react"
 import { FaFacebook, FaFacebookMessenger } from "react-icons/fa"
 
 export default function Home() {
   return (
     <div className="bg-kae-pink">
-      <header className="sticky">
-        <nav className="flex p-2 items-center justify-between bg-kae-light">
-          <div className="flex items-center gap-3">
-            <a href="#"><img className="w-15 h-15" src="logo.svg" alt="cafe logo" /></a>
-            <div className="flex flex-col font-pacifico">
-              <a className="text-kae-dark text-lg" href="#">Kae and</a>
-              <a className="text-kae-dark text-lg" href="#">Jae Cafe</a>
-            </div>
-
-          </div>
-          <div className="gap-3 hidden sm:block">
-            <a href="">Home</a>
-            <a href="">About</a>
-            <a href="">Menu</a>
-            <a href="">Testimonials</a>
-            <a href="">Gallery</a>
-            <a href="">Contact</a>
-          </div>
-        </nav>
-      </header>
 
       {/*Hero Section*/}
-      <section className="h-dvh">
-        <div>
-          <img src="hero-photo.svg" alt="food" />
-        </div>
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col items-center text-center">
-            <h2 className="text-kae-light font-libertinus-serif text-4xl">Snacks.</h2>
-            <h2 className="text-kae-light font-libertinus-serif text-4xl">Sweets.</h2>
-            <h2 className="text-kae-light font-libertinus-serif text-4xl">Street food.</h2>
+      <section className="h-dvh flex flex-col box-border">
+        <header className="fixed w-full">
+          <nav className="flex py-2 px-4 items-center justify-between bg-kae-light">
+            <div className="flex items-center gap-3">
+              <a href="#"><img className="w-15 h-15" src="logo.svg" alt="cafe logo" /></a>
+              <div className="flex flex-col font-pacifico">
+                <a className="text-kae-dark text-lg" href="#">Kae and</a>
+                <a className="text-kae-dark text-lg" href="#">Jae Cafe</a>
+              </div>
+            </div>
+            <Menu className="h-8 w-8 sm:hidden" />
+            <div className="gap-5 hidden sm:flex items-center">
+              <a className="text-kae-dark font-semibold" href="">Home</a>
+              <a className="text-kae-dark font-semibold" href="">About</a>
+              <a className="text-kae-dark font-semibold" href="">Menu</a>
+              <a className="text-kae-dark font-semibold" href="">Testimonials</a>
+              <a className="text-kae-dark font-semibold" href="">Gallery</a>
+              <a className="text-kae-dark font-semibold" href="">Contact</a>
+            </div>
+          </nav>
+        </header>
+        <div className="flex flex-1 flex-col md:flex-row md:justify-evenly md:items-center">
+          <div className="flex justify-center md:order-1 md:pr-10">
+            <img className="w-2xl h-2xl md:w-3xl md:h-3xl" src="hero-photo.svg" alt="food" />
           </div>
-          <p className="text-center text-kae-light px-2 font-roboto">Your go-to mobile spot for Korean-inspired bites, classic comfort food, and refreshing, sweet beverages. Catch us serving up your favorites daily.</p>
-          <div className="flex justify-center gap-5">
-            <button className="bg-kae-dark text-kae-light py-3 px-5 rounded-full font-roboto">Order Now</button>
-            <button className="border-1 py-3 px-5 rounded-full font-roboto">Contact Us</button>
+          <div className="flex flex-col gap-5 md:order-0 md:max-w-sm md:pl-10">
+            <div className="flex flex-col items-center text-center md:items-start">
+              <h2 className="text-kae-light font-libertinus-serif text-4xl">Snacks.</h2>
+              <h2 className="text-kae-light font-libertinus-serif text-4xl">Sweets.</h2>
+              <h2 className="text-kae-light font-libertinus-serif text-4xl">Street food.</h2>
+            </div>
+            <p className="text-center text-kae-light px-2 font-roboto md:text-start">Your go-to mobile spot for Korean-inspired bites, classic comfort food, and refreshing, sweet beverages. Catch us serving up your favorites daily.</p>
+            <div className="flex justify-center gap-5 md:justify-start">
+              <button className="bg-kae-dark text-kae-light py-3 px-5 rounded-full font-roboto">Order Now</button>
+              <button className="border-1 py-3 px-5 rounded-full font-roboto">Contact Us</button>
+            </div>
           </div>
         </div>
       </section>
@@ -112,7 +114,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="flex flex-col items-center bg-kae-light p-6 h-dvh gap-15">
+      <section className="flex flex-col items-center bg-kae-light p-6 gap-15">
         <h2 className="text-kae-dark text-2xl text-center font-bold">TESTIMONIALS</h2>
         {/*
               <ul className="swiper-wrapper">
