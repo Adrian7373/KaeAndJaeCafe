@@ -1,121 +1,103 @@
 import TestimonialSlider from "@/components/TestimonialsSlider"
-import { Clock, Mail, MapPin, Menu, Phone } from "lucide-react"
+import { Clock, Mail, MapPin, Phone } from "lucide-react"
 import { FaFacebook, FaFacebookMessenger } from "react-icons/fa"
+import NavBar from "@/components/NavBar"
 
 export default function Home() {
   return (
-    <div className="bg-kae-pink">
+    <div>
 
       {/*Hero Section*/}
-      <section className="h-dvh flex flex-col box-border">
-        <header className="fixed w-full">
-          <nav className="flex py-2 px-4 items-center justify-between bg-kae-light">
-            <div className="flex items-center gap-3">
-              <a href="#"><img className="w-15 h-15" src="logo.svg" alt="cafe logo" /></a>
-              <div className="flex flex-col font-pacifico">
-                <a className="text-kae-dark text-lg" href="#">Kae and</a>
-                <a className="text-kae-dark text-lg" href="#">Jae Cafe</a>
-              </div>
-            </div>
-            <Menu className="h-8 w-8 sm:hidden" />
-            <div className="gap-5 hidden sm:flex items-center">
-              <a className="text-kae-dark font-semibold" href="">Home</a>
-              <a className="text-kae-dark font-semibold" href="">About</a>
-              <a className="text-kae-dark font-semibold" href="">Menu</a>
-              <a className="text-kae-dark font-semibold" href="">Testimonials</a>
-              <a className="text-kae-dark font-semibold" href="">Gallery</a>
-              <a className="text-kae-dark font-semibold" href="">Contact</a>
-            </div>
-          </nav>
-        </header>
-        <div className="flex flex-1 flex-col md:flex-row md:justify-evenly md:items-center">
+      <section id="home" className="h-dvh flex flex-col box-border bg-kae-pink items-center ">
+        <NavBar />
+        <div className="flex flex-1 flex-col pt-20 md:flex-row md:justify-evenly md:items-center max-w-7xl">
           <div className="flex justify-center md:order-1 md:pr-10">
             <img className="w-2xl h-2xl md:w-3xl md:h-3xl" src="hero-photo.svg" alt="food" />
           </div>
           <div className="flex flex-col gap-5 md:order-0 md:max-w-sm md:pl-10">
             <div className="flex flex-col items-center text-center md:items-start">
-              <h2 className="text-kae-light font-libertinus-serif text-4xl">Snacks.</h2>
-              <h2 className="text-kae-light font-libertinus-serif text-4xl">Sweets.</h2>
-              <h2 className="text-kae-light font-libertinus-serif text-4xl">Street food.</h2>
+              <h2 className="text-kae-light font-libertinus-serif text-4xl 2xl:text-6xl">Snacks.</h2>
+              <h2 className="text-kae-purple font-libertinus-serif text-4xl 2xl:text-6xl">Sweets.</h2>
+              <h2 className="text-kae-light font-libertinus-serif text-4xl 2xl:text-6xl">Street food.</h2>
             </div>
-            <p className="text-center text-kae-light px-2 font-roboto md:text-start">Your go-to mobile spot for Korean-inspired bites, classic comfort food, and refreshing, sweet beverages. Catch us serving up your favorites daily.</p>
-            <div className="flex justify-center gap-5 md:justify-start">
-              <button className="bg-kae-dark text-kae-light py-3 px-5 rounded-full font-roboto">Order Now</button>
-              <button className="border-1 py-3 px-5 rounded-full font-roboto">Contact Us</button>
+            <p className="text-center text-kae-light px-2 font-roboto md:text-start 2xl:text-xl">Your go-to mobile spot for Korean-inspired bites, classic comfort food, and refreshing, sweet beverages. Catch us serving up your favorites daily.</p>
+            <div className="flex justify-center gap-3 md:justify-start">
+              <button className="cursor-pointer bg-kae-dark text-kae-light py-3 px-7 rounded-full font-roboto 2xl:text-lg transition-all duration-300 hover:bg-kae-purple hover:scale-105 hover:shadow-xl active:scale-95">Order Now</button>
+              <a href="#contact" className="border-2 border-kae-purple text-kae-purple py-3 px-7 rounded-full font-roboto 2xl:text-lg transition-all duration-300 hover:bg-kae-dark hover:text-kae-light hover:scale-105 hover:shadow-xl active:scale-95">Contact Us</a>
             </div>
           </div>
         </div>
       </section>
 
       {/* About Us Section */}
-      <section>
-        <div className="bg-kae-light p-7">
-          <div className="flex flex-col items-center gap-6">
-            <h2 className="text-center text-xl">ABOUT US</h2>
-            <p className="text-center">What started as a love for good food turned into Camp Tinio's favorite mobile hangout. We realized that the best memories aren't made inside four walls, they happen wherever the food is hot and the drinks are sweet.</p>
-            <div>
-              <img className="rounded-full object-cover w-80 h-80" src="about-photo.jpg" alt="photo of customers" />
-            </div>
+      <section id="about" className="flex justify-center bg-kae-light scroll-mt-19 2xl:scroll-mt-60">
+        <div className="flex flex-col items-center gap-6 p-7 bg-kae-light md:grid md:grid-cols-2 max-w-7xl md:p-20">
+          <div className="flex flex-col gap-6 md:order-1">
+            <h2 className="text-center text-xl font-semibold 2xl:text-4xl">ABOUT US</h2>
+            <p className="text-center text-lg 2xl:text-xl">What started as a love for good food turned into Camp Tinio's favorite mobile hangout. We realized that the best memories aren't made inside four walls, they happen wherever the food is hot and the drinks are sweet.</p>
+          </div>
+          <div className="md:order-0 flex justify-center">
+            <img className="rounded-full object-cover w-60 h-60" src="about-photo.jpg" alt="photo of customers" />
           </div>
         </div>
       </section>
 
       {/* Menu Section */}
-      <section>
-        <div className="flex flex-col items-center p-6 bg-kae-dark">
-          <h2 className="text-kae-light text-xl font-semibold">OUR MENU</h2>
-          <div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="chicken-meals.svg" alt="chicken meals" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Chicken Meals</p>
+      <section id="menu" className="flex justify-center bg-kae-dark scroll-mt-19">
+        <div className="flex flex-col items-center p-6 2xl:pt-15 bg-kae-dark max-w-7xl">
+          <h2 className="text-kae-light text-xl font-semibold 2xl:text-4xl 2xl:pb-15">OUR MENU</h2>
+          <div className="grid-cols-2 gap-x-20 gap-y-10 md:grid lg:grid-cols-3 2xl:pb-15">
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="chicken-meals.svg" alt="chicken meals" />
+              <p className="menu-label">Chicken Meals</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="waffles.svg" alt="waffles" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Waffles</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="waffles.svg" alt="waffles" />
+              <p className="menu-label">Waffles</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="bibimbap.svg" alt="bibimbap" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Bibimbap</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="bibimbap.svg" alt="bibimbap" />
+              <p className="menu-label">Bibimbap</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="korean-streetfoods.svg" alt="korean street foods" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Korean Street Foods</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="korean-streetfoods.svg" alt="korean street foods" />
+              <p className="menu-label">Korean Street Foods</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="tofu.svg" alt="Tofu" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Tofu</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="tofu.svg" alt="Tofu" />
+              <p className="menu-label">Tofu</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="rice-meals.svg" alt="rice meals" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Rice Meals</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="rice-meals.svg" alt="rice meals" />
+              <p className="menu-label">Rice Meals</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="corndogs.svg" alt="corndogs" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Corndogs</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="corndogs.svg" alt="corndogs" />
+              <p className="menu-label">Corndogs</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="spicy-noodles-and-ramen.svg" alt="Spicy Noodles and Ramen" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Spicy Noodles and Ramen</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="spicy-noodles-and-ramen.svg" alt="Spicy Noodles and Ramen" />
+              <p className="menu-label">Spicy Noodles and Ramen</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="burgers-and-sandwiches.svg" alt="Burgers and Sandwiches" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Burgers and Sandwiches</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="burgers-and-sandwiches.svg" alt="Burgers and Sandwiches" />
+              <p className="menu-label">Burgers and Sandwiches</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="fries-and-nachos.svg" alt="Fries and Nachos" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Fries and Nachos</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="fries-and-nachos.svg" alt="Fries and Nachos" />
+              <p className="menu-label">Fries and Nachos</p>
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-60 h-60" src="various-beverages.svg" alt="Various Beverages" />
-              <p className="text-libertinus-serif text-kae-light text-lg font-medium">Various Beverages</p>
+            <div className="flex flex-col items-center relative group">
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="various-beverages.svg" alt="Various Beverages" />
+              <p className="menu-label">Various Beverages</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="flex flex-col items-center bg-kae-light p-6 gap-15">
-        <h2 className="text-kae-dark text-2xl text-center font-bold">TESTIMONIALS</h2>
+      <section id="testimonials" className="flex flex-col items-center bg-kae-light p-6 2xl:pt-15 gap-15 w-full scroll-mt-19 2xl:scroll-mt-40">
+        <h2 className="text-kae-dark text-2xl text-center font-bold 2xl:text-4xl">TESTIMONIALS</h2>
         {/*
               <ul className="swiper-wrapper">
                 <li className="swiper-slide flex flex-col items-center gap-6">
@@ -145,70 +127,74 @@ export default function Home() {
                 </li>
               </ul>
               */}
-        <TestimonialSlider />
+        <div className="w-full">
+          <TestimonialSlider />
+        </div>
       </section>
 
       {/* Gallery Section */}
-      <section className="p-6 flex flex-col gap-10 bg-kae-pink">
-        <h2 className="text-kae-light text-2xl text-center font-bold">GALLERY</h2>
-        <div className="grid grid-cols-1 gap-6">
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-1.jpg" alt="Chicken sandwich" />
+      <section id="gallery" className="p-6 flex flex-col gap-10 bg-kae-pink 2xl:py-30 2xl:px-15 scroll-mt-19">
+        <h2 className="text-kae-light text-2xl text-center font-bold 2xl:text-4xl">GALLERY</h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="group w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:col-span-1 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-1.jpg" alt="Chicken sandwich" />
           </div>
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-2.jpg" alt="Spicy noodles with egg and spam" />
+          <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:col-span-2 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-2.jpg" alt="Spicy noodles with egg and spam" />
           </div>
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-3.jpg" alt="Fish cake" />
+          <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-3.jpg" alt="Fish cake" />
           </div>
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-4.jpg" alt="Chicken poppers with rice" />
+          <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-4.jpg" alt="Chicken poppers with rice" />
           </div>
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-7.jpg" alt="Corndogs" />
+          <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-7.jpg" alt="Corndogs" />
           </div>
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-6.jpg" alt="Waffles with chocolate and almonds toppings" />
+          <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:order-1 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-6.jpg" alt="Waffles with chocolate and almonds toppings" />
           </div>
-          <div className="w-85 h-45 overflow-hidden rounded-md">
-            <img className="w-full h-full object-cover" src="gallery-5.jpg" alt="Various beverages" />
+          <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:order-0 2xl:h-65">
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-5.jpg" alt="Various beverages" />
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section className="bg-kae-light py-10 px-6 flex flex-col items-center gap-10 ">
+      <section id="contact" className="bg-kae-light py-10 px-6 flex flex-col items-center gap-10 scroll-mt-19">
         <h2 className="text-kae-dark text-2xl text-center font-bold">CONTACT US</h2>
-        <form className="flex flex-col items-center gap-2" action="">
-          <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="name" placeholder="Your Name" />
-          <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="email" placeholder="Your Email" />
-          <textarea className="border-1 p-1 w-80 border-gray-500 rounded-sm h-50" name="message" id="message" placeholder="Your Message"></textarea>
-          <button className="mr-auto bg-kae-dark text-kae-light py-2 px-4 rounded-full">Submit</button>
-        </form>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <MapPin />
-            <p>Zone 3, Camp Tinio, Cabanatuan City, Philippines, 3100</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Mail />
-            <p>kaeandjae@gmail.com</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Phone />
-            <p>0966 632 8432</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock />
-            <p>
-              Monday - Saturday: 10:00 AM - 6:00 PM
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock />
-            <p>
-              Sunday: Closed
-            </p>
+        <div className="flex flex-col gap-10 md:flex-row">
+          <form className="flex flex-col items-center gap-2 md:order-1" action="">
+            <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="name" placeholder="Your Name" />
+            <input className="border-1 p-1 w-80 border-gray-500 rounded-sm" type="text" name="email" placeholder="Your Email" />
+            <textarea className="border-1 p-1 w-80 border-gray-500 rounded-sm h-50" name="message" id="message" placeholder="Your Message"></textarea>
+            <button className="mr-auto bg-kae-dark text-kae-light py-2 px-4 rounded-full md:ml-auto md:mr-0">Submit</button>
+          </form>
+          <div className="flex flex-col gap-4 md:order-0">
+            <div className="flex items-center gap-3">
+              <MapPin />
+              <p>Zone 3, Camp Tinio, Cabanatuan City, Philippines, 3100</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Mail />
+              <p>kaeandjae@gmail.com</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone />
+              <p>0966 632 8432</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock />
+              <p>
+                Monday - Saturday: 10:00 AM - 6:00 PM
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock />
+              <p>
+                Sunday: Closed
+              </p>
+            </div>
           </div>
         </div>
       </section>
