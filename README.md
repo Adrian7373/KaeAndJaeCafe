@@ -10,17 +10,6 @@ This project was built with modern, end-to-end type-safe web technologies to ens
 * **Styling Ecosystem:** Tailwindcss
 * **Code Quality:** ESLint
 
-## 🍔 Menu Highlights
-
-The application features customized assets for the cafe's diverse menu offerings, including:
-* Bibimbap
-* Burgers & Sandwiches
-* Chicken Meals
-* Corndogs
-* Fries & Nachos
-* Beverages
-* Etc.
-
 ## 🛠️ Getting Started
 
 To run this project locally on your machine, follow these steps:
