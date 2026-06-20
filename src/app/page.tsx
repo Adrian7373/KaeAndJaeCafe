@@ -12,13 +12,13 @@ export default function Home() {
         <NavBar />
         <div className="flex flex-1 flex-col pt-20 md:flex-row md:justify-evenly md:items-center max-w-7xl">
           <div className="flex justify-center md:order-1 md:pr-10">
-            <img className="w-2xl h-2xl md:w-3xl md:h-3xl" src="hero-photo.svg" alt="food" />
+            <img className="w-2xl h-2xl md:w-3xl md:h-3xl" src="hero-photo.svg" alt="Kae and Jae food varieties" />
           </div>
           <div className="flex flex-col gap-5 md:order-0 md:max-w-sm md:pl-10">
             <div className="flex flex-col items-center text-center md:items-start">
-              <h2 className="text-kae-light font-libertinus-serif text-4xl 2xl:text-6xl">Snacks.</h2>
-              <h2 className="text-kae-purple font-libertinus-serif text-4xl 2xl:text-6xl">Sweets.</h2>
-              <h2 className="text-kae-light font-libertinus-serif text-4xl 2xl:text-6xl">Street food.</h2>
+              <h1 className="text-kae-light font-libertinus-serif text-4xl 2xl:text-6xl">Snacks.</h1>
+              <h1 className="text-kae-purple font-libertinus-serif text-4xl 2xl:text-6xl">Sweets.</h1>
+              <h1 className="text-kae-light font-libertinus-serif text-4xl 2xl:text-6xl">Street food.</h1>
             </div>
             <p className="text-center text-kae-light px-2 font-roboto md:text-start 2xl:text-xl">Your go-to mobile spot for Korean-inspired bites, classic comfort food, and refreshing, sweet beverages. Catch us serving up your favorites daily.</p>
             <div className="flex justify-center gap-3 md:justify-start">
@@ -37,7 +37,7 @@ export default function Home() {
             <p className="text-center text-lg 2xl:text-xl">What started as a love for good food turned into Camp Tinio's favorite mobile hangout. We realized that the best memories aren't made inside four walls, they happen wherever the food is hot and the drinks are sweet.</p>
           </div>
           <div className="md:order-0 flex justify-center">
-            <img className="rounded-full object-cover w-60 h-60" src="about-photo.jpg" alt="photo of customers" />
+            <img className="rounded-full object-cover w-60 h-60" src="about-photo.jpg" alt="Kae and Jae photo of customers" />
           </div>
         </div>
       </section>
@@ -48,47 +48,47 @@ export default function Home() {
           <h2 className="text-kae-light text-xl font-semibold 2xl:text-4xl 2xl:pb-15">OUR MENU</h2>
           <div className="grid-cols-2 gap-x-20 gap-y-10 md:grid lg:grid-cols-3 2xl:pb-15">
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="chicken-meals.svg" alt="chicken meals" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="chicken-meals.svg" alt="Kae and Jae chicken meals" />
               <p className="menu-label">Chicken Meals</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="waffles.svg" alt="waffles" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="waffles.svg" alt="Kae and Jae waffles" />
               <p className="menu-label">Waffles</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="bibimbap.svg" alt="bibimbap" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="bibimbap.svg" alt="Kae and Jae bibimbap" />
               <p className="menu-label">Bibimbap</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="korean-streetfoods.svg" alt="korean street foods" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="korean-streetfoods.svg" alt="Kae and Jae korean street foods" />
               <p className="menu-label">Korean Street Foods</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="tofu.svg" alt="Tofu" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="tofu.svg" alt="Kae and Jae Tofu" />
               <p className="menu-label">Tofu</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="rice-meals.svg" alt="rice meals" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="rice-meals.svg" alt="Kae and Jae rice meals" />
               <p className="menu-label">Rice Meals</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="corndogs.svg" alt="corndogs" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="corndogs.svg" alt="Kae and Jae corndogs" />
               <p className="menu-label">Corndogs</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="spicy-noodles-and-ramen.svg" alt="Spicy Noodles and Ramen" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="spicy-noodles-and-ramen.svg" alt="Kae and Jae Spicy Noodles and Ramen" />
               <p className="menu-label">Spicy Noodles and Ramen</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="burgers-and-sandwiches.svg" alt="Burgers and Sandwiches" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="burgers-and-sandwiches.svg" alt="Kae and Jae Burgers and Sandwiches" />
               <p className="menu-label">Burgers and Sandwiches</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="fries-and-nachos.svg" alt="Fries and Nachos" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="fries-and-nachos.svg" alt="Kae and Jae Fries and Nachos" />
               <p className="menu-label">Fries and Nachos</p>
             </div>
             <div className="flex flex-col items-center relative group">
-              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="various-beverages.svg" alt="Various Beverages" />
+              <img className="w-60 h-60 transition-transform duration-500 group-hover:scale-110" src="various-beverages.svg" alt="Kae and Jae Various Beverages" />
               <p className="menu-label">Various Beverages</p>
             </div>
           </div>
@@ -137,25 +137,25 @@ export default function Home() {
         <h2 className="text-kae-light text-2xl text-center font-bold 2xl:text-4xl">GALLERY</h2>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="group w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:col-span-1 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-1.jpg" alt="Chicken sandwich" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-1.jpg" alt="Kae and Jae Chicken sandwich" />
           </div>
           <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:col-span-2 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-2.jpg" alt="Spicy noodles with egg and spam" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-2.jpg" alt="Kae and Jae Spicy noodles with egg and spam" />
           </div>
           <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-3.jpg" alt="Fish cake" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-3.jpg" alt="Kae and Jae Fish cake" />
           </div>
           <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-4.jpg" alt="Chicken poppers with rice" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-4.jpg" alt="Kae and Jae Chicken poppers with rice" />
           </div>
           <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-7.jpg" alt="Corndogs" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-7.jpg" alt="Kae and Jae Corndogs" />
           </div>
           <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:order-1 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-6.jpg" alt="Waffles with chocolate and almonds toppings" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-6.jpg" alt="Kae and Jae Waffles with chocolate and almonds toppings" />
           </div>
           <div className="w-full h-45 overflow-hidden rounded-md last:odd:col-span-full md:last:odd:col-span-2 md:rounded-lg lg:order-0 2xl:h-65">
-            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-5.jpg" alt="Various beverages" />
+            <img className="w-full h-full object-cover transition-transform duration-300 lg:scale-110 lg:hover:scale-100" src="gallery-5.jpg" alt="Kae and Jae Various beverages" />
           </div>
         </div>
       </section>
@@ -200,7 +200,7 @@ export default function Home() {
       </section>
 
       <footer className="bg-kae-dark p-5 flex flex-col items-center gap-3">
-        <h2 className="text-kae-light font-md font-inter">© 2026 Kae and Jae Cafe</h2>
+        <h1 className="text-kae-light font-md font-inter">© 2026 Kae and Jae Cafe</h1>
         <div className="flex gap-2">
           <FaFacebook className="w-8 h-8 text-kae-light" />
           <FaFacebookMessenger className="w-8 h-8 text-kae-light" />
