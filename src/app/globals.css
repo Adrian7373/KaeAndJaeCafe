@@ -15,5 +15,12 @@
   --font-pacifico: var(--font-pacifico);
   /*Font for logo*/
 
-  --font-libertinus-serif: var(--font-libertinus-serif) --font-roboto: var(--font-roboto)
+  --font-libertinus-serif: var(--font-libertinus-serif);
+  --font-roboto: var(--font-roboto);
+}
+
+@layer components {
+  .menu-label {
+    @apply font-libertinus-serif text-kae-light text-lg font-medium 2xl:text-2xl;
+  }
 }
