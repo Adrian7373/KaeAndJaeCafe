@@ -12,6 +12,7 @@ const libertinusSerif = Libertinus_Serif({
   variable: "--font-libertinus-serif",
   subsets: ["latin"],
   weight: "400",
+  adjustFontFallback: false,
 })
 
 const geistSans = Geist({
@@ -43,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} ${libertinusSerif.variable} ${roboto.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} ${libertinusSerif.variable} ${roboto.variable} h-full antialiased scroll-smooth`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
