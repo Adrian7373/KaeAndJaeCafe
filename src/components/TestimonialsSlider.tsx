@@ -8,7 +8,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 
 const reviews = [
-    { id: 1, name: "Skusta Clee", text: "“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”", photoPath: "skusta-clee.png" },
+    { id: 1, name: "Skusta Clee", text: "“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab ”", photoPath: "skusta-clee.png" },
     { id: 2, name: "Skusta Clee", text: "“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”", photoPath: "skusta-clee.png" },
     { id: 3, name: "Skusta Clee", text: "“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”", photoPath: "skusta-clee.png" },
     { id: 4, name: "Skusta Clee", text: "“Ang sarap ng chicken sandwich and yung Odeng pero mas masarap parin si Zeinab”", photoPath: "skusta-clee.png" },
@@ -46,16 +46,17 @@ const SliderButtons = () => {
 
 export default function TestimonialSlider() {
     return (
-        <div className="w-full max-w-5xl mx-auto py-8 relative">
+        <div className="w-full max-w-7xl mx-auto py-8 relative">
             <Swiper
                 modules={[Pagination, Autoplay]} // Removed Navigation module entirely!
                 spaceBetween={30}
                 slidesPerView={1}
+                loop={true}
                 pagination={{ clickable: true }}
                 autoplay={{ delay: 5000, disableOnInteraction: false }}
                 breakpoints={{
                     768: { slidesPerView: 2 },
-                    1536: { slidesPerView: 3 }
+                    1000: { slidesPerView: 3 },
                 }}
                 className="pb-14 px-14"
             >
@@ -64,7 +65,7 @@ export default function TestimonialSlider() {
                         <div className="flex flex-col justify-between transition mb-10">
                             <div className='flex flex-col gap-10'>
                                 <div className="text-xl mb-4 flex justify-center">
-                                    <img className='rounded-full object-cover border-1 w-50 h-50' src={review.photoPath} alt={`Picture of ${review.name}`} />
+                                    <img className='rounded-full object-cover border-1 w-48 h-48' src={review.photoPath} alt={`Picture of ${review.name}`} />
                                 </div>
                                 <p className='text-center font-bold text-kae-purple mb-2 text-2xl'>
                                     {review.name}
