@@ -9,7 +9,7 @@ export default function Home() {
 
       {/*Hero Section*/}
       <section id="home" className="min-h-dvh flex flex-col box-border bg-kae-pink items-center ">
-        <NavBar />
+        <NavBar bgColorMobile="bg-kae-light" bgColorMd="bg-kae-pink" />
         <div className="flex flex-1 flex-col pt-20 pb-12 md:flex-row md:justify-evenly md:items-center max-w-7xl">
           <div className="flex justify-center md:order-1 md:pr-10">
             <img className="w-2xl h-2xl md:w-3xl md:h-3xl" src="hero-photo.svg" alt="Kae and Jae food varieties" />

@@ -3,7 +3,7 @@
 import { Menu, X } from "lucide-react"
 import { useState } from "react"
 
-export default function NavBar() {
+export default function NavBar({ bgColorMobile, bgColorMd }: { bgColorMobile: string, bgColorMd: string }) {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -13,7 +13,7 @@ export default function NavBar() {
 
     return (
         <header className="fixed w-full max-w-9xl z-50">
-            <nav className="flex py-2 px-4 items-center justify-between bg-kae-light md:bg-kae-pink 2xl:px-30 2xl:py-5">
+            <nav className={`flex py-2 px-4 items-center justify-between ${bgColorMobile} md:${bgColorMd} 2xl:px-30 2xl:py-5`}>
                 <div className="flex items-center gap-3">
                     <a href="#"><img className="w-15 h-15" src="logo.svg" alt="Kae and Jae logo" /></a>
                     <div className="flex flex-col font-pacifico">
