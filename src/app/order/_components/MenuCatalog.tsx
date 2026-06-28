@@ -40,73 +40,59 @@ export default function MenuCatalog() {
     return (
         <>
             <section>
-                <div className="flex flex-col align-center">
-                    {/* Mobile Screensize */}
-                    <div className="w-full flex mt-19 justify-center border-b">
+                {/* Mobile Screensize */}
+                <div className="flex mt-19 justify-center border-b max-w-max">
 
-                        {/* Left Chevron */}
-                        <button
-                            onClick={() => scroll('left')}
-                            disabled={isAtStart}
-                            className={`p-3 transition-colors
+                    {/* Left Chevron */}
+                    <button
+                        onClick={() => scroll('left')}
+                        disabled={isAtStart}
+                        className={`p-3 transition-colors
                                 ${isAtStart ? "text-gray-300 cursor-not-allowed" : "text-[#2D0A4E] hover:bg-gray-100"}`}
-                            aria-label="Scroll left"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
+                        aria-label="Scroll left"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
 
-                        {/* Menu Categories */}
-                        <div ref={scrollRef} onScroll={checkScroll} className="flex flex-1 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-2"
-                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                    {/* Menu Categories */}
+                    <div ref={scrollRef} onScroll={checkScroll} className="flex flex-1 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-2"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
 
-                            <style dangerouslySetInnerHTML={{
-                                __html: `
+                        <style dangerouslySetInnerHTML={{
+                            __html: `
           .scrollbar-hide::-webkit-scrollbar { display: none; }
         `}} />
 
-                            {categories.map((category) => (
-                                <button onClick={() => setActiveTab(category)} key={category} className={`shrink-0 px-3.5 py-2 text-base transition-colors
+                        {categories.map((category) => (
+                            <button onClick={() => setActiveTab(category)} key={category} className={`shrink-0 px-3.5 py-2 text-base transition-colors
                                     ${activeTab === category
-                                        ? "border-b-4 border-kae-pink"
-                                        : ""
-                                    }`}>{category}</button>
-                            ))}
-                        </div>
-
-                        {/* Right Chevron */}
-                        <button
-                            onClick={() => scroll('right')}
-                            disabled={isAtEnd}
-                            className={`p-3 transition-colors
-                                ${isAtEnd ? "text-gray-300 cursor-not-allowed" : "text-[#2D0A4E] hover:bg-gray-100"}`}
-                            aria-label="Scroll right"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-
+                                    ? "border-b-4 border-kae-pink"
+                                    : ""
+                                }`}>{category}</button>
+                        ))}
                     </div>
 
-
-                    {/* Medium Screensize 
-                    <ul className="bg-green-500 mt-19 hidden md:flex">
-                        <li className="inline">Featured</li>
-                        <li>Group Meals</li>
-                        <li>Chicken</li>
-                        <li>Waffles</li>
-                        <li>Corndogs</li>
-                        <li>Rice Meals</li>
-                        <li>Milk Tea</li>
-                        <li>Fruit Tea</li>
-                        <li>Noodles</li>
-                    </ul>
-                    */}
+                    {/* Right Chevron */}
+                    <button
+                        onClick={() => scroll('right')}
+                        disabled={isAtEnd}
+                        className={`p-3 transition-colors
+                                ${isAtEnd ? "text-gray-300 cursor-not-allowed" : "text-[#2D0A4E] hover:bg-gray-100"}`}
+                        aria-label="Scroll right"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
 
                 </div>
-                <p>{activeTab}</p>
+
+                {/* Menu list */}
+                <div className="grid">
+
+                </div>
             </section>
         </>
     )
