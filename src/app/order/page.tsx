@@ -1,7 +1,13 @@
 import OrderNavBar from "./_components/OrderNavBar"
 import MenuCatalog from "./_components/MenuCatalog"
+import { supabase } from "../../../lib/supabase"
 
-export default function OrderPage() {
+export default async function OrderPage() {
+
+    const { data: menuProducts, error: menuProductError } = await supabase
+        .from("product")
+        .select("*");
+
     return (
         <>
             <OrderNavBar />
