@@ -1,8 +1,12 @@
 "use client";
 
 import { ShoppingBag } from "lucide-react";
+import { useCart } from "@/../context/CartContext";
 
 export default function OrderNavBar() {
+
+    const { toggleCart } = useCart();
+
     return (
         <>
             <header className="fixed w-full max-w-9xl z-50">
@@ -17,11 +21,12 @@ export default function OrderNavBar() {
                     </div>
                     <div className="gap-5 flex items-center">
                         <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#contact">Home</a>
-                        <ShoppingBag />
+                        <ShoppingBag onClick={toggleCart} />
                     </div>
                 </nav>
 
             </header>
+
         </>
     )
 }
