@@ -19,7 +19,7 @@ interface MenuCatalogProps {
 
 export default function MenuCatalog({ products }: MenuCatalogProps) {
 
-    const [activeTab, setActiveTab] = useState('Featured');
+    const [activeTab, setActiveTab] = useState('Chicken');
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
     const scrollRef = useRef(null);
@@ -106,7 +106,13 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
 
                 {/* Menu list */}
                 <div className="grid">
-
+                    {products.filter(product => product.is_available && product.category === activeTab).map((product) => (
+                        <div key={product.id}>
+                            <p>image to</p>
+                            <p>{product.name}</p>
+                            <p>{product.price}</p>
+                        </div>
+                    ))}
                 </div>
             </section>
         </>
