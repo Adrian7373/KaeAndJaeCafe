@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "../../../../context/CartContext";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
 interface Product {
     imageUrl: string,
@@ -22,19 +23,17 @@ interface MenuCatalogProps {
 
 export default function MenuCatalog({ products }: MenuCatalogProps) {
 
-    const { cart, addToCart } = useCart();
-    const [isOpen, setIsOpen] = useState(false);
+    const { cart, addToCart, isOpen } = useCart();
     const [activeTab, setActiveTab] = useState('Chicken');
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
     const scrollRef = useRef(null);
 
+    const totalItems = cart.reduce((total, item) => total + item.qty, 0);
+    const totalPrice = cart.reduce((total, item) => total + item.price, 0);
+
     const categories = ["Featured", "Group Meals", "Chicken", "Waffles", "Corndogs",
         "Rice Meals", "Milk Tea", "Fruit Tea", "Noodles"];
-
-    const toggleBag = () => {
-        setIsOpen(isOpen => !isOpen)
-    }
 
     const checkScroll = () => {
         if (scrollRef.current) {
@@ -135,14 +134,44 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                         </div>
                     ))}
                 </div>
-                <div className={`w-full bg-kae-light p-4 ${!isOpen ? "hidden" : "absolute"} `}>
-                    <div className="flex flex-col min-h-10/12 bg-kae-light w-full">
-                        {cart.map((item) => (
-                            <div key={item.id} className="flex border-y">
-                                <p>{item.name}</p>
+                <div className={`w-full bg-kae-light p-4 top-19 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "absolute"}`}>
+                    <div className="flex flex-col bg-kae-light w-full flex-grow">
+                        {cart?.map((item) => (
+                            <div key={item.id} className="flex border-b align-center justify-between min-h-12 p-2">
+                                <div className="flex gap-2 align-center">
+                                    <div className="flex gap-1">
+                                        {item.qty === 1 ? (
+                                            <Trash2 height={"1rem"} width={"1rem"} className="m-auto" />
+                                        ) : (
+                                            <Minus height={"1rem"} width={"1rem"} className="m-auto" />
+                                        )}
+
+                                        <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
+                                        <Plus height={"1rem"} width={"1rem"} className="m-auto" />
+                                    </div>
+                                    <p>{item.name}</p>
+                                </div>
                                 <p>₱{item.price}</p>
                             </div>
                         ))}
+
+                    </div>
+                    <div className="flex flex-col justify-center gap-3">
+                        <div>
+                            <div className="flex justify-between">
+                                <p>Subtotal</p>
+                                <p>₱{totalPrice}</p>
+                            </div>
+                            <div className="flex justify-between">
+                                <p>Delivery Fee</p>
+                                <p>₱49</p>
+                            </div>
+                            <div className="flex justify-between font-bold">
+                                <p>Total</p>
+                                <p>₱{totalPrice + 49}</p>
+                            </div>
+                        </div>
+                        <button className="px-6 py-3 bg-kae-dark text-kae-light text-xl rounded-lg">Proceed to Checkout</button>
                     </div>
                 </div>
             </section>

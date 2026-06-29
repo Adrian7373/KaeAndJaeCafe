@@ -29,10 +29,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const addToCart = (product: any) => {
         setCart((prevCart) => {
-            const existingItem = cart.find((item) => item.id === product.id);
+            const existingItem = prevCart.find((item) => item.id === product.id);
             if (existingItem) {
                 return prevCart.map((item) => {
-                    item.id === product.id ? { ...item, qty: item.qty + 1 } : item
+                    return item.id === product.id ? { ...item, qty: item.qty + 1 } : item
                 });
             }
             return [...prevCart, { ...product, qty: 1 }];
