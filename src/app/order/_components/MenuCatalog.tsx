@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { useCart } from "../../../../context/CartContext";
 
 interface Product {
+    imageUrl: string,
     id: string,
     name: string,
     image_path: string,
@@ -19,6 +22,8 @@ interface MenuCatalogProps {
 
 export default function MenuCatalog({ products }: MenuCatalogProps) {
 
+    const { cart, addToCart } = useCart();
+    const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Chicken');
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
@@ -26,6 +31,10 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
 
     const categories = ["Featured", "Group Meals", "Chicken", "Waffles", "Corndogs",
         "Rice Meals", "Milk Tea", "Fruit Tea", "Noodles"];
+
+    const toggleBag = () => {
+        setIsOpen(isOpen => !isOpen)
+    }
 
     const checkScroll = () => {
         if (scrollRef.current) {
@@ -105,14 +114,36 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                 </div>
 
                 {/* Menu list */}
-                <div className="grid">
+                <div className="grid grid-cols-2 px-4 py-6 gap-2">
                     {products.filter(product => product.is_available && product.category === activeTab).map((product) => (
-                        <div key={product.id}>
-                            <p>image to</p>
-                            <p>{product.name}</p>
-                            <p>{product.price}</p>
+                        <div key={product.id} className="flex flex-col h-full bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                            <div className="relative w-full aspect-square">
+                                <Image
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, 300px"
+                                />
+                            </div>
+                            <div className="flex flex-col flex-grow p-4 gap-1">
+                                <p>{product.name}</p>
+                                <div className="flex flex-col align-center mt-auto justify-between">
+                                    <p className="font-semibold">₱{product.price}</p>
+                                    <button onClick={() => addToCart(product)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
+                                </div>
+                            </div>
                         </div>
                     ))}
+                </div>
+                <div className={`w-full bg-kae-light p-4 ${!isOpen ? "hidden" : "absolute"} `}>
+                    <div className="flex flex-col min-h-10/12 bg-kae-light w-full">
+                        {cart.map((item) => (
+                            <div key={item.id} className="flex border-y">
+                                <p>{item.name}</p>
+                                <p>₱{item.price}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
         </>
