@@ -2,7 +2,22 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function MenuCatalog() {
+interface Product {
+    id: string,
+    name: string,
+    image_path: string,
+    price: number,
+    discount_price: number,
+    is_available: boolean,
+    est_prep_time: string,
+    category: string
+}
+
+interface MenuCatalogProps {
+    products: Product[]
+}
+
+export default function MenuCatalog({ products }: MenuCatalogProps) {
 
     const [activeTab, setActiveTab] = useState('Featured');
     const [isAtStart, setIsAtStart] = useState(true);
