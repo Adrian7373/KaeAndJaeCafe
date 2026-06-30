@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "../../../../context/CartContext";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Product {
     imageUrl: string,
@@ -32,6 +33,9 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
 
     const categories = ["Featured", "Group Meals", "Chicken", "Waffles", "Corndogs",
         "Rice Meals", "Milk Tea", "Fruit Tea", "Noodles"];
+
+    const router = useRouter();
+
 
     const checkScroll = () => {
         if (scrollRef.current) {
@@ -177,7 +181,7 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                                 <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
                             </div>
                         </div>
-                        <button className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
+                        <button disabled={cart.length === 0} onClick={() => { toggleCart(); router.push("/checkout") }} className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
                     </div>
                 </div>
             </section>
