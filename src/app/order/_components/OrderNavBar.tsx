@@ -1,11 +1,13 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/../context/CartContext";
+import { FlyingClone } from "@/../context/CartContext";
 
 export default function OrderNavBar() {
 
-    const { toggleCart } = useCart();
+    const { toggleCart, cartIconRef, flyingItems, cart, isOpen } = useCart();
+    const totalItems = cart.reduce((total, item) => total + item.qty, 0);
 
     return (
         <>
@@ -21,9 +23,23 @@ export default function OrderNavBar() {
                     </div>
                     <div className="gap-5 flex items-center">
                         <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#contact">Home</a>
-                        <ShoppingBag onClick={toggleCart} />
+
+                        {isOpen ? (
+                            <X onClick={toggleCart} />
+                        ) : (
+                            <div>
+                                <ShoppingBag ref={cartIconRef} onClick={toggleCart} />
+                                <p className="absolute top-10 right-3.5 text-kae-light rounded-full aspect-square text-[8px] bg-kae-dark px-1">{totalItems}</p>
+                            </div>
+                        )}
+
+
                     </div>
                 </nav>
+
+                {flyingItems.map((item) => (
+                    <FlyingClone key={item.id} item={item} />
+                ))}
 
             </header>
 

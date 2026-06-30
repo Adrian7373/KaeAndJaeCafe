@@ -23,14 +23,12 @@ interface MenuCatalogProps {
 
 export default function MenuCatalog({ products }: MenuCatalogProps) {
 
-    const { cart, addToCart, isOpen } = useCart();
+    const { cart, addToCart, isOpen, incrementItem, decrementItem, toggleCart } = useCart();
     const [activeTab, setActiveTab] = useState('Chicken');
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
-    const scrollRef = useRef(null);
-
-    const totalItems = cart.reduce((total, item) => total + item.qty, 0);
-    const totalPrice = cart.reduce((total, item) => total + item.price, 0);
+    const scrollRef = useRef<HTMLDivElement | null>(null);
+    const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
 
     const categories = ["Featured", "Group Meals", "Chicken", "Waffles", "Corndogs",
         "Rice Meals", "Milk Tea", "Fruit Tea", "Noodles"];
@@ -128,32 +126,40 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                                 <p>{product.name}</p>
                                 <div className="flex flex-col align-center mt-auto justify-between">
                                     <p className="font-semibold">₱{product.price}</p>
-                                    <button onClick={() => addToCart(product)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
+                                    <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
-                <div className={`w-full bg-kae-light p-4 top-19 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "absolute"}`}>
-                    <div className="flex flex-col bg-kae-light w-full flex-grow">
-                        {cart?.map((item) => (
-                            <div key={item.id} className="flex border-b align-center justify-between min-h-12 p-2">
-                                <div className="flex gap-2 align-center">
-                                    <div className="flex gap-1">
-                                        {item.qty === 1 ? (
-                                            <Trash2 height={"1rem"} width={"1rem"} className="m-auto" />
-                                        ) : (
-                                            <Minus height={"1rem"} width={"1rem"} className="m-auto" />
-                                        )}
-
-                                        <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
-                                        <Plus height={"1rem"} width={"1rem"} className="m-auto" />
-                                    </div>
-                                    <p>{item.name}</p>
-                                </div>
-                                <p>₱{item.price}</p>
+                <div className={`w-full bg-kae-light p-4 top-[72px] bottom-0 left-0 right-0 z-40 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "fixed"}`}>
+                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5">
+                        {cart.length === 0 ? (
+                            <div className="flex flex-col justify-center items-center gap-5 m-auto">
+                                <p className="text-xl font-semibold">Your Cart is Empty</p>
+                                <button onClick={toggleCart} className="px-4 py-2 bg-kae-dark text-kae-light text-lg rounded-lg">+ Add items</button>
                             </div>
-                        ))}
+                        ) : (
+                            cart?.map((item) => (
+                                <div key={item.id} className="flex border-b align-center justify-between min-h-16 p-2">
+                                    <div className="flex gap-2 items-center">
+                                        <div className="flex gap-1">
+                                            {item.qty === 1 ? (
+                                                <Trash2 height={"1rem"} width={"1rem"} className="m-auto" onClick={() => decrementItem(item)} />
+                                            ) : (
+                                                <Minus height={"1rem"} width={"1rem"} className="m-auto" onClick={() => decrementItem(item)} />
+                                            )}
+
+                                            <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
+                                            <Plus height={"1rem"} width={"1rem"} className="m-auto" onClick={() => incrementItem(item)} />
+                                        </div>
+                                        <p className="px-2">{item.name}</p>
+                                    </div>
+                                    <p className="content-center">₱{item.price}</p>
+                                </div>
+                            ))
+                        )}
+
 
                     </div>
                     <div className="flex flex-col justify-center gap-3">
@@ -164,14 +170,14 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                             </div>
                             <div className="flex justify-between">
                                 <p>Delivery Fee</p>
-                                <p>₱49</p>
+                                <p>{cart.length === 0 ? "₱0" : "₱49"}</p>
                             </div>
                             <div className="flex justify-between font-bold">
                                 <p>Total</p>
-                                <p>₱{totalPrice + 49}</p>
+                                <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
                             </div>
                         </div>
-                        <button className="px-6 py-3 bg-kae-dark text-kae-light text-xl rounded-lg">Proceed to Checkout</button>
+                        <button className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
                     </div>
                 </div>
             </section>
