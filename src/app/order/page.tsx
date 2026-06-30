@@ -2,7 +2,6 @@ export const revalidate = 60;
 import MenuCatalog from "./_components/MenuCatalog"
 import { supabase } from "../../../lib/supabase"
 import OrderNavBar from "./_components/OrderNavBar";
-import { CartProvider } from "../../../context/CartContext";
 
 export default async function OrderPage() {
 
@@ -30,11 +29,9 @@ export default async function OrderPage() {
 
     return (
         <>
-            <CartProvider>
-                <OrderNavBar />
-                <MenuCatalog products={menuProducts} />
-                <h1>HELLO CUSTOMER</h1>
-            </CartProvider>
+            <OrderNavBar />
+            <MenuCatalog products={menuProducts} />
+            <h1>HELLO CUSTOMER</h1>
         </>
     )
 }

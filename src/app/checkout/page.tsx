@@ -2,11 +2,13 @@
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import TimePicker from "./_components/TimePicker";
+import { useCart } from "../../../context/CartContext";
 
 
 export default function CheckoutPage() {
 
     const [isDelivery, setIsDelivery] = useState(true);
+    const { cart } = useCart();
 
     return (
         <>
@@ -96,7 +98,56 @@ export default function CheckoutPage() {
                     </div>
                 )}
 
-            </form>
+                {/* Payment Method */}
+                <div className="bg-kae-light px-4 py-4 flex flex-col gap-2">
+                    <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Payment</p>
+                    <label className="border-1 rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="cash">
+                        <input
+                            name="paymentType"
+                            id="cash"
+                            type="radio"
+                            value={"cash"}
+                        />
+                        <span className="grow-1 pb-0.5">Cash</span>
+                    </label>
+                    <label className="border-1 rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="gcash">
+                        <input
+                            name="paymentType"
+                            id="gcash"
+                            type="radio"
+                            value={"gcash"}
+                        />
+                        <span className="grow-1 pb-0.5">Gcash</span>
+                    </label>
+                </div>
+
+                {/* Order Summary */}
+                <div>
+                    <p>Order Summary</p>
+                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5">
+                        {cart.length === 0 ? (
+                            <div className="flex flex-col justify-center items-center gap-5 m-auto">
+                                <p className="text-xl font-semibold">Your Cart is Empty</p>
+                            </div>
+                        ) : (
+                            cart?.map((item) => (
+                                <div key={item.id} className="flex border-b align-center justify-between min-h-16 p-2">
+                                    <div className="flex gap-2 items-center">
+                                        <div className="flex gap-1">
+                                            <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
+                                        </div>
+                                        <p className="px-2">{item.name}</p>
+                                    </div>
+                                    <p className="content-center">₱{item.price}</p>
+                                </div>
+                            ))
+                        )}
+
+
+                    </div>
+                </div>
+
+            </form >
         </>
     )
 }
