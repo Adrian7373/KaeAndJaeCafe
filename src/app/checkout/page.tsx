@@ -3,18 +3,21 @@ import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import TimePicker from "./_components/TimePicker";
 import { useCart } from "../../../context/CartContext";
+import { useRouter } from "next/navigation";
 
 
 export default function CheckoutPage() {
 
     const [isDelivery, setIsDelivery] = useState(true);
     const { cart } = useCart();
+    const router = useRouter();
+    const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
 
     return (
         <>
             <header className="fixed w-full max-w-9xl z-50">
                 <nav className="flex py-2 px-4 items-center justify-between bg-kae-pink md:bg-kae-pink 2xl:px-30 2xl:py-5">
-                    <div className="flex h-10 items-center">
+                    <div onClick={() => router.back()} className="flex h-10 items-center">
                         <ChevronLeft className="mt-0.5" />
                         <p>Back to Menu</p>
                     </div>
@@ -26,7 +29,7 @@ export default function CheckoutPage() {
                     <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Customer Details</p>
                     <div className="flex flex-col gap-2">
                         <div className="relative">
-                            <input name="firstName" id="firstName" type="text" placeholder="First Name" className="rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input autoFocus name="firstName" id="firstName" type="text" placeholder="First Name" className="rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="firstName" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">First Name</label>
@@ -122,31 +125,39 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Order Summary */}
-                <div>
-                    <p>Order Summary</p>
-                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5">
-                        {cart.length === 0 ? (
-                            <div className="flex flex-col justify-center items-center gap-5 m-auto">
-                                <p className="text-xl font-semibold">Your Cart is Empty</p>
-                            </div>
-                        ) : (
-                            cart?.map((item) => (
-                                <div key={item.id} className="flex border-b align-center justify-between min-h-16 p-2">
-                                    <div className="flex gap-2 items-center">
-                                        <div className="flex gap-1">
-                                            <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
-                                        </div>
-                                        <p className="px-2">{item.name}</p>
+                <div className="bg-kae-light px-4 py-4 flex flex-col gap-2 mb-20">
+                    <div className="flex flex-col  w-full flex-grow pt-1 bg-kae-light">
+                        <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Order Summary</p>
+                        {cart?.map((item) => (
+                            <div key={item.id} className="flex border-b align-center justify-between min-h-16 p-2">
+                                <div className="flex gap-2 items-center">
+                                    <div className="flex gap-1">
+                                        <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
                                     </div>
-                                    <p className="content-center">₱{item.price}</p>
+                                    <p className="px-2">{item.name}</p>
                                 </div>
-                            ))
-                        )}
-
-
+                                <p className="content-center">₱{item.price}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
-
+                <div className="fixed flex flex-col justify-center gap-3 bottom-0 left-0 px-4 py-2 bg-white w-full z-45">
+                    <div>
+                        <div className="flex justify-between">
+                            <p>Subtotal</p>
+                            <p>₱{totalPrice}</p>
+                        </div>
+                        <div className="flex justify-between">
+                            <p>Delivery Fee</p>
+                            <p>{cart.length === 0 ? "₱0" : "₱49"}</p>
+                        </div>
+                        <div className="flex justify-between font-bold">
+                            <p>Total</p>
+                            <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
+                        </div>
+                    </div>
+                    <button disabled={cart.length === 0} onClick={() => { router.push("/checkout") }} className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
+                </div>
             </form >
         </>
     )

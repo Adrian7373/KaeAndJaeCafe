@@ -58,7 +58,6 @@ export default function TimePicker() {
 
             {/* 1. The Visual Feedback */}
             <div className="text-center">
-                <p className="text-gray-500 text-sm font-bold uppercase tracking-wide">Pickup Time</p>
                 <p className="text-3xl font-bold text-kae-dark mt-1">{selectedTime}</p>
             </div>
 
