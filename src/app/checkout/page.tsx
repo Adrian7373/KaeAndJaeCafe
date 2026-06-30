@@ -10,7 +10,7 @@ import { placeOrder } from "../actions";
 export default function CheckoutPage() {
 
     const [isDelivery, setIsDelivery] = useState(true);
-    const { cart } = useCart();
+    const { cart, selectedTime } = useCart();
     const router = useRouter();
     const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
 
@@ -30,19 +30,19 @@ export default function CheckoutPage() {
                     <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Customer Details</p>
                     <div className="flex flex-col gap-2">
                         <div className="relative">
-                            <input autoFocus name="firstName" id="firstName" type="text" placeholder="First Name" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input required autoFocus name="firstName" id="firstName" type="text" placeholder="First Name" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="firstName" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">First Name</label>
                         </div>
                         <div className="relative">
-                            <input name="lastName" id="lastName" type="text" placeholder="Last Name" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input required name="lastName" id="lastName" type="text" placeholder="Last Name" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="lastName" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">Last Name</label>
                         </div>
                         <div className="relative">
-                            <input name="contact" id="contact" type="text" placeholder="Mobile Number" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input required name="contact" id="contact" type="text" placeholder="Mobile Number" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="contact" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">Mobile Number</label>
@@ -55,6 +55,7 @@ export default function CheckoutPage() {
                     <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Order Type</p>
                     <label className="border-1 border-gray-500  rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="delivery">
                         <input
+                            required
                             name="orderType"
                             id="delivery"
                             type="radio"
@@ -66,6 +67,7 @@ export default function CheckoutPage() {
                     </label>
                     <label className="border-1 border-gray-500  rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="pickUp">
                         <input
+                            required
                             name="orderType"
                             id="pickUp"
                             type="radio"
@@ -82,13 +84,13 @@ export default function CheckoutPage() {
                     <div className="bg-kae-light px-4 py-4 flex flex-col gap-2">
                         <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Deliver To</p>
                         <div className="relative">
-                            <input name="cityBrgy" id="cityBrgy" type="text" placeholder="City, Barangay" className="border-gray-500  rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input required name="cityBrgy" id="cityBrgy" type="text" placeholder="City, Barangay" className="border-gray-500  rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="cityBrgy" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">City, Barangay</label>
                         </div>
                         <div className="relative">
-                            <input name="street" id="street" type="text" placeholder="street" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input required name="street" id="street" type="text" placeholder="street" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="cityBrgy" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">Purok, Street, House no.</label>
@@ -107,6 +109,7 @@ export default function CheckoutPage() {
                     <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Payment</p>
                     <label className="border-1 border-gray-500  rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="cash">
                         <input
+                            required
                             name="paymentType"
                             id="cash"
                             type="radio"
@@ -116,6 +119,7 @@ export default function CheckoutPage() {
                     </label>
                     <label className="border-1 border-gray-500  rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="gcash">
                         <input
+                            required
                             name="paymentType"
                             id="gcash"
                             type="radio"
@@ -124,6 +128,10 @@ export default function CheckoutPage() {
                         <span className="grow-1 pb-0.5">Gcash</span>
                     </label>
                 </div>
+
+                {/* Cart hidden input */}
+                <input type="hidden" name="cartData" value={JSON.stringify(cart)} />
+                <input type="hidden" name="selectedTime" value={JSON.stringify(selectedTime)} />
 
                 {/* Order Summary */}
                 <div className="bg-kae-light px-4 py-4 flex flex-col gap-2 mb-20">
