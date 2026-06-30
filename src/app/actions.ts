@@ -40,25 +40,27 @@ export async function placeOrder(formData: FormData) {
 
     // Inserting order details first to get order_id
     const { data: orderId, error: orderIdError } = await supabase
-        .from("record")
+        .from("order")
         .insert({
             customer_name: `${cleanData.firstName} ${cleanData.lastName}`,
             contact: cleanData.contact,
             order_type: cleanData.orderType,
             delivery_address: `${cleanData?.cityBrgy}, ${cleanData?.street}`,
             payment_method: cleanData.paymentType,
-            pickup_time: selectedTime
+            pickup_time: cleanData.orderType === "delivery" ? null : selectedTime
         })
-        .select("id");
-    if (orderIdError) return {
-        success: false,
-        message: `Failed to place order: ${orderIdError.message}`,
-        errors: orderIdError.details
-    } as any;
+        .select("id").maybeSingle();
+    if (orderIdError) {
+        return {
+            success: false,
+            message: `Failed to place order: ${orderIdError.message}`,
+            errors: orderIdError.details
+        } as any
+    };
 
     const validatedCart = cartArray.map((item: CartItem) => {
         return {
-            order_id: orderId,
+            order_id: orderId?.id,
             product_id: item.id,
             quantity: item.qty,
             price_at_checkout: item.price
@@ -70,9 +72,12 @@ export async function placeOrder(formData: FormData) {
         .from("order_items")
         .insert(validatedCart)
 
-    if (orderFillError) return {
-        success: false,
-        message: `Failed to fill order: ${orderFillError.message}`,
-        errors: orderFillError.details
-    } as any;
+    if (orderFillError) {
+        return {
+            success: false,
+            message: `Failed to fill order: ${orderFillError.message}`,
+            errors: orderFillError.details
+        } as any;
+
+    }
 }

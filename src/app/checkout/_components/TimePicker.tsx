@@ -43,6 +43,7 @@ export default function TimePicker() {
         const isActive = selectedTime === label;
         return (
             <button
+                type="button"
                 onClick={() => setSelectedTime(label)}
                 className={`w-full py-3 rounded-xl font-bold transition-all border-2 ${isActive
                     ? "bg-kae-purple text-white border-kae-purple shadow-md"
@@ -72,7 +73,7 @@ export default function TimePicker() {
             {/* 3. The Headless Dropdown for Specific Times */}
             <div className="relative mt-2 z-10">
                 <Listbox value={selectedTime} onChange={setSelectedTime}>
-                    <Listbox.Button className="w-full bg-gray-50 border-2 border-gray-200 text-gray-700 py-3 px-4 rounded-xl font-bold text-left hover:border-gray-300 transition-colors flex justify-between items-center">
+                    <Listbox.Button type="button" className="w-full bg-gray-50 border-2 border-gray-200 text-gray-700 py-3 px-4 rounded-xl font-bold text-left hover:border-gray-300 transition-colors flex justify-between items-center">
                         <span>Or choose specific time...</span>
                         <span className="text-gray-400">▼</span>
                     </Listbox.Button>
