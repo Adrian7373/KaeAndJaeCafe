@@ -37,7 +37,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [flyingItems, setFlyingItems] = useState<FlyingItem[]>([]);
 
-    const cartIconRef = useRef<HTMLButtonElement>(null);
+    const cartIconRef = useRef<SVGSVGElement>(null);
 
     const toggleCart = () => {
         setIsOpen(prev => !prev);
