@@ -3,11 +3,13 @@
 import { ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/../context/CartContext";
 import { FlyingClone } from "@/../context/CartContext";
+import { useRouter } from "next/navigation";
 
 export default function OrderNavBar() {
 
     const { toggleCart, cartIconRef, flyingItems, cart, isOpen } = useCart();
     const totalItems = cart.reduce((total, item) => total + item.qty, 0);
+    const router = useRouter();
 
     return (
         <>
@@ -22,7 +24,7 @@ export default function OrderNavBar() {
                         </div>
                     </div>
                     <div className="gap-5 flex items-center">
-                        <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#contact">Home</a>
+                        <button className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" onClick={() => router.push("/")}>Home</button>
 
                         {isOpen ? (
                             <X onClick={toggleCart} />

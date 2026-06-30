@@ -1,8 +1,13 @@
+"use client";
 import TestimonialSlider from "@/components/TestimonialsSlider"
 import { Clock, Mail, MapPin, Phone } from "lucide-react"
 import NavBar from "@/components/NavBar"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
+
+  const router = useRouter();
+
   return (
     <div>
 
@@ -21,7 +26,7 @@ export default function Home() {
             </div>
             <p className="text-center text-kae-light px-2 font-roboto md:text-start 2xl:text-xl">Your go-to mobile spot for Korean-inspired bites, classic comfort food, and refreshing, sweet beverages. Catch us serving up your favorites daily.</p>
             <div className="flex justify-center gap-3 md:justify-start">
-              <button className="cursor-pointer bg-kae-dark text-kae-light py-3 px-7 rounded-full font-roboto 2xl:text-lg transition-all duration-300 hover:bg-kae-purple hover:scale-105 hover:shadow-xl active:scale-95">Order Now</button>
+              <button className="cursor-pointer bg-kae-dark text-kae-light py-3 px-7 rounded-full font-roboto 2xl:text-lg transition-all duration-300 hover:bg-kae-purple hover:scale-105 hover:shadow-xl active:scale-95" onClick={() => router.push("/order")}>Order Now</button>
               <a href="#contact" className="border-2 border-kae-purple text-kae-purple py-3 px-7 rounded-full font-roboto 2xl:text-lg transition-all duration-300 hover:bg-kae-dark hover:text-kae-light hover:scale-105 hover:shadow-xl active:scale-95">Contact Us</a>
             </div>
           </div>
