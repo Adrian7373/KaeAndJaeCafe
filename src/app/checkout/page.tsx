@@ -4,6 +4,7 @@ import { useState } from "react";
 import TimePicker from "./_components/TimePicker";
 import { useCart } from "../../../context/CartContext";
 import { useRouter } from "next/navigation";
+import { placeOrder } from "../actions";
 
 
 export default function CheckoutPage() {
@@ -23,7 +24,7 @@ export default function CheckoutPage() {
                     </div>
                 </nav>
             </header>
-            <form action="" className="mt-14 px-4 py-5 flex flex-col gap-4">
+            <form action={placeOrder} className="mt-14 px-4 py-5 flex flex-col gap-4">
                 {/* Customer Details */}
                 <div className="bg-kae-light px-4 py-4 flex flex-col gap-2">
                     <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Customer Details</p>
@@ -41,7 +42,7 @@ export default function CheckoutPage() {
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">Last Name</label>
                         </div>
                         <div className="relative">
-                            <input name="contact" id="lastName" type="text" placeholder="Mobile Number" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                            <input name="contact" id="contact" type="text" placeholder="Mobile Number" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="contact" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
                    peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal
                    peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">Mobile Number</label>
@@ -156,7 +157,7 @@ export default function CheckoutPage() {
                             <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
                         </div>
                     </div>
-                    <button disabled={cart.length === 0} onClick={() => { router.push("/checkout") }} className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
+                    <button disabled={cart.length === 0} type="submit" className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
                 </div>
             </form >
         </>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Listbox } from "@headlessui/react";
+import { useCart } from "../../../../context/CartContext";
 
 function generateDynamicTimeSlots(intervalMinutes = 5, totalSlots = 30) {
     const slots: string[] = [];
@@ -30,8 +31,8 @@ function generateDynamicTimeSlots(intervalMinutes = 5, totalSlots = 30) {
 }
 
 export default function TimePicker() {
-    const [selectedTime, setSelectedTime] = useState("ASAP (~15 mins)");
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
+    const { selectedTime, setSelectedTime } = useCart();
 
     useEffect(() => {
         const generatedSlots = generateDynamicTimeSlots(5, 30);
