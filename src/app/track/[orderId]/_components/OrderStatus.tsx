@@ -21,6 +21,17 @@ interface OrderStatusProps {
 
 export default function OrderStatus({ orderStatus }: OrderStatusProps) {
     const { first_name, status, payment_method, delivery_address, orderType, orders } = orderStatus;
+    const normalizedStatus = status.toLowerCase();
+
+    const statusRank =
+        normalizedStatus === "pending" ? 0
+            : normalizedStatus === "cooking" ? 1
+                : normalizedStatus === "prepared" ? 2
+                    : normalizedStatus === "delivering" ? 3
+                        : normalizedStatus === "success" ? 4
+                            : 0;
+
+    const isStepComplete = (stepRank: number) => statusRank >= stepRank;
 
     const [isShowingDetails, setIsShowingDetails] = useState(false);
 
@@ -39,11 +50,16 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                 </header>
                 <div className="flex-grow justify-center items-center content-center">
                     <OrderAnimation status={status} />
-                    <p>{status.toLowerCase() === "pending" ? "Order placed"
-                        : status.toLowerCase() === "cooking" ? "Cooking Food"
-                            : status.toLowerCase() === "prepared" ? "Food Prepared"
-                                : status.toLowerCase() === "delivering" ? "Out for Delivery"
-                                    : status.toLowerCase() === "success" && "Food Delivered"}</p>
+                    <p className="text-center text-xl">{normalizedStatus === "pending" ? "Order placed"
+                        : normalizedStatus === "cooking" ? "Cooking Food"
+                            : normalizedStatus === "prepared" ? "Food Prepared"
+                                : normalizedStatus === "delivering" ? "Out for Delivery"
+                                    : normalizedStatus === "success" && "Food Delivered"}</p>
+                    <p className="text-center">{normalizedStatus === "pending" ? "Waiting for cafe to accept your order"
+                        : normalizedStatus === "cooking" ? "Your food is being prepared"
+                            : normalizedStatus === "prepared" ? "Your food is prepared and is waiting for delivery"
+                                : normalizedStatus === "delivering" ? "Please prepare to recieve your food"
+                                    : normalizedStatus === "success" && "Thank you for ordering!"}</p>
                 </div>
                 <div className="flex flex-col justify-center border-1 border-gray-400 rounded-t-3xl px-6 py-4 gap-5 bg-kae-light">
                     <p className={`text-center ${isShowingDetails && "hidden"} `}>Track your order</p>
@@ -54,27 +70,28 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                 <Store />
                                 <p>Order Accepted</p>
                             </div>
-                            <CircleCheck fill="bg-kae-dark" color="white" />
+                            <CircleCheck className={isStepComplete(1) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                         </div>
                         <div className="flex justify-between">
                             <div className="flex gap-2">
                                 <Hamburger />
                                 <p>Order Ready</p>
                             </div>
-                            <CircleCheck fill="bg-kae-dark" color="white" />
+                            <CircleCheck className={isStepComplete(2) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                         </div>
                         <div className="flex justify-between">
                             <div className="flex gap-2">
                                 <Bike />
                                 <p>Order Picked up</p>
                             </div>
-                            <CircleCheck fill="bg-kae-dark" color="white" />
+                            <CircleCheck className={isStepComplete(3) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                         </div>
                         <div className="flex justify-between">
                             <div className="flex gap-2">
                                 <CircleCheckBig />
                                 <p>Order Delivered</p>
                             </div>
+                            <CircleCheck className={isStepComplete(4) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                         </div>
                     </div>
 
