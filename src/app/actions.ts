@@ -48,7 +48,8 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
     const { data: orderId, error: orderIdError } = await supabase
         .from("order")
         .insert({
-            customer_name: `${cleanData.firstName} ${cleanData.lastName}`,
+            first_name: cleanData.firstName,
+            last_name: cleanData.lastName,
             contact: cleanData.contact,
             order_type: cleanData.orderType,
             delivery_address: `${cleanData?.cityBrgy}, ${cleanData?.street}`,
