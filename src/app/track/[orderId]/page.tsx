@@ -1,7 +1,13 @@
+import OrderStatus from "./_components/OrderStatus";
+import OrderDetails from "./_components/OrderStatus"
 
+export default function TrackPage({ params }: { params: { orderId: string } }) {
 
-export default function TrackPage({ params }: { params: string }) {
+    const { orderId } = params;
+
     return (
-        <p>Burat</p>
+        <>
+            <OrderStatus />
+        </>
     )
 }
