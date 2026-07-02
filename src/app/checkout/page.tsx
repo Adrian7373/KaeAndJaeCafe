@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import TimePicker from "./_components/TimePicker";
 import { useCart } from "../../../context/CartContext";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ export default function CheckoutPage() {
     const { cart, selectedTime } = useCart();
     const router = useRouter();
     const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
+    const [state, formAction, isPending] = useActionState(placeOrder, null);
 
     return (
         <>
@@ -24,7 +25,7 @@ export default function CheckoutPage() {
                     </div>
                 </nav>
             </header>
-            <form action={placeOrder} className="mt-14 px-4 py-5 flex flex-col gap-4">
+            <form action={formAction} className="mt-14 px-4 py-5 flex flex-col gap-4">
                 {/* Customer Details */}
                 <div className="bg-kae-light px-4 py-4 flex flex-col gap-2">
                     <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Customer Details</p>
@@ -49,6 +50,7 @@ export default function CheckoutPage() {
                         </div>
                     </div>
                 </div>
+
 
                 {/* Order Type */}
                 <div className="bg-kae-light px-4 py-4 flex flex-col gap-2">
@@ -151,6 +153,11 @@ export default function CheckoutPage() {
                     </div>
                 </div>
                 <div className="fixed flex flex-col justify-center gap-3 bottom-0 left-0 px-4 py-2 bg-white w-full z-45">
+                    {state?.error && (
+                        <div className="bg-red-100 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200">
+                            ⚠️ {state.error}
+                        </div>
+                    )}
                     <div>
                         <div className="flex justify-between">
                             <p>Subtotal</p>
@@ -165,7 +172,9 @@ export default function CheckoutPage() {
                             <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
                         </div>
                     </div>
-                    <button disabled={cart.length === 0} type="submit" className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
+                    <button disabled={cart.length === 0 && isPending} type="submit" className={`flex justify-center gap-2 items-center px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}><div
+                        className={`${isPending ? "" : "hidden"} rounded-full border-white border-t-transparent animate-spin w-6 h-6 border-2`}
+                    ></div>Proceed to Checkout</button>
                 </div>
             </form >
         </>
