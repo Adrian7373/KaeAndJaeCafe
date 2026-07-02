@@ -9,15 +9,18 @@ interface Order {
     price_at_checkout: string
 }
 interface OrderStatusProps {
-    orderType: string,
-    delivery_address: string,
-    payment_method: string,
-    status: string,
-    first_name: string,
-    orders: Order[]
+    orderStatus: {
+        orderType: string,
+        delivery_address: string,
+        payment_method: string,
+        status: string,
+        first_name: string,
+        orders: any[] | null
+    }
 }
 
-export default function OrderStatus() {
+export default function OrderStatus({ orderStatus }: OrderStatusProps) {
+    const { first_name, status, payment_method, delivery_address, orderType, orders } = orderStatus;
 
     const [isShowingDetails, setIsShowingDetails] = useState(false);
 

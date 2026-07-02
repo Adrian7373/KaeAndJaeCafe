@@ -85,5 +85,5 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
         } as any;
 
     }
-    redirect(`/track/${orderId}`);
+    redirect(`/track/${orderId.id}`);
 }
