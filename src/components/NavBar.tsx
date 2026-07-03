@@ -34,7 +34,7 @@ export default function NavBar({ bgColorMobile, bgColorMd }: { bgColorMobile: st
             </nav>
             <div
                 onClick={toggleMenu}
-                className={`fixed inset-0 bg-kae-dark/40 backdrop-blur-sm z-40 transition-all duration-3000 md:hidden ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                className={`fixed inset-0 bg-kae-dark/40 backdrop-blur-sm z-40 transition-all duration-300 md:hidden ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
                     }`}
             ></div>
 

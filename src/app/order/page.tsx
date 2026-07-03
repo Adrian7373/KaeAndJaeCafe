@@ -4,6 +4,7 @@ import { supabase } from "../../../lib/supabase"
 import OrderNavBar from "./_components/OrderNavBar";
 import { cookies } from "next/headers";
 import ActiveOrderBanner from "./_components/ActiveOrderBanner";
+import Footer from "@/components/Footer";
 
 export default async function OrderPage() {
 
@@ -37,6 +38,7 @@ export default async function OrderPage() {
             <OrderNavBar />
             <MenuCatalog products={menuProducts} />
             <ActiveOrderBanner />
+            <Footer />
         </>
     )
 }
