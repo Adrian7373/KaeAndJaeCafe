@@ -3,6 +3,7 @@ import { ArrowLeft, Bike, CircleCheck, CircleCheckBig, Hamburger, Menu, Store } 
 import { useState } from "react";
 import OrderAnimation from "./OrderAnimation";
 import { useRouter } from "next/navigation";
+import TrackingClientFeatures from "./TrackingClientFeatures";
 
 interface Order {
     name: string,
@@ -17,12 +18,14 @@ interface OrderStatusProps {
         status: string,
         first_name: string,
         orderTotal: number,
+        orderId: string,
+        orderTimestamp: string,
         orders: any[] | null
     }
 }
 
 export default function OrderStatus({ orderStatus }: OrderStatusProps) {
-    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal } = orderStatus;
+    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal, orderId, orderTimestamp } = orderStatus;
     const normalizedStatus = status.toLowerCase();
     const normalizedOrderType = orderType?.toLowerCase();
     const isPickupOrder = normalizedOrderType === "pickup";
@@ -44,15 +47,19 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
         setIsShowingDetails(prev => !prev);
     }
 
+    const copyLink = () => {
+
+    }
+
     return (
         <>
-            <div className="flex flex-col max-h-dvh min-h-dvh">
+            <div className="flex flex-col min-h-dvh">
                 <header>
                     <nav className="flex justify-between items-center bg-kae-pink px-4 py-4">
                         <ArrowLeft onClick={() => router.push("/order")} className="h-8 w-8" />
                     </nav>
                 </header>
-                <div className="flex-grow justify-center items-center content-center">
+                <div className="flex-grow justify-center items-center content-center my-6">
                     <OrderAnimation status={status} />
                     <p className="text-center text-xl">{normalizedStatus === "pending" ? "Order placed"
                         : normalizedStatus === "cooking" ? "Cooking Food"
@@ -66,10 +73,6 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                     : normalizedStatus === "success" && "Thank you for ordering!"}</p>
                 </div>
                 <div className="flex flex-col justify-center border-1 border-gray-400 rounded-t-3xl px-6 py-4 gap-5 bg-kae-light">
-                    <div className={`flex justify-between ${isShowingDetails && "hidden"}`}>
-                        <p>Order for <b>{first_name}</b></p>
-                        <p>{orderType}</p>
-                    </div>
                     <p className={`text-center ${isShowingDetails && "hidden"} `}>Track your order</p>
 
                     <div className={`flex flex-col gap-5 ${isShowingDetails && "hidden"}`}>
@@ -108,6 +111,12 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                     <div className={`${!isShowingDetails && "hidden"} flex flex-col gap-4`}>
                         <p className="text-center">Your Order</p>
                         <div>
+                            <p>Order for <b>{first_name}</b></p>
+                            <p>Order type: {orderType}</p>
+                            <p>Date ordered: {orderTimestamp}</p>
+                            <p>Payment: {payment_method}</p>
+                        </div>
+                        <div>
                             {orders?.map((item) => (
                                 <div className="flex justify-between min-h-12 border-b items-center py-2" key={item.id}>
                                     <div className="flex gap-2 items-center">
@@ -123,9 +132,9 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
 
                     <div className="flex justify-between border-1 border-gray-400 rounded-xl px-4 py-3">
                         <p className={`${isShowingDetails && "order-3"} content-center`}>Total: ₱{orderTotal.toFixed(2)}</p>
-                        <p className={`content-center order-2 ${isShowingDetails ? "block" : "hidden"}`}>{payment_method}</p>
                         <button onClick={toggleShow} className={`text-kae-dark ${isShowingDetails && "order-0"} bg-kae-pink px-2 py-1 rounded-lg text-kae-lightz`}>{isShowingDetails ? "Order Status" : "Order Details"}</button>
                     </div>
+                    <TrackingClientFeatures orderId={orderId} />
                 </div>
             </div>
         </>
