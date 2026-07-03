@@ -101,3 +101,24 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
 
     redirect(`/track/${orderId.id}`);
 }
+
+export async function loginAdmin(prevState: any, formData: FormData) {
+    const password = formData.get("password") as string;
+    const email = process.env.ADMIN_EMAIL;
+
+    if (!email) {
+        return { error: "Server configuration error" }
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    })
+
+    if (error) {
+        return { error: "Invalid password" }
+    }
+
+    redirect("/admin/dashboard")
+
+}   
