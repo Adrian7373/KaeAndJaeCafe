@@ -1,5 +1,6 @@
 import OrderStatus from "./_components/OrderStatus";
 import { supabase } from "@/../lib/supabase";
+import AutoRefresh from "./_components/RefreshComponent";
 
 export default async function TrackPage({ params }: { params: { orderId: string } }) {
 
@@ -7,7 +8,7 @@ export default async function TrackPage({ params }: { params: { orderId: string 
 
     const { data: orderInfo, error: orderInfoError } = await supabase
         .from("order")
-        .select("order_type, delivery_address, payment_method, status, first_name")
+        .select("order_type, delivery_address, payment_method, status, first_name, created_at")
         .eq("id", orderId)
         .maybeSingle();
 
@@ -28,6 +29,21 @@ export default async function TrackPage({ params }: { params: { orderId: string 
         return total + Number(item.quantity) * Number(item.price_at_checkout);
     }, 0);
 
+    const date = new Date(orderInfo?.created_at.replace(" ", "T"));
+
+    const options: Intl.DateTimeFormatOptions = {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+        timeZone: 'Asia/Manila'
+    };
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', options).format(date);
+    console.log(formattedDate);
+
     const orderStatus = {
         orderType: orderInfo?.order_type,
         delivery_address: orderInfo?.delivery_address,
@@ -35,11 +51,14 @@ export default async function TrackPage({ params }: { params: { orderId: string 
         status: orderInfo?.status,
         first_name: orderInfo?.first_name,
         orders: orderDetails,
-        orderTotal: orderTotal
+        orderTotal: orderTotal,
+        orderId: orderId,
+        orderTimestamp: formattedDate
     }
 
     return (
         <>
+            <AutoRefresh />
             <OrderStatus orderStatus={orderStatus} />
         </>
     )
