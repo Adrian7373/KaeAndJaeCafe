@@ -30,6 +30,7 @@ type CartContextType = {
     flyingItems: FlyingItem[];
     selectedTime: string;
     setSelectedTime: (selectedTime: string) => void;
+    clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -41,6 +42,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const [selectedTime, setSelectedTime] = useState("ASAP (~15 mins)");
 
     const cartIconRef = useRef<SVGSVGElement>(null);
+
+    const clearCart = () => {
+        setCart([]);
+    }
 
     const toggleCart = () => {
         setIsOpen(prev => !prev);
@@ -98,7 +103,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, isOpen, toggleCart, incrementItem, decrementItem, cartIconRef, flyingItems, selectedTime, setSelectedTime }} >
+        <CartContext.Provider value={{ cart, addToCart, isOpen, toggleCart, incrementItem, decrementItem, cartIconRef, flyingItems, selectedTime, setSelectedTime, clearCart }} >
             {children}
         </CartContext.Provider>
     );

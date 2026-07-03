@@ -3,6 +3,7 @@ import { supabase } from "../../lib/supabase";
 import { CartItem } from "../../context/CartContext";
 import z, { success } from "zod";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 const checkOutSchema = z.object({
     firstName: z.string().min(2, "Full name is required"),
@@ -85,5 +86,12 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
         } as any;
 
     }
+
+    const cookieStore = await cookies();
+    cookieStore.set("active_order_id", orderId.id, {
+        maxAge: 7200,
+        httpOnly: true,
+    });
+
     redirect(`/track/${orderId.id}`);
 }
