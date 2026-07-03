@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Pacifico, Libertinus_Serif, Roboto } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/Footer"
 import { CartProvider } from "../../context/CartContext";
 
 const roboto = Roboto({
@@ -48,7 +47,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} ${libertinusSerif.variable} ${roboto.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col"><CartProvider>{children}</CartProvider> <Footer /></body>
+      <body className="min-h-full flex flex-col"><CartProvider>{children}</CartProvider></body>
     </html>
   );
 }

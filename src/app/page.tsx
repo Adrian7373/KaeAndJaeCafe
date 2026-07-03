@@ -3,6 +3,7 @@ import TestimonialSlider from "@/components/TestimonialsSlider"
 import { Clock, Mail, MapPin, Phone } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import { useRouter } from "next/navigation"
+import Footer from "@/components/Footer";
 
 export default function Home() {
 
@@ -202,7 +203,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      <Footer />
     </div>
   )
 }
