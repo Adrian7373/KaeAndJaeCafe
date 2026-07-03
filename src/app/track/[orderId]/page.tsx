@@ -20,13 +20,22 @@ export default async function TrackPage({ params }: { params: { orderId: string 
         .select("quantity, price_at_checkout, product(name)")
         .eq("order_id", orderId);
 
+    if (orderDetailsError) {
+        throw new Error(`Failed to get order items: ${orderDetailsError.message}`)
+    }
+
+    const orderTotal = (orderDetails ?? []).reduce((total, item) => {
+        return total + Number(item.quantity) * Number(item.price_at_checkout);
+    }, 0);
+
     const orderStatus = {
         orderType: orderInfo?.order_type,
         delivery_address: orderInfo?.delivery_address,
         payment_method: orderInfo?.payment_method,
         status: orderInfo?.status,
         first_name: orderInfo?.first_name,
-        orders: orderDetails
+        orders: orderDetails,
+        orderTotal: orderTotal
     }
 
     return (

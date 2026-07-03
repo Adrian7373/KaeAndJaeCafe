@@ -30,7 +30,7 @@ export default function OrderAnimation({ status }: { status: string }) {
         <div className="w-64 h-64 mx-auto flex items-center justify-center">
             <Lottie
                 animationData={animationData}
-                loop={true}
+                loop={status.toLowerCase() === "success" ? false : true}
                 autoplay={true}
             />
         </div>

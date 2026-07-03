@@ -2,6 +2,7 @@
 import { ArrowLeft, Bike, CircleCheck, CircleCheckBig, Hamburger, Menu, Store } from "lucide-react";
 import { useState } from "react";
 import OrderAnimation from "./OrderAnimation";
+import { useRouter } from "next/navigation";
 
 interface Order {
     name: string,
@@ -15,13 +16,17 @@ interface OrderStatusProps {
         payment_method: string,
         status: string,
         first_name: string,
+        orderTotal: number,
         orders: any[] | null
     }
 }
 
 export default function OrderStatus({ orderStatus }: OrderStatusProps) {
-    const { first_name, status, payment_method, delivery_address, orderType, orders } = orderStatus;
+    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal } = orderStatus;
     const normalizedStatus = status.toLowerCase();
+    const normalizedOrderType = orderType?.toLowerCase();
+    const isPickupOrder = normalizedOrderType === "pickup";
+    const router = useRouter();
 
     const statusRank =
         normalizedStatus === "pending" ? 0
@@ -44,8 +49,7 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
             <div className="flex flex-col max-h-dvh min-h-dvh">
                 <header>
                     <nav className="flex justify-between items-center bg-kae-pink px-4 py-4">
-                        <ArrowLeft className="h-8 w-8" />
-                        <Menu className="h-8 w-8" />
+                        <ArrowLeft onClick={() => router.push("/order")} className="h-8 w-8" />
                     </nav>
                 </header>
                 <div className="flex-grow justify-center items-center content-center">
@@ -57,11 +61,15 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                     : normalizedStatus === "success" && "Food Delivered"}</p>
                     <p className="text-center">{normalizedStatus === "pending" ? "Waiting for cafe to accept your order"
                         : normalizedStatus === "cooking" ? "Your food is being prepared"
-                            : normalizedStatus === "prepared" ? "Your food is prepared and is waiting for delivery"
-                                : normalizedStatus === "delivering" ? "Please prepare to recieve your food"
+                            : normalizedStatus === "prepared" ? (isPickupOrder ? "Your food is prepared and ready for pick-up." : "Your food is prepared and is waiting for delivery")
+                                : normalizedStatus === "delivering" ? `Your food is on the way. Delivery address: ${delivery_address}`
                                     : normalizedStatus === "success" && "Thank you for ordering!"}</p>
                 </div>
                 <div className="flex flex-col justify-center border-1 border-gray-400 rounded-t-3xl px-6 py-4 gap-5 bg-kae-light">
+                    <div className={`flex justify-between ${isShowingDetails && "hidden"}`}>
+                        <p>Order for <b>{first_name}</b></p>
+                        <p>{orderType}</p>
+                    </div>
                     <p className={`text-center ${isShowingDetails && "hidden"} `}>Track your order</p>
 
                     <div className={`flex flex-col gap-5 ${isShowingDetails && "hidden"}`}>
@@ -79,19 +87,21 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                             </div>
                             <CircleCheck className={isStepComplete(2) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                         </div>
-                        <div className="flex justify-between">
-                            <div className="flex gap-2">
-                                <Bike />
-                                <p>Order Picked up</p>
+                        {!isPickupOrder && (
+                            <div className="flex justify-between">
+                                <div className="flex gap-2">
+                                    <Bike />
+                                    <p>Order Picked up</p>
+                                </div>
+                                <CircleCheck className={isStepComplete(3) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                             </div>
-                            <CircleCheck className={isStepComplete(3) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
-                        </div>
+                        )}
                         <div className="flex justify-between">
                             <div className="flex gap-2">
                                 <CircleCheckBig />
-                                <p>Order Delivered</p>
+                                <p>{isPickupOrder ? "Order Picked up" : "Order Delivered"}</p>
                             </div>
-                            <CircleCheck className={isStepComplete(4) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
+                            <CircleCheck className={isStepComplete(isPickupOrder ? 3 : 4) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
                         </div>
                     </div>
 
@@ -104,7 +114,7 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                         <p className="h-max bg-kae-dark text-sm text-kae-light px-2 py-1 content-center rounded-full">{item.quantity}x</p>
                                         <p>{item.product.name}</p>
                                     </div>
-                                    <p className="flex-grow text-right">{item.price_at_checkout}</p>
+                                    <p className="flex-grow text-right">₱{item.price_at_checkout}</p>
                                 </div>
                             ))}
                         </div>
@@ -112,8 +122,9 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
 
 
                     <div className="flex justify-between border-1 border-gray-400 rounded-xl px-4 py-3">
-                        <p className={`${isShowingDetails && "order-1"} content-center`}>Total: ₱67.00</p>
-                        <button onClick={toggleShow} className={`text-kae-dark ${isShowingDetails && "order-0"} bg-kae-pink px-2 py-1 rounded-lg text-kae-light`}>{isShowingDetails ? "Order Status" : "Order Details"}</button>
+                        <p className={`${isShowingDetails && "order-3"} content-center`}>Total: ₱{orderTotal.toFixed(2)}</p>
+                        <p className={`content-center order-2 ${isShowingDetails ? "block" : "hidden"}`}>{payment_method}</p>
+                        <button onClick={toggleShow} className={`text-kae-dark ${isShowingDetails && "order-0"} bg-kae-pink px-2 py-1 rounded-lg text-kae-lightz`}>{isShowingDetails ? "Order Status" : "Order Details"}</button>
                     </div>
                 </div>
             </div>

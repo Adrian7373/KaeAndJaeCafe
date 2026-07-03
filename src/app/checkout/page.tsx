@@ -10,7 +10,7 @@ import { placeOrder } from "../actions";
 export default function CheckoutPage() {
 
     const [isDelivery, setIsDelivery] = useState(true);
-    const { cart, selectedTime } = useCart();
+    const { cart, selectedTime, clearCart } = useCart();
     const router = useRouter();
     const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
     const [state, formAction, isPending] = useActionState(placeOrder, null);
