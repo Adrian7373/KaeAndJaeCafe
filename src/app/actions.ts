@@ -13,7 +13,9 @@ const checkOutSchema = z.object({
     cityBrgy: z.string().optional(),
     street: z.string().optional(),
     pickUpTime: z.string().optional(),
-    paymentType: z.string()
+    paymentType: z.string(),
+    latitude: z.string(),
+    longitude: z.string()
     /*cartData:z.array(z.object({
         id:z.string(),
         name:z.string(),
@@ -55,7 +57,9 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
             order_type: cleanData.orderType,
             delivery_address: `${cleanData?.cityBrgy}, ${cleanData?.street}`,
             payment_method: cleanData.paymentType,
-            pickup_time: cleanData.orderType === "delivery" ? null : selectedTime
+            pickup_time: cleanData.orderType === "delivery" ? null : selectedTime,
+            delivery_lat: cleanData.latitude,
+            delivery_long: cleanData.longitude
         })
         .select("id").maybeSingle();
     if (orderIdError || orderId === null) {

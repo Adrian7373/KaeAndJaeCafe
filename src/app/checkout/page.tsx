@@ -5,10 +5,20 @@ import TimePicker from "./_components/TimePicker";
 import { useCart } from "../../../context/CartContext";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "../actions";
+import dynamic from "next/dynamic";
 
+const LocationMap = dynamic(() => import("./_components/MapPicker"), {
+    ssr: false,
+    loading: () => (
+        <div className="h-64 w-full bg-gray-100 animate-pulse rounded-xl flex items-center justify-center">
+            <span className="text-gray-400 font-bold">Loading Map...</span>
+        </div>
+    )
+});
 
 export default function CheckoutPage() {
 
+    const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
     const [isDelivery, setIsDelivery] = useState(true);
     const { cart, selectedTime, clearCart } = useCart();
     const router = useRouter();
@@ -85,6 +95,11 @@ export default function CheckoutPage() {
                 {isDelivery ? (
                     <div className="bg-kae-light px-4 py-4 flex flex-col gap-2">
                         <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Deliver To</p>
+                        <LocationMap
+                            onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })}
+                        />
+                        <input type="hidden" name="latitude" value={coordinates.lat} />
+                        <input type="hidden" name="longitude" value={coordinates.lng} />
                         <div className="relative">
                             <input required name="cityBrgy" id="cityBrgy" type="text" placeholder="City, Barangay" className="border-gray-500  rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                             <label htmlFor="cityBrgy" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none
