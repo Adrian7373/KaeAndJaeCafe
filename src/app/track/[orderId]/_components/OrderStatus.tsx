@@ -110,11 +110,11 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
 
                     <div className={`${!isShowingDetails && "hidden"} flex flex-col gap-4`}>
                         <p className="text-center">Your Order</p>
-                        <div>
+                        <div className="border-1 px-4 py-2 border-gray-400 rounded-xl">
                             <p>Order for <b>{first_name}</b></p>
-                            <p>Order type: {orderType}</p>
-                            <p>Date ordered: {orderTimestamp}</p>
-                            <p>Payment: {payment_method}</p>
+                            <p>Order type: <b>{orderType}</b></p>
+                            <p>Date ordered: <b>{orderTimestamp}</b></p>
+                            <p>Payment: <b>{payment_method}</b></p>
                         </div>
                         <div>
                             {orders?.map((item) => (
