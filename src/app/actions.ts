@@ -43,6 +43,7 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
         return { success: false, error: summary } as any;
     }
     const cleanData = validatedFields.data;
+    const normalizedOrderType = cleanData.orderType.toLowerCase();
 
     //Retrieving selected time and cart items
     const selectedTime = formData.get("selectedTime");
@@ -57,10 +58,10 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
             first_name: cleanData.firstName,
             last_name: cleanData.lastName,
             contact: cleanData.contact,
-            order_type: cleanData.orderType,
+            order_type: normalizedOrderType,
             delivery_address: `${cleanData?.cityBrgy}, ${cleanData?.street}`,
             payment_method: cleanData.paymentType,
-            pickup_time: cleanData.orderType === "delivery" ? null : selectedTime,
+            pickup_time: normalizedOrderType === "delivery" ? null : selectedTime,
             delivery_lat: cleanData.latitude,
             delivery_long: cleanData.longitude,
             customer_note: cleanData.notes,
