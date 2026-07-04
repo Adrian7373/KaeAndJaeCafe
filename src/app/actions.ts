@@ -1,9 +1,10 @@
 "use server";
-import { supabase } from "../../lib/supabase";
+import { createServerClient } from "../../lib/supabase-server";
 import { CartItem } from "../../context/CartContext";
 import z, { success } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+
 
 const checkOutSchema = z.object({
     firstName: z.string().min(2, "Full name is required"),
@@ -49,6 +50,7 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
     const cartArray = JSON.parse(rawCart);
 
     // Inserting order details first to get order_id
+    const supabase = await createServerClient(true);
     const { data: orderId, error: orderIdError } = await supabase
         .from("orders")
         .insert({
@@ -61,7 +63,8 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
             pickup_time: cleanData.orderType === "delivery" ? null : selectedTime,
             delivery_lat: cleanData.latitude,
             delivery_long: cleanData.longitude,
-            customer_note: cleanData.notes
+            customer_note: cleanData.notes,
+            status: "pending"
         })
         .select("id").maybeSingle();
     if (orderIdError || orderId === null) {
@@ -110,6 +113,7 @@ export async function loginAdmin(prevState: any, formData: FormData) {
         return { error: "Server configuration error" }
     }
 
+    const supabase = await createServerClient(true);
     const { error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password
@@ -121,4 +125,31 @@ export async function loginAdmin(prevState: any, formData: FormData) {
 
     redirect("/admin/dashboard")
 
-}   
+}
+
+export async function updateOrderAction(orderId: string, newStatus: string) {
+    const supabase = await createServerClient(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        console.error("Server Action Failed: No user cookie found!");
+        return { success: false, error: "Unauthorized Server Request" };
+    }
+
+    console.log("Server successfully authenticated as:", user.email);
+
+    const { data, error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId)
+        .select()
+        .single();
+
+    if (error) {
+        console.error("Server Action Update Failed:", error);
+        return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
