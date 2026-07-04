@@ -1,6 +1,6 @@
 export const revalidate = 60;
 import MenuCatalog from "./_components/MenuCatalog"
-import { createServerClient } from "../../../lib/supabase-server"
+import { createServerClient } from "@/../lib/supabase-server"
 import OrderNavBar from "./_components/OrderNavBar";
 import { cookies } from "next/headers";
 import ActiveOrderBanner from "./_components/ActiveOrderBanner";

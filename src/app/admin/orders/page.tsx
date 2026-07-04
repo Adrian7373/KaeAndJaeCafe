@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/../lib/supabase';
 import { redirect, useRouter } from 'next/navigation';
 import { updateOrderAction } from '@/app/actions';
+import { HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
 
 
 // 1. Strict Types matching your database schema
 export type OrderStatus = 'pending' | 'cooking' | 'prepared' | 'delivering' | 'success' | 'cancelled';
+export type OrderType = 'delivery' | 'pickup';
 
 export interface OrderItem {
     quantity: number;
@@ -18,10 +20,14 @@ export interface Order {
     id: string;
     created_at: string;
     status: OrderStatus;
+    order_type: OrderType;
     first_name: string;
+    last_name: string;
     contact: string;
     delivery_address: string;
-    order_items: OrderItem[];
+    payment_method: string;
+    pickup_time: string;
+    order_items?: OrderItem[];
 }
 
 
@@ -39,8 +45,117 @@ export default function OrdersPage() {
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
     const cookingOrders = orders.filter((o) => o.status === 'cooking');
-    const preparedOrders = orders.filter((o) => o.status === 'prepared');
-    const deliveringOrders = orders.filter((o) => o.status === 'delivering');
+    const isPickupOrder = (order: Order) => order.order_type.toLowerCase() === 'pickup';
+    const preparedOrders = orders.filter((o) => o.status === 'prepared' && !isPickupOrder(o));
+    const deliveringOrders = orders.filter(
+        (o) => (o.status === 'delivering' && !isPickupOrder(o))
+            || (o.status === 'prepared' && isPickupOrder(o))
+    );
+
+    const getCookingAction = (order: Order) => ({
+        label: isPickupOrder(order) ? 'READY FOR PICKUP' : 'ORDER PREPARED',
+        nextStatus: 'prepared' as OrderStatus,
+    });
+
+    const getFinalAction = (order: Order) => ({
+        label: isPickupOrder(order) ? 'PICKUP COMPLETE' : 'DELIVERY COMPLETE',
+        nextStatus: 'success' as OrderStatus,
+    });
+
+    const renderOrderCard = (
+        order: Order,
+        actionButton: {
+            label: string;
+            className: string;
+            onClick: () => void;
+        },
+        colors: {
+            squareFill: string;
+        }
+    ) => (
+        <div key={order.id} className={`border border-${colors.squareFill}-400 shadow-sm p-4 rounded-xl`}>
+            <div className='flex justify-between mb-3'>
+                <div className='flex'>
+                    <Square fill={colors.squareFill} strokeWidth={0} />
+                    <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
+                </div>
+                <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                <X />
+            </div>
+            <div>
+                <div className={`flex flex-col gap-2 border-t border-${colors.squareFill}-500 py-2`}>
+                    <div className='flex gap-2'>
+                        <Wallet />
+                        <p className='font-semibold'>{order.payment_method}</p>
+                    </div>
+                    {order.order_type === "delivery" ? (<div className='flex gap-2'>
+                        <MapPin />
+                        <p>{order.delivery_address}</p>
+                    </div>) : (<div className='flex gap-2'>
+                        <HandPlatter />
+                        <p>Pick-up {order.pickup_time}</p>
+                    </div>)}
+                    <div className='flex gap-2'>
+                        <Phone />
+                        <p>{order.contact}</p>
+                    </div>
+                </div>
+                <div className='mt-2'>
+                    <p className='text-md font-semibold'>ORDERS</p>
+                    {order.order_items?.map((item, index) => (
+                        <div className='flex justify-between border-b py-2 gap-2' key={index}>
+                            <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
+                            <p className='flex-grow'>{item.product.name}</p>
+                            <p>₱{item.product.price}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <button
+                onClick={actionButton.onClick}
+                className={actionButton.className}
+            >
+                {actionButton.label}
+            </button>
+        </div>
+    );
+
+    const upsertOrderInState = (nextOrder: Order) => {
+        setOrders((currentOrders) => {
+            const nextOrders = [...currentOrders.filter((order) => order.id !== nextOrder.id), nextOrder];
+            return nextOrders.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        });
+    };
+
+    const fetchOrderWithItems = async (orderId: string, maxAttempts = 5) => {
+        for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+            const { data, error } = await supabase
+                .from('orders')
+                .select(`
+                    id, created_at, status, order_type, first_name, last_name, pickup_time, contact, delivery_address, payment_method,
+                    order_items ( quantity, product ( name, price ) )
+                `)
+                .eq('id', orderId)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Error fetching inserted order:', error.message);
+                return null;
+            }
+
+            const hydratedOrder = data as Order | null;
+
+            if (hydratedOrder?.order_items?.length) {
+                return hydratedOrder;
+            }
+
+            if (attempt < maxAttempts - 1) {
+                await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+        }
+
+        return null;
+    };
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -59,16 +174,16 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-          id, created_at, status, first_name, contact, delivery_address,
+                    id, created_at, status, order_type, first_name,last_name,pickup_time, contact, delivery_address,payment_method,
           order_items ( quantity, product ( name, price ) )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
                 .order('created_at', { ascending: true }); // Oldest orders at the top
 
             if (error) {
-                console.error("Error fetching initial orders:", error);
+                console.error("Error fetching initial orders:", error.message);
             } else {
-                setOrders(data as Order[] || []);
+                setOrders((data as unknown as Order[]) || []);
             }
             setLoading(false);
         };
@@ -81,9 +196,31 @@ export default function OrdersPage() {
             .on(
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'orders' },
-                (payload) => {
-                    const newOrder = payload.new as Order;
-                    setOrders((currentOrders) => [...currentOrders, newOrder]);
+                async (payload) => {
+                    const insertedOrder = await fetchOrderWithItems((payload.new as { id: string }).id);
+
+                    if (!insertedOrder) {
+                        return;
+                    }
+
+                    upsertOrderInState(insertedOrder);
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'order_items' },
+                async (payload) => {
+                    const orderId = (payload.new as { order_id?: string }).order_id;
+
+                    if (!orderId) {
+                        return;
+                    }
+
+                    const refreshedOrder = await fetchOrderWithItems(orderId);
+
+                    if (refreshedOrder) {
+                        upsertOrderInState(refreshedOrder);
+                    }
                 }
             )
             .on(
@@ -131,19 +268,54 @@ export default function OrdersPage() {
     if (loading) return <div className="p-8 text-center font-bold text-gray-500">Loading live orders...</div>;
 
     return (
-        <div className="flex gap-4 w-full min-h-screen p-4 bg-gray-50 overflow-x-auto">
+        <div className="flex flex-row w-screen pt-20 h-screen bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
 
             {/* PENDING COLUMN */}
-            <div className="flex-1 min-w-[300px] bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500">
+            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start">
                 <h2 className="font-bold text-orange-500 mb-4 tracking-wider text-sm">PENDING ({pendingOrders.length})</h2>
                 <div className="space-y-4">
                     {pendingOrders.map((order) => (
-                        <div key={order.id} className="border border-gray-100 shadow-sm p-4 rounded-xl">
-                            <p className="font-bold text-gray-800">{order.first_name}</p>
-                            <p className="text-sm text-gray-500 mb-3">{order.order_items?.length} items</p>
+                        <div key={order.id} className="border border-orange-500 shadow-sm p-4 rounded-xl">
+                            <div className='flex justify-between mb-3'>
+                                <div className='flex'>
+                                    <Square fill='orange' strokeWidth={0} />
+                                    <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
+                                </div>
+                                <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                                <X />
+                            </div>
+                            <div>
+                                <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
+                                    <div className='flex gap-2'>
+                                        <Wallet />
+                                        <p className='font-semibold'>{order.payment_method}</p>
+                                    </div>
+                                    {order.order_type === "delivery" ? (<div className='flex gap-2'>
+                                        <MapPin />
+                                        <p>{order.delivery_address}</p>
+                                    </div>) : (<div className='flex gap-2'>
+                                        <HandPlatter />
+                                        <p>Pick-up {order.pickup_time}</p>
+                                    </div>)}
+                                    <div className='flex gap-2'>
+                                        <Phone />
+                                        <p>{order.contact}</p>
+                                    </div>
+                                </div>
+                                <div className='mt-2'>
+                                    <p className='text-md font-semibold'>ORDERS</p>
+                                    {order.order_items?.map((item, index) => (
+                                        <div className='flex justify-between border-b py-2 gap-2' key={index}>
+                                            <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
+                                            <p className='flex-grow'>{item.product.name}</p>
+                                            <p>₱{item.product.price}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                             <button
                                 onClick={() => updateOrderStatus(order.id, 'cooking')}
-                                className="w-full bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold py-2 rounded-lg transition-colors"
+                                className="w-full mt-3 bg-orange-400 text-kae-light font-bold py-2 rounded-lg transition-colors"
                             >
                                 START COOKING
                             </button>
@@ -153,58 +325,45 @@ export default function OrdersPage() {
             </div>
 
             {/* COOKING COLUMN */}
-            <div className="flex-1 min-w-[300px] bg-white rounded-lg shadow-sm p-4 border-t-4 border-purple-600">
+            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-purple-600 snap-start">
                 <h2 className="font-bold text-purple-600 mb-4 tracking-wider text-sm">COOKING ({cookingOrders.length})</h2>
                 <div className="space-y-4">
                     {cookingOrders.map((order) => (
-                        <div key={order.id} className="border border-gray-100 shadow-sm p-4 rounded-xl">
-                            <p className="font-bold text-gray-800">{order.first_name}</p>
-                            <p className="text-sm text-gray-500 mb-3">{order.order_items?.length} items</p>
-                            <button
-                                onClick={() => updateOrderStatus(order.id, 'prepared')}
-                                className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold py-2 rounded-lg transition-colors"
-                            >
-                                ORDER PREPARED
-                            </button>
-                        </div>
+                        renderOrderCard(order, {
+                            label: getCookingAction(order).label,
+                            className: "w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
+                            onClick: () => updateOrderStatus(order.id, getCookingAction(order).nextStatus),
+                        }, { squareFill: "purple" })
                     ))}
                 </div>
             </div>
 
             {/* PREPARED COLUMN */}
-            <div className="flex-1 min-w-[300px] bg-white rounded-lg shadow-sm p-4 border-t-4 border-blue-500">
+            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-blue-500 snap-start">
                 <h2 className="font-bold text-blue-500 mb-4 tracking-wider text-sm">PREPARED ({preparedOrders.length})</h2>
                 <div className="space-y-4">
                     {preparedOrders.map((order) => (
-                        <div key={order.id} className="border border-gray-100 shadow-sm p-4 rounded-xl">
-                            <p className="font-bold text-gray-800">{order.first_name}</p>
-                            <p className="text-sm text-gray-500 mb-3">{order.order_items?.length} items</p>
-                            <button
-                                onClick={() => updateOrderStatus(order.id, 'delivering')}
-                                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 rounded-lg transition-colors"
-                            >
-                                SEND TO DELIVERY
-                            </button>
-                        </div>
+                        renderOrderCard(order, {
+                            label: 'SEND TO DELIVERY',
+                            className: "w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
+                            onClick: () => updateOrderStatus(order.id, 'delivering')
+
+                        }, { squareFill: "blue" })
                     ))}
                 </div>
             </div>
 
             {/* DELIVERING COLUMN */}
-            <div className="flex-1 min-w-[300px] bg-white rounded-lg shadow-sm p-4 border-t-4 border-green-500">
+            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-green-500 snap-start">
                 <h2 className="font-bold text-green-500 mb-4 tracking-wider text-sm">DELIVERING ({deliveringOrders.length})</h2>
                 <div className="space-y-4">
                     {deliveringOrders.map((order) => (
-                        <div key={order.id} className="border border-gray-100 shadow-sm p-4 rounded-xl">
-                            <p className="font-bold text-gray-800">{order.first_name}</p>
-                            <p className="text-sm text-gray-500 mb-3">{order.order_items?.length} items</p>
-                            <button
-                                onClick={() => updateOrderStatus(order.id, 'success')}
-                                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition-colors"
-                            >
-                                MARK COMPLETE
-                            </button>
-                        </div>
+                        renderOrderCard(order, {
+                            label: getFinalAction(order).label,
+                            className: "w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition-colors",
+                            onClick: () => updateOrderStatus(order.id, getFinalAction(order).nextStatus),
+
+                        }, { squareFill: "green" })
                     ))}
                 </div>
             </div>
