@@ -1,6 +1,6 @@
 import { Square } from "lucide-react"
 import TopSellersCard from "./_components/TopSellerCard"
-import { supabase } from "@/../lib/supabase"
+import { createServerClient } from "../../../../lib/supabase-server"
 import { redirect } from "next/navigation"
 import AutoRefresh from "@/app/track/[orderId]/_components/RefreshComponent"
 
@@ -19,9 +19,10 @@ interface PendingOrder {
 
 export default async function DashboardPage() {
 
+    const supabase = await createServerClient();
 
-    const { data: user } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (!user || error) {
         redirect("/login")
     }
 
