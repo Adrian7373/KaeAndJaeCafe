@@ -1,9 +1,10 @@
 import OrderStatus from "./_components/OrderStatus";
-import { supabase } from "@/../lib/supabase";
+import { createServerClient } from "@/../lib/supabase-server";
 import AutoRefresh from "./_components/RefreshComponent";
 
 export default async function TrackPage({ params }: { params: { orderId: string } }) {
 
+    const supabase = await createServerClient();
     const { orderId } = await params;
 
     const { data: orderInfo, error: orderInfoError } = await supabase

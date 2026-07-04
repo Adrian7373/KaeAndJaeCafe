@@ -1,12 +1,14 @@
 export const revalidate = 60;
 import MenuCatalog from "./_components/MenuCatalog"
-import { supabase } from "../../../lib/supabase"
+import { createServerClient } from "../../../lib/supabase-server"
 import OrderNavBar from "./_components/OrderNavBar";
 import { cookies } from "next/headers";
 import ActiveOrderBanner from "./_components/ActiveOrderBanner";
 import Footer from "@/components/Footer";
 
 export default async function OrderPage() {
+
+    const supabase = await createServerClient();
 
     const cookieStore = await cookies();
     const activeOrderId = cookieStore.get("active_order_id")?.value;
