@@ -50,7 +50,7 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
 
     // Inserting order details first to get order_id
     const { data: orderId, error: orderIdError } = await supabase
-        .from("order")
+        .from("orders")
         .insert({
             first_name: cleanData.firstName,
             last_name: cleanData.lastName,
