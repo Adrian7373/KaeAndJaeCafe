@@ -1,61 +1,35 @@
 // components/dashboard/TopSellersCard.tsx
 import Image from "next/image";
-import { supabase } from "@/../lib/supabase";
 
-export default async function TopSellersCard() {
+type TopSeller = {
+    name: string;
+    imageUrl: string;
+    totalSold: number;
+};
 
-    const now = new Date();
-    const phtDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
-
-    const startOfDay = new Date(phtDate.getFullYear(), phtDate.getMonth(), phtDate.getDate(), 0, 0, 0);
-    const endOfDay = new Date(phtDate.getFullYear(), phtDate.getMonth(), phtDate.getDate(), 23, 59, 59);
-
-    const { data: orders, error } = await supabase
-        .from("order")
-        .select(`
-      id,
-      created_at,
-      order_items (
-        quantity,
-        product (
-          id,
-          name,
-          image_path
-        )
-      )
-    `)
-        .gte("created_at", startOfDay.toISOString())
-        .lte("created_at", endOfDay.toISOString());
-
-    if (error || !orders) {
-        return <div>Failed to load top sellers.</div>;
-    }
-
-    const salesCount = new Map<string, { name: string; imagePath: string; totalSold: number }>();
-
-    orders.forEach((order: any) => {
-        order.order_items.forEach((item: any) => {
-            const prod = item.product;
-            const current = salesCount.get(prod.id) || {
-                name: prod.name,
-                imagePath: prod.imagePath,
-                totalSold: 0
-            };
-
-            salesCount.set(prod.id, {
-                ...current,
-                totalSold: current.totalSold + item.quantity
-            });
-        });
-    });
-
-    const topSellers = Array.from(salesCount.values())
-        .sort((a, b) => b.totalSold - a.totalSold)
-        .slice(0, 3);
-
+export default function TopSellersCard({ topSellers }: { topSellers: TopSeller[] }) {
     return (
         <>
+            <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
+                <p className="text-xl">Today's Top Sellers</p>
+                {topSellers.map((item) => (
+                    <div key={item.name} className="flex items-center py-2 justify-between">
+                        <div className="flex gap-3">
+                            <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100 relative shrink-0">
+                                <Image
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <p className="text-sm font-medium text-gray-800 content-center">{item.name}</p>
+                        </div>
+                        <p className="text-sm content-center text-center">{item.totalSold} Sold</p>
 
+                    </div>
+                ))}
+            </div>
         </>
     );
 }
