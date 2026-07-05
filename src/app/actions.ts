@@ -208,3 +208,42 @@ export async function editOrderItemsAction(orderId: string, newItems: { productI
 
     return { success: true };
 }
+
+export async function addCategoryAction(name: string) {
+    const supabase = await createServerClient(true);
+    const { data, error } = await supabase
+        .from('categories')
+        .insert([{ name }])
+        .select()
+        .single();
+
+    if (error) return { success: false, error: error.message };
+    return { success: true, data };
+}
+
+// 2. Upsert Product (Handles BOTH Add and Edit)
+export async function upsertProductAction(productData: any) {
+    const supabase = await createServerClient(true);
+
+    // If it has an ID, Supabase will UPDATE. If no ID, it will INSERT.
+    const { data, error } = await supabase
+        .from('products')
+        .upsert(productData)
+        .select()
+        .single();
+
+    if (error) return { success: false, error: error.message };
+    return { success: true, data };
+}
+
+// 3. Quick Toggle Availability (For the fast 1-tap switch)
+export async function toggleProductAvailabilityAction(productId: string, isAvailable: boolean) {
+    const supabase = await createServerClient(true);
+    const { error } = await supabase
+        .from('product')
+        .update({ is_available: !isAvailable })
+        .eq('id', productId);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
