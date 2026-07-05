@@ -7,8 +7,11 @@ import TrackingClientFeatures from "./TrackingClientFeatures";
 
 interface Order {
     name: string,
-    quantity: string,
-    price_at_checkout: string
+    quantity: number,
+    price_at_checkout: number,
+    product: {
+        name: string
+    }
 }
 interface OrderStatusProps {
     orderStatus: {
@@ -20,7 +23,7 @@ interface OrderStatusProps {
         orderTotal: number,
         orderId: string,
         orderTimestamp: string,
-        orders: any[] | null
+        orders: Order[] | null
     }
 }
 
@@ -45,10 +48,6 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
 
     const toggleShow = () => {
         setIsShowingDetails(prev => !prev);
-    }
-
-    const copyLink = () => {
-
     }
 
     return (
@@ -119,13 +118,13 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                             <p>Payment: <b>{payment_method}</b></p>
                         </div>
                         <div>
-                            {orders?.map((item) => (
-                                <div className="flex justify-between min-h-12 border-b items-center py-2" key={item.id}>
+                            {orders?.map((item: Order) => (
+                                <div className="flex justify-between min-h-12 border-b items-center py-2" key={item.name}>
                                     <div className="flex gap-2 items-center">
                                         <p className="h-max bg-kae-dark text-sm text-kae-light px-2 py-1 content-center rounded-full">{item.quantity}x</p>
                                         <p>{item.product.name}</p>
                                     </div>
-                                    <p className="flex-grow text-right">₱{item.price_at_checkout}</p>
+                                    <p className="flex-grow text-right">₱{item.price_at_checkout * item.quantity}</p>
                                 </div>
                             ))}
                         </div>
