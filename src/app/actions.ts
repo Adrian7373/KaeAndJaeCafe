@@ -52,6 +52,13 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
 
     // Inserting order details first to get order_id
     const supabase = await createServerClient(true);
+
+    // Build a safe delivery address: trim parts, omit empty, or set null
+    const addressParts = [cleanData?.cityBrgy, cleanData?.street]
+        .map((s) => (typeof s === "string" ? s.trim() : ""))
+        .filter(Boolean);
+    const deliveryAddress = addressParts.length ? addressParts.join(", ") : null;
+
     const { data: orderId, error: orderIdError } = await supabase
         .from("orders")
         .insert({
@@ -59,7 +66,7 @@ export async function placeOrder(prevState: ActionState, formData: FormData): Pr
             last_name: cleanData.lastName,
             contact: cleanData.contact,
             order_type: normalizedOrderType,
-            delivery_address: `${cleanData?.cityBrgy}, ${cleanData?.street}`,
+            delivery_address: deliveryAddress,
             payment_method: cleanData.paymentType,
             pickup_time: normalizedOrderType === "delivery" ? null : selectedTime,
             delivery_lat: cleanData.latitude,
