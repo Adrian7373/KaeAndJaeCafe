@@ -15,7 +15,7 @@ export type OrderType = 'delivery' | 'pickup';
 export interface OrderItem {
     quantity: number;
     product: { name: string; price: number; id: string };
-    price_at_checkout: number;
+    price_at_checkout?: number;
 }
 
 export interface Order {
@@ -32,6 +32,12 @@ export interface Order {
     order_items?: OrderItem[];
 }
 
+export interface Product {
+    id: string;
+    name: string;
+    price: number;
+}
+
 
 export default function OrdersPage() {
 
@@ -46,6 +52,7 @@ export default function OrdersPage() {
     const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+    const [catalog, setCatalog] = useState<Product[]>([]);
 
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -167,7 +174,7 @@ export default function OrdersPage() {
                         <div className='flex justify-between border-b py-2 gap-2' key={index}>
                             <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                             <p className='flex-grow'>{item.product.name}</p>
-                            <p>₱{item.product.price}</p>
+                            <p>₱{item.product.price * item.quantity}</p>
                         </div>
                     ))}
                 </div>
@@ -252,6 +259,8 @@ export default function OrdersPage() {
             } else {
                 setOrders((data as unknown as Order[]) || []);
             }
+            const { data: productsData } = await supabase.from('product').select('id, name, price');
+            setCatalog(productsData as Product[] || []);
             setLoading(false);
         };
 
@@ -335,7 +344,7 @@ export default function OrdersPage() {
     if (loading) return <div className="p-8 text-center font-bold text-gray-500">Loading live orders...</div>;
 
     return (
-        <div className="flex flex-row w-screen pt-20 h-screen bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
+        <div className="flex flex-row w-screen pt-20 h-full bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
 
             {/* PENDING COLUMN */}
             <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start">
@@ -375,7 +384,7 @@ export default function OrdersPage() {
                                         <div className='flex justify-between border-b py-2 gap-2' key={index}>
                                             <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                                             <p className='flex-grow'>{item.product.name}</p>
-                                            <p>₱{item.product.price}</p>
+                                            <p>₱{item.product.price * item.quantity}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -477,6 +486,7 @@ export default function OrdersPage() {
             {editingOrder && (
                 <EditOrderModal
                     order={editingOrder}
+                    catalog={catalog}
                     onClose={() => setEditingOrder(null)}
                     onConfirm={handleEditOrder}
                 />

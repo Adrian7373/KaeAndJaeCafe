@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { ChevronLeft, MapPin, Phone, Square, Plus, Minus } from "lucide-react";
-import { Order, OrderItem } from "../page";
+import { Order, OrderItem, Product } from "../page";
 
 interface EditOrderModalProps {
     order: Order;
+    catalog: Product[];
     onClose: () => void;
     onConfirm: (updatedItems: OrderItem[]) => Promise<void>;
 }
 
-export default function EditOrderModal({ order, onClose, onConfirm }: EditOrderModalProps) {
+export default function EditOrderModal({ order, onClose, onConfirm, catalog }: EditOrderModalProps) {
 
     // 1. Core Sandbox State: Tracks edits before they are sent to the database
     const [editableItems, setEditableItems] = useState<OrderItem[]>(() =>
@@ -24,6 +25,26 @@ export default function EditOrderModal({ order, onClose, onConfirm }: EditOrderM
 
     // 2. UI Control States
     const [isSaving, setIsSaving] = useState(false);
+    const [isAddingItem, setIsAddingItem] = useState(false);
+
+    const handleAddNewItem = (product: Product) => {
+        setEditableItems((prev) => {
+            const existingIndex = prev.findIndex(item => item.product.id === product.id);
+
+            if (existingIndex >= 0) {
+                // It's already in the cart, just add 1
+                const newItems = [...prev];
+                newItems[existingIndex] = { ...newItems[existingIndex], quantity: newItems[existingIndex].quantity + 1 };
+                return newItems;
+            }
+
+            // Brand new item
+            return [...prev, { quantity: 1, product }];
+        });
+
+        // Snap back to the order view immediately
+        setIsAddingItem(false);
+    };
 
     // 3. Handlers
     const handleQuantityChange = (index: number, delta: number) => {
@@ -99,53 +120,79 @@ export default function EditOrderModal({ order, onClose, onConfirm }: EditOrderM
 
                     {/* Orders Section */}
                     <div>
-                        <h2 className="font-extrabold text-[#4a1c40] tracking-wider mb-3 text-lg">ORDERS</h2>
-
-                        <div className="space-y-3">
-                            {editableItems.map((item, index) => (
-                                <div key={index} className="bg-[#b3b3b3] rounded-lg p-3 flex items-center shadow-sm">
-
-                                    {/* Left: Quantity Controls */}
-                                    <div className="flex items-center gap-3 mr-4">
-                                        <button
-                                            onClick={() => handleQuantityChange(index, -1)}
-                                            className="text-gray-800 hover:text-black font-bold p-1 active:scale-95 transition-transform"
-                                        >
-                                            <Minus size={20} strokeWidth={2.5} />
-                                        </button>
-                                        <span className="text-2xl font-medium w-4 text-center text-black">
-                                            {item.quantity}
-                                        </span>
-                                        <button
-                                            onClick={() => handleQuantityChange(index, 1)}
-                                            className="text-gray-800 hover:text-black font-bold p-1 active:scale-95 transition-transform"
-                                        >
-                                            <Plus size={20} strokeWidth={2.5} />
-                                        </button>
-                                    </div>
-
-                                    {/* Middle: Item Details */}
-                                    <div className="flex-1 pr-2">
-                                        <p className="font-extrabold text-[13px] text-black leading-tight">
-                                            {item.product.name}
-                                        </p>
-                                    </div>
-
-                                    {/* Right: Price */}
-                                    <p className="font-medium text-xs text-black">
-                                        ₱{((item.price_at_checkout ?? item.product.price) * item.quantity).toFixed(2)}
-                                    </p>
-                                </div>
-                            ))}
-
-                            {/* Add Item Button */}
-                            <button
-                                className="w-full mt-2 flex items-center justify-center gap-2 py-4 border border-black bg-transparent hover:bg-black/5 rounded-lg text-black font-medium transition-colors"
-                            >
-                                <Plus size={20} strokeWidth={1.5} />
-                                Add an Item
-                            </button>
+                        <div className="flex justify-between items-center mb-3">
+                            <h2 className="font-extrabold text-[#4a1c40] tracking-wider text-lg">
+                                {isAddingItem ? "SELECT ITEM" : "ORDERS"}
+                            </h2>
+                            {isAddingItem && (
+                                <button
+                                    onClick={() => setIsAddingItem(false)}
+                                    className="text-sm font-bold text-red-500 hover:text-red-700"
+                                >
+                                    CANCEL
+                                </button>
+                            )}
                         </div>
+
+                        {!isAddingItem ? (
+                            // --- NORMAL ORDER VIEW ---
+                            <div className="space-y-3">
+                                {editableItems.map((item, index) => (
+                                    <div key={index} className="bg-[#b3b3b3] rounded-lg p-3 flex items-center shadow-sm">
+                                        {/* Left: Quantity Controls */}
+                                        <div className="flex items-center gap-3 mr-4">
+                                            <button onClick={() => handleQuantityChange(index, -1)} className="text-gray-800 hover:text-black font-bold p-1 active:scale-95 transition-transform">
+                                                <Minus size={20} strokeWidth={2.5} />
+                                            </button>
+                                            <span className="text-2xl font-medium w-4 text-center text-black">{item.quantity}</span>
+                                            <button onClick={() => handleQuantityChange(index, 1)} className="text-gray-800 hover:text-black font-bold p-1 active:scale-95 transition-transform">
+                                                <Plus size={20} strokeWidth={2.5} />
+                                            </button>
+                                        </div>
+                                        {/* Middle: Item Details */}
+                                        <div className="flex-1 pr-2">
+                                            <p className="font-extrabold text-[13px] text-black leading-tight">{item.product.name}</p>
+                                        </div>
+                                        {/* Right: Price */}
+                                        <p className="font-medium text-xs text-black">₱{(item.product.price * item.quantity).toFixed(2)}</p>
+                                    </div>
+                                ))}
+
+                                {/* The Toggle Button */}
+                                <button
+                                    onClick={() => setIsAddingItem(true)}
+                                    className="w-full mt-2 flex items-center justify-center gap-2 py-4 border border-black bg-transparent hover:bg-black/5 rounded-lg text-black font-medium transition-colors"
+                                >
+                                    <Plus size={20} strokeWidth={1.5} />
+                                    Add an Item
+                                </button>
+                            </div>
+                        ) : (
+                            // --- CATALOG SELECTION VIEW ---
+                            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                                {/* Optional: Search Bar could go here in the future! */}
+
+                                {catalog.length === 0 ? (
+                                    <p className="text-center text-gray-500 py-4">No products found in catalog.</p>
+                                ) : (
+                                    catalog.map((product) => (
+                                        <button
+                                            key={product.id}
+                                            onClick={() => handleAddNewItem(product)}
+                                            className="w-full bg-white border border-gray-200 rounded-lg p-4 flex justify-between items-center shadow-sm hover:border-orange-400 active:scale-[0.98] transition-all"
+                                        >
+                                            <p className="font-extrabold text-gray-900 text-sm text-left">{product.name}</p>
+                                            <div className="flex items-center gap-3">
+                                                <p className="font-medium text-gray-600">₱{product.price.toFixed(2)}</p>
+                                                <div className="bg-[#34a853] text-white p-1 rounded-md">
+                                                    <Plus size={16} strokeWidth={3} />
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
