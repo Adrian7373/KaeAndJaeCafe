@@ -1,4 +1,4 @@
-"use client"; // <-- This is the magic line that fixes the crash!
+"use client";
 
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/../lib/supabase';
@@ -43,10 +43,8 @@ export default function OrdersPage() {
 
     const router = useRouter();
 
-    // 1. Initialize Supabase exactly ONCE for the entire component
     const supabase = useMemo(() => createClient(), []);
 
-    // 2. The main state holding all active orders
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
@@ -92,10 +90,8 @@ export default function OrdersPage() {
 
         const targetOrderId = editingOrder.id;
 
-        // 1. Close the modal immediately so the user can keep working
         setEditingOrder(null);
 
-        // 2. Optimistic UI Update: Swap out the items array instantly
         const previousOrders = [...orders];
         setOrders((currentOrders) =>
             currentOrders.map((order) =>
@@ -103,20 +99,17 @@ export default function OrdersPage() {
             )
         );
 
-        // 3. Strip down the payload to only what the database needs
         const payload = updatedItems.map((item) => ({
             productId: item.product.id,
             quantity: item.quantity,
             price_at_checkout: item.price_at_checkout ?? item.product.price
         }));
 
-        // 4. Execute the Server Action
         const result = await editOrderItemsAction(targetOrderId, payload);
 
-        // 5. Rollback if the server fails
         if (!result.success) {
             alert("Failed to save edits: " + result.error);
-            setOrders(previousOrders); // Revert the UI
+            setOrders(previousOrders);
         }
     };
 
@@ -241,8 +234,6 @@ export default function OrdersPage() {
         checkAuth();
     }, [supabase, router]);
 
-    // React Rule: The useEffect itself cannot be async, 
-    // but you CAN define and call an async function inside it!
     useEffect(() => {
         const fetchActiveOrders = async () => {
             const { data, error } = await supabase
@@ -321,8 +312,6 @@ export default function OrdersPage() {
 
     const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
 
-
-        // 1. Optimistic UI Update: Snap the card to the next column instantly
         const previousOrders = [...orders];
         setOrders((currentOrders) =>
             currentOrders.map((order) =>
@@ -330,14 +319,12 @@ export default function OrdersPage() {
             )
         );
 
-        // 2. Database Update: Only touch the status column
         const result = await updateOrderAction(orderId, newStatus);
 
-        // 3. Rollback if the server fails
         if (!result.success) {
             console.error("Failed to update status:", result.error);
             alert("Failed to update order: " + result.error);
-            setOrders(previousOrders); // Revert the UI
+            setOrders(previousOrders);
         }
     };
 
