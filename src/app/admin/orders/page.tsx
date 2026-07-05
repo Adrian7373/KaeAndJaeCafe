@@ -344,7 +344,7 @@ export default function OrdersPage() {
     if (loading) return <div className="p-8 text-center font-bold text-gray-500">Loading live orders...</div>;
 
     return (
-        <div className="flex flex-row w-screen pt-20 h-full bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
+        <div className="flex flex-row w-screen pt-20 bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
 
             {/* PENDING COLUMN */}
             <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start">
