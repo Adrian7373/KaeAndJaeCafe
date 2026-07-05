@@ -6,19 +6,21 @@ import { useCart } from "../../../../context/CartContext";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-interface Product {
-    imageUrl: string,
-    id: string,
-    name: string,
-    image_path: string,
-    price: number,
-    discount_price: number,
-    is_available: boolean,
-    est_prep_time: string,
-    category: string
+export interface Product {
+    imageUrl: string;
+    id: string;
+    name: string;
+    image_path: string;
+    price: number;
+    discount_price: number;
+    is_available: boolean;
+    est_prep_time: string;
+    product_category?: {
+        name: string
+    };
 }
 
-interface MenuCatalogProps {
+export interface MenuCatalogProps {
     products: Product[]
 }
 
@@ -116,7 +118,7 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
 
                 {/* Menu list */}
                 <div className="grid grid-cols-2 px-4 py-6 gap-2">
-                    {products.filter(product => product.is_available && product.category === activeTab).map((product) => (
+                    {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
                         <div key={product.id} className="flex flex-col h-full bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                             <div className="relative w-full aspect-square">
                                 <Image

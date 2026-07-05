@@ -5,6 +5,7 @@ import OrderNavBar from "./_components/OrderNavBar";
 import { cookies } from "next/headers";
 import ActiveOrderBanner from "./_components/ActiveOrderBanner";
 import Footer from "@/components/Footer";
+import { MenuCatalogProps, Product } from "./_components/MenuCatalog";
 
 export default async function OrderPage() {
 
@@ -15,13 +16,15 @@ export default async function OrderPage() {
 
     const { data: menuItems, error: menuItemsError } = await supabase
         .from("product")
-        .select("id, name, image_path, price, discount_price, is_available, est_prep_time, category");
+        .select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(name)");
 
     if (menuItemsError) {
         throw new Error(menuItemsError.message)
     }
 
-    const menuProducts = menuItems.map((item) => {
+
+
+    const menuProducts: Product[] = menuItems.map((item) => {
         const { data: { publicUrl } } = supabase
             .storage
             .from("product_images")
@@ -30,7 +33,7 @@ export default async function OrderPage() {
         return {
             ...item,
             imageUrl: publicUrl,
-        }
+        } as unknown as Product;
     }) || [];
 
     console.log(menuProducts);
