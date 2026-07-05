@@ -14,8 +14,8 @@ interface Product {
     discount_price: string,
     is_available: boolean,
     est_prep_time: string,
-    category?: {
-        name: string
+    product_category?: {
+        id: string
     }
 }
 
@@ -32,29 +32,29 @@ export default function MenuManagementPage() {
     const [textToSearch, setTextToSearch] = useState<string | null>(null);
 
     //UI states
-    const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+    const [activeCategoryId, setActiveCategoryId] = useState<string | null>("all");
     const [isToggling, setIsToggling] = useState(false);
+    const [searchInput, setSearchInput] = useState<string>("");
 
     const [supabase] = useState(() => createClient());
 
     //Search function
-    const handleSearch = (value: string) => {
+    useEffect(() => {
         const searchTimeOut = setTimeout(() => {
-            setTextToSearch(value);
+            setTextToSearch(searchInput);
         }, 500);
-        return clearTimeout(searchTimeOut);
-    }
+        return () => clearTimeout(searchTimeOut);
+    }, [searchInput])
 
     useEffect(() => {
         const fetchMenuData = async () => {
             const [catRes, prodRes] = await Promise.all([
                 supabase.from("product_category").select("name, id"),
-                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(name)")
+                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(id)")
             ]);
 
             if (catRes.data) {
                 setCategories(catRes.data);
-                if (catRes.data.length > 0) setActiveCategoryId(catRes.data[0].id);
             }
             if (prodRes.data) {
                 const productsWithUrls = prodRes.data.map((product) => {
@@ -98,17 +98,45 @@ export default function MenuManagementPage() {
         }
     }
 
+    const visibleProducts = products.filter((product) => {
+        // 1. Check if the dropdown is set to "all", OR if the ID matches
+        const matchesCategory = activeCategoryId === "all" || String(product.product_category?.id) === String(activeCategoryId);
+
+        const hasSearchText = textToSearch && textToSearch.trim() !== "";
+
+        if (hasSearchText) {
+            return product.name.toLowerCase().includes(textToSearch.toLowerCase());
+        }
+
+        return matchesCategory;
+    });
+
     return (
         <>
-            <div className="pt-20 px-4">
-                <div className="flex border-1 rounded-xl items-center px-2">
+            <div className="pt-20 px-4 flex gap-1">
+                <div className="flex border-1 rounded-xl items-center px-2 max-w-6/10">
                     <Search className="w-10 h-10 content-center" />
-                    <input onChange={(e) => handleSearch(e.target.value)} className="py-4 flex-grow text-xl px-2 outline-none content-center" type="text" />
+                    <input value={searchInput} onChange={(e) => {
+                        setSearchInput(e.target.value); if (e.target.value.trim() !== "") {
+                            setActiveCategoryId("all");
+                        }
+                    }} className="py-3 max-w-6/8 text-xl px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
                 </div>
+                <select className="border-1 px-2 rounded-xl flex-grow" onChange={(e) => {
+                    setActiveCategoryId(e.target.value); if (e.target.value !== "all") {
+                        setSearchInput("");
+                        setTextToSearch("");
+                    }
+                }} value={activeCategoryId ?? "all"}>
+                    <option value="all">All items</option>
+                    {categories.map((category) => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                </select>
             </div>
             {/* Menu Catalog */}
             <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center">
-                {products.map((product) => (
+                {visibleProducts.map((product) => (
                     <div key={product.id} className="flex flex-col border-1 rounded-xl w-6/8 py-4 px-4">
                         <div className="relative aspect-square rounded-t-2xl overflow-hidden">
                             <Image
