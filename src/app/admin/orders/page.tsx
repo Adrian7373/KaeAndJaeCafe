@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/../lib/supabase';
-import { redirect, useRouter } from 'next/navigation';
-import { updateOrderAction } from '@/app/actions';
+import { useRouter } from 'next/navigation';
+import { cancelOrderAction, updateOrderAction, editOrderItemsAction } from '@/app/actions';
 import { HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
+import EditOrderModal from './_components/EditOrderModal';
 
 
 // 1. Strict Types matching your database schema
@@ -13,7 +14,8 @@ export type OrderType = 'delivery' | 'pickup';
 
 export interface OrderItem {
     quantity: number;
-    product: { name: string; price: number };
+    product: { name: string; price: number; id: string };
+    price_at_checkout: number;
 }
 
 export interface Order {
@@ -41,6 +43,9 @@ export default function OrdersPage() {
     // 2. The main state holding all active orders
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+    const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -51,6 +56,62 @@ export default function OrdersPage() {
         (o) => (o.status === 'delivering' && !isPickupOrder(o))
             || (o.status === 'prepared' && isPickupOrder(o))
     );
+
+    const handleDeleteOrder = async () => {
+        if (!orderToDelete) return;
+
+        setIsDeleting(true);
+
+        // 1. Optimistic UI Update: Instantly remove it from the screen
+        const previousOrders = [...orders];
+        setOrders((currentOrders) => currentOrders.filter(order => order.id !== orderToDelete.id));
+
+        setIsDeleting(false);
+        // 2. Execute the Server Action
+        const result = await cancelOrderAction(orderToDelete.id);
+
+        // 3. Rollback if the database fails
+        if (!result.success) {
+            alert("Failed to cancel order: " + result.error);
+            setOrders(previousOrders); // Snap it back onto the screen
+        }
+
+        // 4. Close the modal and reset loading state
+        setOrderToDelete(null);
+    };
+
+    const handleEditOrder = async (updatedItems: OrderItem[]) => {
+        if (!editingOrder) return;
+
+        const targetOrderId = editingOrder.id;
+
+        // 1. Close the modal immediately so the user can keep working
+        setEditingOrder(null);
+
+        // 2. Optimistic UI Update: Swap out the items array instantly
+        const previousOrders = [...orders];
+        setOrders((currentOrders) =>
+            currentOrders.map((order) =>
+                order.id === targetOrderId ? { ...order, order_items: updatedItems } : order
+            )
+        );
+
+        // 3. Strip down the payload to only what the database needs
+        const payload = updatedItems.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+            price_at_checkout: item.price_at_checkout ?? item.product.price
+        }));
+
+        // 4. Execute the Server Action
+        const result = await editOrderItemsAction(targetOrderId, payload);
+
+        // 5. Rollback if the server fails
+        if (!result.success) {
+            alert("Failed to save edits: " + result.error);
+            setOrders(previousOrders); // Revert the UI
+        }
+    };
 
     const getCookingAction = (order: Order) => ({
         label: isPickupOrder(order) ? 'READY FOR PICKUP' : 'ORDER PREPARED',
@@ -80,7 +141,7 @@ export default function OrdersPage() {
                     <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                 </div>
                 <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                <X />
+                <X onClick={() => setOrderToDelete(order)} />
             </div>
             <div>
                 <div className={`flex flex-col gap-2 border-t border-${colors.squareFill}-500 py-2`}>
@@ -133,7 +194,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, first_name, last_name, pickup_time, contact, delivery_address, payment_method,
-                    order_items ( quantity, product ( name, price ) )
+                    order_items ( quantity, product ( name, price, id ), price_at_checkout )
                 `)
                 .eq('id', orderId)
                 .maybeSingle();
@@ -161,7 +222,7 @@ export default function OrdersPage() {
         const checkAuth = async () => {
             const { data: { user }, error } = await supabase.auth.getUser();
             if (!user || error) {
-                redirect("/login")
+                router.push("/login")
             }
         };
         checkAuth();
@@ -175,7 +236,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, first_name,last_name,pickup_time, contact, delivery_address,payment_method,
-          order_items ( quantity, product ( name, price ) )
+          order_items ( quantity, product ( name, price, id ), price_at_checkout )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
                 .order('created_at', { ascending: true }); // Oldest orders at the top
@@ -282,7 +343,7 @@ export default function OrdersPage() {
                                     <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                                 </div>
                                 <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                                <X />
+                                <X onClick={() => setOrderToDelete(order)} />
                             </div>
                             <div>
                                 <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
@@ -313,12 +374,18 @@ export default function OrdersPage() {
                                     ))}
                                 </div>
                             </div>
-                            <button
-                                onClick={() => updateOrderStatus(order.id, 'cooking')}
-                                className="w-full mt-3 bg-orange-400 text-kae-light font-bold py-2 rounded-lg transition-colors"
-                            >
-                                START COOKING
-                            </button>
+                            <div className='flex gap-2'>
+                                <button onClick={() => setEditingOrder(order)}
+                                    className='lassName="w-full mt-3 bg-kae-light text-orange-500 border-1 border-orange-500 font-bold py-2 px-4 rounded-lg transition-colors'>
+                                    EDIT
+                                </button>
+                                <button
+                                    onClick={() => updateOrderStatus(order.id, 'cooking')}
+                                    className="w-full mt-3 bg-orange-400 text-kae-light font-bold py-2 rounded-lg transition-colors"
+                                >
+                                    START COOKING
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -367,7 +434,47 @@ export default function OrdersPage() {
                     ))}
                 </div>
             </div>
+            {orderToDelete && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col items-center text-center">
 
+                        {/* Warning Icon Container */}
+                        <div className="h-16 w-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                            <X size={32} strokeWidth={3} />
+                        </div>
+
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">Cancel Order?</h2>
+                        <p className="text-gray-500 text-sm mb-6">
+                            Are you sure you want to cancel the order for <span className="font-bold text-gray-800">{orderToDelete.first_name} {orderToDelete.last_name}</span>? This action cannot be undone.
+                        </p>
+
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setOrderToDelete(null)}
+                                disabled={isDeleting}
+                                className="flex-1 py-3 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+                            >
+                                CANCEL
+                            </button>
+                            <button
+                                onClick={handleDeleteOrder}
+                                disabled={isDeleting}
+                                className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
+                            >
+                                {isDeleting ? "CANCELLING..." : "CANCEL"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* THE EDIT OVERLAY */}
+            {editingOrder && (
+                <EditOrderModal
+                    order={editingOrder}
+                    onClose={() => setEditingOrder(null)}
+                    onConfirm={handleEditOrder}
+                />
+            )}
         </div>
     );
 }
