@@ -172,12 +172,18 @@ export default function OrdersPage() {
                     ))}
                 </div>
             </div>
-            <button
-                onClick={actionButton.onClick}
-                className={actionButton.className}
-            >
-                {actionButton.label}
-            </button>
+            <div className='flex gap-2'>
+                <button onClick={() => setEditingOrder(order)}
+                    className={`lassName="w-full mt-3 bg-kae-light text-${colors.squareFill}-500 border-1 border-${colors.squareFill}-200 font-bold py-2 px-4 rounded-lg transition-colors`}>
+                    EDIT
+                </button>
+                <button
+                    onClick={actionButton.onClick}
+                    className={actionButton.className}
+                >
+                    {actionButton.label}
+                </button>
+            </div>
         </div>
     );
 
