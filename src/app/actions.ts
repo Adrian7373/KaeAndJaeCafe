@@ -177,7 +177,6 @@ export async function editOrderItemsAction(orderId: string, newItems: { productI
         };
     }
 
-    // 1. WIPE: Delete all existing items for this order
     const { error: deleteError } = await supabase
         .from('order_items')
         .delete()
@@ -188,7 +187,6 @@ export async function editOrderItemsAction(orderId: string, newItems: { productI
         return { success: false, error: deleteError.message };
     }
 
-    // 2. Format the new data for Supabase
     const itemsToInsert = newItems.map((item) => ({
         order_id: orderId,
         product_id: item.productId,
@@ -196,7 +194,6 @@ export async function editOrderItemsAction(orderId: string, newItems: { productI
         price_at_checkout: item.price_at_checkout
     }));
 
-    // 3. REPLACE: Bulk insert the updated items
     const { error: insertError } = await supabase
         .from('order_items')
         .insert(itemsToInsert);
@@ -221,13 +218,11 @@ export async function addCategoryAction(name: string) {
     return { success: true, data };
 }
 
-// 2. Upsert Product (Handles BOTH Add and Edit)
 export async function upsertProductAction(productData: any) {
     const supabase = await createServerClient(true);
 
-    // If it has an ID, Supabase will UPDATE. If no ID, it will INSERT.
     const { data, error } = await supabase
-        .from('products')
+        .from('product')
         .upsert(productData)
         .select()
         .single();
@@ -236,7 +231,6 @@ export async function upsertProductAction(productData: any) {
     return { success: true, data };
 }
 
-// 3. Quick Toggle Availability (For the fast 1-tap switch)
 export async function toggleProductAvailabilityAction(productId: string, isAvailable: boolean) {
     const supabase = await createServerClient(true);
     const { error } = await supabase
