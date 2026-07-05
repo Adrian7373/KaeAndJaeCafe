@@ -65,12 +65,14 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                         : normalizedStatus === "cooking" ? "Cooking Food"
                             : normalizedStatus === "prepared" ? "Food Prepared"
                                 : normalizedStatus === "delivering" ? "Out for Delivery"
-                                    : normalizedStatus === "success" && "Food Delivered"}</p>
+                                    : normalizedStatus === "success" ? "Food Delivered"
+                                        : normalizedStatus === "cancelled" && "Order Cancelled"}</p>
                     <p className="text-center">{normalizedStatus === "pending" ? "Waiting for cafe to accept your order"
                         : normalizedStatus === "cooking" ? "Your food is being prepared"
                             : normalizedStatus === "prepared" ? (isPickupOrder ? "Your food is prepared and ready for pick-up." : "Your food is prepared and is waiting for delivery")
                                 : normalizedStatus === "delivering" ? `Your food is on the way. Delivery address: ${delivery_address}`
-                                    : normalizedStatus === "success" && "Thank you for ordering!"}</p>
+                                    : normalizedStatus === "success" ? "Thank you for ordering!"
+                                        : normalizedStatus === "cancelled" && "Your order has been cancelled by the cafe"}</p>
                 </div>
                 <div className="flex flex-col justify-center border-1 border-gray-400 rounded-t-3xl px-6 py-4 gap-5 bg-kae-light">
                     <p className={`text-center ${isShowingDetails && "hidden"} `}>Track your order</p>

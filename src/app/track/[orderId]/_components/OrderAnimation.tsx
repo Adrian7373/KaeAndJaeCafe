@@ -9,6 +9,7 @@ import cookingAnim from "../animations/Cooking.json"
 import foodPreparedAnim from "../animations/FoodPrepared.json"
 import outForDeliveryAnim from "../animations/OutForDelivery.json"
 import successAnim from "../animations/Success.json"
+import cancelledAnim from "../animations/Cancelled.json"
 
 export default function OrderAnimation({ status }: { status: string }) {
 
@@ -20,6 +21,7 @@ export default function OrderAnimation({ status }: { status: string }) {
             case "prepared": return foodPreparedAnim;
             case "delivering": return outForDeliveryAnim;
             case "success": return successAnim;
+            case "cancelled": return cancelledAnim;
             default: return waitingAnim; // Fallback
         }
     };
