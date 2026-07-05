@@ -1,11 +1,12 @@
 "use client";
 import { createClient } from "@/../lib/supabase"
-import { toggleProductAvailabilityAction } from "@/app/actions";
+import { toggleProductAvailabilityAction, upsertProductAction } from "@/app/actions";
 import { Search, SquarePen } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import EditMenuItemModal from "./_components/EditMenuItemModal";
 
-interface Product {
+export interface Product {
     id: string,
     name: string,
     image_path: string,
@@ -19,7 +20,7 @@ interface Product {
     }
 }
 
-interface Category {
+export interface Category {
     id: string,
     name: string
 }
@@ -35,8 +36,13 @@ export default function MenuManagementPage() {
     const [activeCategoryId, setActiveCategoryId] = useState<string | null>("all");
     const [isToggling, setIsToggling] = useState(false);
     const [searchInput, setSearchInput] = useState<string>("");
+    const [itemToEdit, setItemToEdit] = useState<Partial<Product> | null>(null)
 
     const [supabase] = useState(() => createClient());
+
+    const toggleEdit = (item: Product) => {
+        setItemToEdit(item);
+    }
 
     //Search function
     useEffect(() => {
@@ -58,19 +64,19 @@ export default function MenuManagementPage() {
             }
             if (prodRes.data) {
                 const productsWithUrls = prodRes.data.map((product) => {
-                    // 2. Generate the URL for each path
+
                     const { data } = supabase.storage
-                        .from('product_images') // Replace with your actual bucket name
+                        .from('product_images')
                         .getPublicUrl(product.image_path);
 
-                    // 3. Attach it to the product object
+
                     return {
                         ...product,
                         image_url: data.publicUrl
                     };
                 });
 
-                // 4. Save the transformed array to state
+
                 setProducts(productsWithUrls as unknown as Product[]);
             }
         };
@@ -99,7 +105,7 @@ export default function MenuManagementPage() {
     }
 
     const visibleProducts = products.filter((product) => {
-        // 1. Check if the dropdown is set to "all", OR if the ID matches
+
         const matchesCategory = activeCategoryId === "all" || String(product.product_category?.id) === String(activeCategoryId);
 
         const hasSearchText = textToSearch && textToSearch.trim() !== "";
@@ -110,6 +116,47 @@ export default function MenuManagementPage() {
 
         return matchesCategory;
     });
+
+    const closeEditModal = () => {
+        setItemToEdit(null);
+    }
+
+    const handleSaveProduct = async (updatedData: any, newImageFile: File | null) => {
+        let finalImagePath = updatedData.image_path;
+
+
+        if (newImageFile) {
+            const fileExt = newImageFile.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('product_images')
+                .upload(filePath, newImageFile);
+
+            if (uploadError) {
+                alert("Error uploading image: " + uploadError.message);
+                return;
+            }
+
+            finalImagePath = filePath;
+        }
+
+
+        const productPayload = {
+            ...updatedData,
+            image_path: finalImagePath
+        };
+
+        const result = await upsertProductAction(productPayload);
+
+        if (result.success) {
+            setItemToEdit(null);
+
+        } else {
+            alert("Failed to save product: " + result.error);
+        }
+    };
 
     return (
         <>
@@ -157,13 +204,17 @@ export default function MenuManagementPage() {
                             <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600" : "bg-red-500"} font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
                                 {product.is_available === true ? "Available" : "Not Available"}
                             </button>
-                            <button className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 rounded-xl">
+                            <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 rounded-xl">
                                 <SquarePen />EDIT ITEM
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
+            {itemToEdit && (
+                <EditMenuItemModal product={itemToEdit} onClose={closeEditModal} categories={categories} onSave={handleSaveProduct} />
+            )}
+
         </>
     )
 }
