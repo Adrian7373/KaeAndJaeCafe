@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronLeft, MapPin, Phone, Square, Plus, Minus } from "lucide-react";
-import { Order, OrderItem } from "../page"; // IMPORTANT: Adjust this path if your types are in a different file
+import { Order, OrderItem } from "../page";
 
 interface EditOrderModalProps {
     order: Order;
@@ -45,8 +45,6 @@ export default function EditOrderModal({ order, onClose, onConfirm }: EditOrderM
     const handleConfirmClick = async () => {
         setIsSaving(true);
         await onConfirm(editableItems);
-        // We don't necessarily need setIsSaving(false) here because the parent 
-        // will unmount this modal upon success, but it's good practice if it fails!
         setIsSaving(false);
     };
 

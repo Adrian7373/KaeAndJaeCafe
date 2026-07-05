@@ -131,25 +131,72 @@ export async function loginAdmin(prevState: any, formData: FormData) {
 export async function updateOrderAction(orderId: string, newStatus: string) {
     const supabase = await createServerClient(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        console.error("Server Action Failed: No user cookie found!");
-        return { success: false, error: "Unauthorized Server Request" };
-    }
-
-    console.log("Server successfully authenticated as:", user.email);
-
     const { data, error } = await supabase
         .from('orders')
         .update({ status: newStatus })
         .eq('id', orderId)
-        .select()
-        .single();
 
     if (error) {
         console.error("Server Action Update Failed:", error);
         return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
+export async function cancelOrderAction(orderId: string) {
+    const supabase = await createServerClient(true);
+
+    const { data, error } = await supabase
+        .from('orders')
+        .update({ status: "cancelled" })
+        .eq('id', orderId)
+
+    if (error) {
+        console.error("Server Action Cancel Failed:", error);
+        return { success: false, error: error.message };
+    }
+
+    return { success: true };
+}
+
+export async function editOrderItemsAction(orderId: string, newItems: { productId: string, quantity: number, price_at_checkout: number }[]) {
+    const supabase = await createServerClient(true);
+
+    if (newItems.some((item) => item.price_at_checkout == null)) {
+        return {
+            success: false,
+            error: "Missing price_at_checkout for edited order items",
+        };
+    }
+
+    // 1. WIPE: Delete all existing items for this order
+    const { error: deleteError } = await supabase
+        .from('order_items')
+        .delete()
+        .eq('order_id', orderId);
+
+    if (deleteError) {
+        console.error("Failed to delete old items:", deleteError);
+        return { success: false, error: deleteError.message };
+    }
+
+    // 2. Format the new data for Supabase
+    const itemsToInsert = newItems.map((item) => ({
+        order_id: orderId,
+        product_id: item.productId,
+        quantity: item.quantity,
+        price_at_checkout: item.price_at_checkout
+    }));
+
+    // 3. REPLACE: Bulk insert the updated items
+    const { error: insertError } = await supabase
+        .from('order_items')
+        .insert(itemsToInsert);
+
+    if (insertError) {
+        console.error("Failed to insert new items:", insertError);
+        return { success: false, error: insertError.message };
     }
 
     return { success: true };
