@@ -1,12 +1,25 @@
 "use client";
 
-import { Menu, X } from "lucide-react"
-import { useState } from "react"
+import { Menu, Store, X } from "lucide-react"
+import { useState, useEffect } from "react"
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getStoreStatusAction, toggleStoreStatusAction } from "@/app/actions";
 
 export default function AdminSideBar() {
     const pathname = usePathname();
+
+    const [isAcceptingOrders, setIsAcceptingOrders] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStatus = async () => {
+            const status = await getStoreStatusAction();
+            setIsAcceptingOrders(status);
+            setIsLoading(false);
+        };
+        fetchStatus();
+    }, []);
 
     const tabs = [
         { name: "Dashboard", href: "/admin/dashboard" },
@@ -19,6 +32,20 @@ export default function AdminSideBar() {
     const toggleMenu = () => {
         setIsOpen(!isOpen);
     }
+
+    const handleToggle = async () => {
+        const newStatus = !isAcceptingOrders;
+
+        // Optimistic UI update
+        setIsAcceptingOrders(newStatus);
+
+        // Server Sync
+        const result = await toggleStoreStatusAction(newStatus);
+        if (!result.success) {
+            alert("Failed to update store status.");
+            setIsAcceptingOrders(!newStatus); // Revert on fail
+        }
+    };
 
     return (
         <header className="fixed w-full max-w-9xl z-50">
@@ -53,7 +80,7 @@ export default function AdminSideBar() {
                     <div className="w-full px-4 py-2 h-[76px] flex items-center h-12 w-12">
                         <X className="ml-auto" onClick={toggleMenu} />
                     </div>
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex flex-col px-4 py-4 items-center gap-2">
                         {tabs.map((tab) => {
                             // Check if this tab is the active page
                             const isActive = pathname === tab.href;
@@ -62,7 +89,7 @@ export default function AdminSideBar() {
                                 <Link
                                     key={tab.name}
                                     href={tab.href}
-                                    className={`w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl transition-all font-xl
+                                    className={`w-full flex font-bold items-center justify-center gap-3 px-4 py-3 rounded-xl transition-all font-xl
                 ${isActive
                                             ? "bg-kae-purple text-white shadow-md"
                                             : "text-gray-400 hover:bg-gray-800 hover:text-white"
@@ -72,6 +99,29 @@ export default function AdminSideBar() {
                                 </Link>
                             );
                         })}
+                    </div>
+                </div>
+                <div>
+                    <div className="mt-auto p-4 border-t border-gray-100">
+                        <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
+                            <div className="flex items-center gap-2 text-[#4a1c40] font-bold">
+                                <Store size={18} />
+                                <span className="text-sm">ONLINE ORDERS</span>
+                            </div>
+
+                            <button
+                                onClick={handleToggle}
+                                disabled={isLoading}
+                                className={`relative w-full h-10 rounded-full transition-colors duration-300 flex items-center px-1 ${isAcceptingOrders ? 'bg-green-500' : 'bg-red-500'
+                                    }`}
+                            >
+
+                                {/* The Text Label */}
+                                <span className={`absolute w-full text-center text-xs font-black text-white pointer-events-none transition-opacity`}>
+                                    {isAcceptingOrders ? 'ACCEPTING' : 'PAUSED'}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -5,7 +5,8 @@ import OrderNavBar from "./_components/OrderNavBar";
 import { cookies } from "next/headers";
 import ActiveOrderBanner from "./_components/ActiveOrderBanner";
 import Footer from "@/components/Footer";
-import { MenuCatalogProps, Product } from "./_components/MenuCatalog";
+import { Product } from "./_components/MenuCatalog";
+import { getStoreStatusAction } from "../actions";
 
 export default async function OrderPage() {
 
@@ -22,7 +23,7 @@ export default async function OrderPage() {
         throw new Error(menuItemsError.message)
     }
 
-
+    const isStoreOpen = await getStoreStatusAction();
 
     const menuProducts: Product[] = menuItems.map((item) => {
         const { data: { publicUrl } } = supabase
@@ -41,7 +42,7 @@ export default async function OrderPage() {
     return (
         <>
             <OrderNavBar />
-            <MenuCatalog products={menuProducts} />
+            <MenuCatalog products={menuProducts} isStoreOpen={isStoreOpen} />
             <ActiveOrderBanner />
             <Footer />
         </>

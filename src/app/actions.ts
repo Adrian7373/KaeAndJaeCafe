@@ -242,3 +242,27 @@ export async function toggleProductAvailabilityAction(productId: string, isAvail
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
+
+// Get the current status
+export async function getStoreStatusAction() {
+    const supabase = await createServerClient();
+    const { data } = await supabase
+        .from('store_settings')
+        .select('is_accepting_orders')
+        .eq('id', 1)
+        .single();
+
+    return data?.is_accepting_orders ?? false;
+}
+
+// Flip the switch
+export async function toggleStoreStatusAction(newStatus: boolean) {
+    const supabase = await createServerClient(true);
+    const { error } = await supabase
+        .from('store_settings')
+        .update({ is_accepting_orders: newStatus })
+        .eq('id', 1);
+
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}

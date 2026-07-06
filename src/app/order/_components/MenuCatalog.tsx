@@ -22,9 +22,10 @@ export interface Product {
 
 export interface MenuCatalogProps {
     products: Product[]
+    isStoreOpen: boolean
 }
 
-export default function MenuCatalog({ products }: MenuCatalogProps) {
+export default function MenuCatalog({ products, isStoreOpen }: MenuCatalogProps) {
 
     const { cart, addToCart, isOpen, incrementItem, decrementItem, toggleCart } = useCart();
     const [activeTab, setActiveTab] = useState('Chicken');
@@ -169,13 +170,23 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
 
                     </div>
                     <div className="flex flex-col justify-center gap-3">
+                        {!isStoreOpen && (
+                            <p className="text-center">The store is currently closed/on break. Please check again later.</p>
+                        )}
                         <div>
                             <div className="flex justify-between font-bold">
                                 <p>Subtotal</p>
                                 <p>{cart.length === 0 ? "₱0" : `₱${totalPrice}`}</p>
                             </div>
                         </div>
-                        <button disabled={cart.length === 0} onClick={() => { toggleCart(); router.push("/checkout") }} className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
+                        <button
+                            disabled={cart.length === 0 || !isStoreOpen}
+                            onClick={() => { toggleCart(); router.push("/checkout") }}
+                            className={`px-6 py-3 text-kae-light text-xl rounded-lg ${(cart.length === 0 || !isStoreOpen) ? "bg-gray-500 cursor-not-allowed" : "bg-kae-dark"
+                                }`}
+                        >
+                            Proceed to Checkout
+                        </button>
                     </div>
                 </div>
             </section>
