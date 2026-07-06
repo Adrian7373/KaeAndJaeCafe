@@ -91,10 +91,20 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
         }
     })
 
+    let finalCart = validatedCart;
+    if (normalizedOrderType === "delivery") {
+        finalCart = [...finalCart, {
+            orderId: orderId.id,
+            product_id: 1,
+            quantity: 1,
+            price_at_checkout: 45
+        }]
+    }
+
     //Inserting the cart to order_items using the order_id
     const { error: orderFillError } = await supabase
         .from("order_items")
-        .insert(validatedCart)
+        .insert(finalCart)
 
     if (orderFillError) {
         return {
