@@ -25,12 +25,13 @@ interface OrderStatusProps {
         orderId: string,
         orderTimestamp: string,
         maxEstPrepTime: string,
+        delivery_fee: number,
         orders: Order[] | null
     }
 }
 
 export default function OrderStatus({ orderStatus }: OrderStatusProps) {
-    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal, orderId, orderTimestamp, maxEstPrepTime } = orderStatus;
+    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal, orderId, orderTimestamp, maxEstPrepTime, delivery_fee } = orderStatus;
     const normalizedStatus = status.toLowerCase();
     const normalizedOrderType = orderType?.toLowerCase();
     const isPickupOrder = normalizedOrderType === "pickup";
@@ -62,7 +63,7 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                 </header>
                 <div className="flex-grow justify-center items-center content-center my-6">
                     <OrderAnimation status={status} />
-                    <p className="text-center text-xl">{normalizedStatus === "pending" ? "Order placed"
+                    <p className="text-center text-xl font-semibold">{normalizedStatus === "pending" ? "Order placed"
                         : normalizedStatus === "cooking" ? "Cooking Food"
                             : normalizedStatus === "prepared" ? "Food Prepared"
                                 : normalizedStatus === "delivering" ? "Out for Delivery"
@@ -76,7 +77,7 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                         : normalizedStatus === "cancelled" && "Your order has been cancelled by the cafe"}</p>
                 </div>
                 <div className="flex flex-col justify-center border-1 border-gray-400 rounded-t-3xl px-6 py-4 gap-5 bg-kae-light">
-                    <p className={`text-center ${isShowingDetails && "hidden"} `}>Track your order</p>
+                    <p className={`text-center ${isShowingDetails && "hidden"} font-semibold`}>Track your order</p>
 
                     <div className={`flex flex-col gap-5 ${isShowingDetails && "hidden"}`}>
                         <div className="flex justify-between">
@@ -129,12 +130,18 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                     <p className="flex-grow text-right">₱{item.price_at_checkout * item.quantity}</p>
                                 </div>
                             ))}
+                            {delivery_fee !== 0 && (
+                                <div className="flex gap-2 items-center pl-8 py-2">
+                                    <p>Delivery fee</p>
+                                    <p className="flex-grow text-right">₱49</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
 
                     <div className="flex justify-between border-1 border-gray-400 rounded-xl px-4 py-3">
-                        <p className={`${isShowingDetails && "order-3"} content-center`}>Total: ₱{orderTotal.toFixed(2)}</p>
+                        <p className={`${isShowingDetails && "order-3"} content-center font-semibold`}>Total: ₱{(orderTotal + delivery_fee).toFixed(2)}</p>
                         <button onClick={toggleShow} className={`text-kae-dark ${isShowingDetails && "order-0"} bg-kae-pink px-2 py-1 rounded-lg text-kae-lightz`}>{isShowingDetails ? "Order Status" : "Order Details"}</button>
                     </div>
                     <TrackingClientFeatures orderId={orderId} />

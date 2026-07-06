@@ -10,7 +10,7 @@ export default async function TrackPage({ params }: { params: { orderId: string 
 
     const { data: orderInfo, error: orderInfoError } = await supabase
         .from("orders")
-        .select("order_type, delivery_address, payment_method, status, first_name, created_at")
+        .select("order_type, delivery_address, payment_method, status, first_name, created_at, delivery_fee")
         .eq("id", orderId)
         .maybeSingle();
 
@@ -63,7 +63,8 @@ export default async function TrackPage({ params }: { params: { orderId: string 
         orderTotal: orderTotal,
         orderId: orderId,
         orderTimestamp: formattedDate,
-        maxEstPrepTime: String(maxEstPrepTime)
+        maxEstPrepTime: String(maxEstPrepTime),
+        delivery_fee: orderInfo?.delivery_fee
     }
 
     return (

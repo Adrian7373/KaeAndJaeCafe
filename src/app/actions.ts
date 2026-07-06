@@ -72,7 +72,8 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
             delivery_lat: cleanData.latitude,
             delivery_long: cleanData.longitude,
             customer_note: cleanData.notes,
-            status: "pending"
+            status: "pending",
+            delivery_fee: normalizedOrderType === "delivery" ? 49 : 0
         })
         .select("id").maybeSingle();
     if (orderIdError || orderId === null) {
