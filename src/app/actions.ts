@@ -210,7 +210,7 @@ export async function editOrderItemsAction(orderId: string, newItems: { productI
 export async function addCategoryAction(name: string) {
     const supabase = await createServerClient(true);
     const { data, error } = await supabase
-        .from('categories')
+        .from('product_category')
         .insert([{ name }])
         .select()
         .single();

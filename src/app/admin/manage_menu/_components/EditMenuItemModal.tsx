@@ -17,7 +17,7 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
     const [price, setPrice] = useState(product.price?.toString() || "");
     const [discountPrice, setDiscountPrice] = useState(product.discount_price?.toString() || "");
     const [prepTime, setPrepTime] = useState(product.est_prep_time || "");
-    const [categoryId, setCategoryId] = useState(product.product_category?.id || product.product_category?.id || "");
+    const [categoryId, setCategoryId] = useState(product.product_category?.id || "");
 
     // Image States
     const [imageFile, setImageFile] = useState<File | null>(null);

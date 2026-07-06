@@ -1,10 +1,11 @@
 "use client";
 import { createClient } from "@/../lib/supabase"
-import { toggleProductAvailabilityAction, upsertProductAction } from "@/app/actions";
-import { Search, SquarePen } from "lucide-react";
+import { addCategoryAction, toggleProductAvailabilityAction, upsertProductAction } from "@/app/actions";
+import { Plus, Search, SquarePen } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import EditMenuItemModal from "./_components/EditMenuItemModal";
+import NewCategoryModal from "./_components/AddNewCategoryModal";
 
 export interface Product {
     id: string,
@@ -37,11 +38,16 @@ export default function MenuManagementPage() {
     const [isToggling, setIsToggling] = useState(false);
     const [searchInput, setSearchInput] = useState<string>("");
     const [itemToEdit, setItemToEdit] = useState<Partial<Product> | null>(null)
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
 
     const [supabase] = useState(() => createClient());
 
     const toggleEdit = (item: Product) => {
         setItemToEdit(item);
+    }
+
+    const toggleClose = () => {
+        setIsAddingCategory(false);
     }
 
     //Search function
@@ -152,24 +158,50 @@ export default function MenuManagementPage() {
 
         if (result.success) {
             setItemToEdit(null);
-
+            window.location.reload();
         } else {
             alert("Failed to save product: " + result.error);
         }
     };
 
+    const handleNewCategory = async (newCategory: string) => {
+        if (!newCategory.trim()) return;
+
+        const tempId = "1234567890";
+        const optimisticCategory = { id: tempId, name: newCategory };
+        setCategories((prevCategories) => [...prevCategories, optimisticCategory]);
+
+        setActiveCategoryId(tempId);
+
+        const result = await addCategoryAction(newCategory);
+        if (result && result.success) {
+            setCategories((prevCategories) => prevCategories.map((category) => (
+                category.id === tempId ? result.data : category
+            )))
+            setActiveCategoryId(result.data.id)
+        } else {
+            alert("Failed to add category" + result.error)
+            setCategories((prevCategories) =>
+                prevCategories.filter((cat) => (
+                    cat.id !== tempId)
+                ));
+            setActiveCategoryId("all");
+        }
+        setIsAddingCategory(false);
+    }
+
     return (
         <>
-            <div className="pt-20 px-4 flex gap-1">
-                <div className="flex border-1 rounded-xl items-center px-2 max-w-6/10">
-                    <Search className="w-10 h-10 content-center" />
+            <div className="pt-24 px-4 flex gap-1">
+                <div className="flex border-1 rounded-xl items-center px-2 max-w-6/10 bg-kae-light">
+                    <Search className="w-8 h-8 content-center" />
                     <input value={searchInput} onChange={(e) => {
                         setSearchInput(e.target.value); if (e.target.value.trim() !== "") {
                             setActiveCategoryId("all");
                         }
-                    }} className="py-3 max-w-6/8 text-xl px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
+                    }} className="py-3 max-w-6/8 text-lg px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
                 </div>
-                <select className="border-1 px-2 rounded-xl flex-grow" onChange={(e) => {
+                <select className="border-1 px-2 rounded-xl flex-grow bg-kae-light" onChange={(e) => {
                     setActiveCategoryId(e.target.value); if (e.target.value !== "all") {
                         setSearchInput("");
                         setTextToSearch("");
@@ -180,6 +212,10 @@ export default function MenuManagementPage() {
                         <option key={category.id} value={category.id}>{category.name}</option>
                     ))}
                 </select>
+            </div>
+            <div className="flex px-4 gap-2 justify-center">
+                <button onClick={() => setIsAddingCategory(true)} className="bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600"><Plus /> Add new Category</button>
+                <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600"><Plus /> Add new Item</button>
             </div>
             {/* Menu Catalog */}
             <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center">
@@ -213,6 +249,9 @@ export default function MenuManagementPage() {
             </div>
             {itemToEdit && (
                 <EditMenuItemModal product={itemToEdit} onClose={closeEditModal} categories={categories} onSave={handleSaveProduct} />
+            )}
+            {isAddingCategory && (
+                <NewCategoryModal toggleClose={toggleClose} onSave={handleNewCategory} />
             )}
 
         </>
