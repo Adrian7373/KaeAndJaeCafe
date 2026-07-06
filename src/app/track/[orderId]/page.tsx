@@ -1,6 +1,7 @@
 import OrderStatus from "./_components/OrderStatus";
 import { createServerClient } from "@/../lib/supabase-server";
 import AutoRefresh from "./_components/RefreshComponent";
+import { Order } from "./_components/OrderStatus";
 
 export default async function TrackPage({ params }: { params: { orderId: string } }) {
 
@@ -19,10 +20,10 @@ export default async function TrackPage({ params }: { params: { orderId: string 
 
     const { data: orderDetails, error: orderDetailsError } = await supabase
         .from("order_items")
-        .select("quantity, price_at_checkout, product(name)")
+        .select("id, quantity, price_at_checkout, product(name)")
         .eq("order_id", orderId);
 
-    if (orderDetailsError) {
+    if (!orderDetails || orderDetailsError) {
         throw new Error(`Failed to get order items: ${orderDetailsError.message}`)
     }
 
@@ -46,12 +47,12 @@ export default async function TrackPage({ params }: { params: { orderId: string 
     console.log(formattedDate);
 
     const orderStatus = {
-        orderType: orderInfo?.order_type,
-        delivery_address: orderInfo?.delivery_address,
-        payment_method: orderInfo?.payment_method,
-        status: orderInfo?.status,
-        first_name: orderInfo?.first_name,
-        orders: orderDetails,
+        orderType: orderInfo?.order_type || "",
+        delivery_address: orderInfo?.delivery_address || "",
+        payment_method: orderInfo?.payment_method || "",
+        status: orderInfo?.status || "pending",
+        first_name: orderInfo?.first_name || "",
+        orders: orderDetails as unknown as Order[],
         orderTotal: orderTotal,
         orderId: orderId,
         orderTimestamp: formattedDate

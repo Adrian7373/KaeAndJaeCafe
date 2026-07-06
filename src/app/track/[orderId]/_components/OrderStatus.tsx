@@ -5,8 +5,8 @@ import OrderAnimation from "./OrderAnimation";
 import { useRouter } from "next/navigation";
 import TrackingClientFeatures from "./TrackingClientFeatures";
 
-interface Order {
-    name: string,
+export interface Order {
+    id: string,
     quantity: number,
     price_at_checkout: number,
     product: {
@@ -119,7 +119,7 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                         </div>
                         <div>
                             {orders?.map((item: Order) => (
-                                <div className="flex justify-between min-h-12 border-b items-center py-2" key={item.name}>
+                                <div className="flex justify-between min-h-12 border-b items-center py-2" key={item.id}>
                                     <div className="flex gap-2 items-center">
                                         <p className="h-max bg-kae-dark text-sm text-kae-light px-2 py-1 content-center rounded-full">{item.quantity}x</p>
                                         <p>{item.product.name}</p>
