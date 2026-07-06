@@ -20,15 +20,22 @@ export default async function TrackPage({ params }: { params: { orderId: string 
 
     const { data: orderDetails, error: orderDetailsError } = await supabase
         .from("order_items")
-        .select("id, quantity, price_at_checkout, product(name)")
+        .select("id, quantity, price_at_checkout, product(name, est_prep_time)")
         .eq("order_id", orderId);
 
     if (!orderDetails || orderDetailsError) {
         throw new Error(`Failed to get order items: ${orderDetailsError.message}`)
     }
 
-    const orderTotal = (orderDetails ?? []).reduce((total, item) => {
+    const typedOrderDetails = (orderDetails as unknown as Order[]) || [];
+
+    const orderTotal = (typedOrderDetails ?? []).reduce((total, item) => {
         return total + Number(item.quantity) * Number(item.price_at_checkout);
+    }, 0);
+
+    const maxEstPrepTime = (typedOrderDetails ?? []).reduce((maxTime, item) => {
+        const itemPrepTime = Number(item.product?.est_prep_time) || 0;
+        return Math.max(maxTime, itemPrepTime);
     }, 0);
 
     const date = new Date(orderInfo?.created_at.replace(" ", "T"));
@@ -55,7 +62,8 @@ export default async function TrackPage({ params }: { params: { orderId: string 
         orders: orderDetails as unknown as Order[],
         orderTotal: orderTotal,
         orderId: orderId,
-        orderTimestamp: formattedDate
+        orderTimestamp: formattedDate,
+        maxEstPrepTime: String(maxEstPrepTime)
     }
 
     return (

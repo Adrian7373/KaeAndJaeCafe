@@ -157,7 +157,7 @@ export default function CheckoutPage() {
                 <input type="hidden" name="selectedTime" value={JSON.stringify(selectedTime)} />
 
                 {/* Order Summary */}
-                <div className="bg-kae-light px-4 py-4 flex flex-col gap-2 mb-20">
+                <div className="bg-kae-light px-4 py-4 flex flex-col gap-2 mb-100">
                     <div className="flex flex-col  w-full flex-grow pt-1 bg-kae-light">
                         <p className="border-b pb-3 mb-2 border-gray-400 text-lg">Order Summary</p>
                         {cart?.map((item) => (

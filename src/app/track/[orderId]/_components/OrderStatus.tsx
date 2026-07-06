@@ -11,6 +11,7 @@ export interface Order {
     price_at_checkout: number,
     product: {
         name: string
+        est_prep_time: string
     }
 }
 interface OrderStatusProps {
@@ -23,12 +24,13 @@ interface OrderStatusProps {
         orderTotal: number,
         orderId: string,
         orderTimestamp: string,
+        maxEstPrepTime: string,
         orders: Order[] | null
     }
 }
 
 export default function OrderStatus({ orderStatus }: OrderStatusProps) {
-    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal, orderId, orderTimestamp } = orderStatus;
+    const { first_name, status, payment_method, delivery_address, orderType, orders, orderTotal, orderId, orderTimestamp, maxEstPrepTime } = orderStatus;
     const normalizedStatus = status.toLowerCase();
     const normalizedOrderType = orderType?.toLowerCase();
     const isPickupOrder = normalizedOrderType === "pickup";
@@ -66,8 +68,8 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                 : normalizedStatus === "delivering" ? "Out for Delivery"
                                     : normalizedStatus === "success" ? "Food Delivered"
                                         : normalizedStatus === "cancelled" && "Order Cancelled"}</p>
-                    <p className="text-center">{normalizedStatus === "pending" ? "Waiting for cafe to accept your order"
-                        : normalizedStatus === "cooking" ? "Your food is being prepared"
+                    <p className="text-center px-4">{normalizedStatus === "pending" ? "Waiting for cafe to accept your order"
+                        : normalizedStatus === "cooking" ? `Your food is being prepared. Max estimated time: ${maxEstPrepTime}mins`
                             : normalizedStatus === "prepared" ? (isPickupOrder ? "Your food is prepared and ready for pick-up." : "Your food is prepared and is waiting for delivery")
                                 : normalizedStatus === "delivering" ? `Your food is on the way. Delivery address: ${delivery_address}`
                                     : normalizedStatus === "success" ? "Thank you for ordering!"
