@@ -124,7 +124,7 @@ export default async function DashboardPage() {
 
     return (
         <>
-            <div className="flex flex-col gap-3 pt-20 px-4 max-h-dvh">
+            <div className="flex flex-col gap-3 pt-22 pb-4 px-4 max-h-dvh">
                 <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
                     <p className="text-2xl">Good Morning, Adrian</p>
                 </div>
