@@ -33,7 +33,7 @@ type ActionState = {
     success: boolean | null
 }
 
-export async function placeOrder(prevState: ActionState, formData: FormData): Promise<ActionState> {
+export async function placeOrder(prevState: ActionState | null, formData: FormData): Promise<ActionState> {
     const rawData = Object.fromEntries(formData.entries());
     const validatedFields = checkOutSchema.safeParse(rawData)
     if (!validatedFields.success) {
