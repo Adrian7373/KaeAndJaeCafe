@@ -186,11 +186,11 @@ export default function CheckoutPage() {
                         </div>
                         <div className="flex justify-between">
                             <p>Delivery Fee</p>
-                            <p>{cart.length === 0 ? "₱0" : "₱49"}</p>
+                            <p>{cart.length === 0 || !isDelivery ? "₱0" : "₱49"}</p>
                         </div>
                         <div className="flex justify-between font-bold">
                             <p>Total</p>
-                            <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
+                            <p>{cart.length === 0 ? "₱0" : isDelivery ? `₱${totalPrice + 49}` : `₱${totalPrice}`}</p>
                         </div>
                     </div>
                     <button disabled={cart.length === 0 && isPending} type="submit" className={`flex justify-center gap-2 items-center px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}><div

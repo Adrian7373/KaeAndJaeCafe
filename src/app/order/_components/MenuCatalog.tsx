@@ -138,7 +138,7 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                         </div>
                     ))}
                 </div>
-                <div className={`w-full bg-kae-light p-4 top-[72px] bottom-0 left-0 right-0 z-40 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "fixed"}`}>
+                <div className={`w-full bg-kae-light p-4 top-[72px] bottom-0 left-0 right-0 z-80 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "fixed"}`}>
                     <div className="flex flex-col bg-kae-light w-full flex-grow pt-5">
                         {cart.length === 0 ? (
                             <div className="flex flex-col justify-center items-center gap-5 m-auto">
@@ -170,17 +170,9 @@ export default function MenuCatalog({ products }: MenuCatalogProps) {
                     </div>
                     <div className="flex flex-col justify-center gap-3">
                         <div>
-                            <div className="flex justify-between">
-                                <p>Subtotal</p>
-                                <p>₱{totalPrice}</p>
-                            </div>
-                            <div className="flex justify-between">
-                                <p>Delivery Fee</p>
-                                <p>{cart.length === 0 ? "₱0" : "₱49"}</p>
-                            </div>
                             <div className="flex justify-between font-bold">
-                                <p>Total</p>
-                                <p>{cart.length === 0 ? "₱0" : `₱${totalPrice + 49}`}</p>
+                                <p>Subtotal</p>
+                                <p>{cart.length === 0 ? "₱0" : `₱${totalPrice}`}</p>
                             </div>
                         </div>
                         <button disabled={cart.length === 0} onClick={() => { toggleCart(); router.push("/checkout") }} className={`px-6 py-3 text-kae-light text-xl rounded-lg ${cart.length === 0 ? "bg-gray-500" : "bg-kae-dark"}`}>Proceed to Checkout</button>
