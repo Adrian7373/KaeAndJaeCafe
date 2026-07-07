@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from "@/../lib/supabase"
 import { addCategoryAction, toggleProductAvailabilityAction, upsertProductAction } from "@/app/actions";
-import { Plus, Search, SquarePen } from "lucide-react";
+import { Plus, Search, SquarePen, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import EditMenuItemModal from "./_components/EditMenuItemModal";
@@ -240,9 +240,14 @@ export default function MenuManagementPage() {
                             <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600" : "bg-red-500"} font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
                                 {product.is_available === true ? "Available" : "Not Available"}
                             </button>
-                            <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 rounded-xl">
-                                <SquarePen />EDIT ITEM
-                            </button>
+                            <div className="flex rounded-xl overflow-hidden">
+                                <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 flex-grow">
+                                    <SquarePen />EDIT
+                                </button>
+                                <button className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
+                                    <Trash2 />DELETE
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
