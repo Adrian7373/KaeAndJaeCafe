@@ -266,3 +266,18 @@ export async function toggleStoreStatusAction(newStatus: boolean) {
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
+
+export async function permaDeleteOrder(orderId: string | null) {
+    if (!orderId) return;
+
+    const supabase = await createServerClient(true);
+    const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", orderId)
+
+    if (error) {
+        return { success: false, error: error }
+    }
+    return { success: true }
+}

@@ -3,6 +3,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Coins, HandPlatter, 
 import { useEffect, useState, useMemo } from "react";
 import { Order } from "../orders/page";
 import { createClient } from "@/../lib/supabase";
+import { permaDeleteOrder } from "@/app/actions";
 
 export interface OrderItem {
     quantity: number;
@@ -21,59 +22,58 @@ export interface HistoricalOrder {
     order_items: OrderItem[];
 }
 
+interface Feedback {
+    isSuccess: boolean,
+    message: string,
+    isVisible: boolean
+}
+
 export default function HistoryPage() {
 
     const supabase = useMemo(() => createClient(), []);
 
-    // --- FILTER STATES ---
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
-    // --- DATA & PAGINATION STATES ---
     const [orders, setOrders] = useState<HistoricalOrder[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 15; // Clean number for desktop/tablet view
+    const itemsPerPage = 15;
     const [orderToDelete, setOrderToDelete] = useState<HistoricalOrder | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-    // --- DETAILED MODAL STATE (Optional UX) ---
     const [selectedOrder, setSelectedOrder] = useState<HistoricalOrder | null>(null);
 
-    // Calculate total order cost safely
     const calculateOrderTotal = (orderItems: OrderItem[] | undefined) => {
         return (orderItems ?? []).reduce((total, item) => {
             return total + Number(item.quantity) * Number(item.price_at_checkout);
         }, 0);
     };
 
-    // --- THE POWERHOUSE EFFECT ---
     useEffect(() => {
         const fetchHistoricalOrders = async () => {
             setLoading(true);
 
-            // 1. Build the base query requesting exact count rows
             let query = supabase
                 .from("orders")
                 .select(`
                     id, created_at, status, order_type, first_name, last_name, payment_method,
                     order_items ( quantity, price_at_checkout, product ( name, price ) )
                 `, { count: "exact" })
-                .in("status", ["success", "cancelled"]); // Only query completed/archived states
+                .in("status", ["success", "cancelled"]);
 
-            // 2. Dynamic Text Search Filtering
             if (searchTerm.trim() !== "") {
                 query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`);
             }
 
-            // 3. Dynamic Status Filtering
             if (statusFilter !== "all") {
                 query = query.eq("status", statusFilter);
             }
 
-            // 4. Dynamic Date Range Filtering (Inclusive of full day bounds)
             if (startDate) {
                 query = query.gte("created_at", `${startDate}T00:00:00`);
             }
@@ -81,12 +81,11 @@ export default function HistoryPage() {
                 query = query.lte("created_at", `${endDate}T23:59:59`);
             }
 
-            // 5. Sorting & Pagination Math
             const from = (currentPage - 1) * itemsPerPage;
             const to = from + itemsPerPage - 1;
 
             query = query
-                .order("created_at", { ascending: false }) // Newest history first
+                .order("created_at", { ascending: false })
                 .range(from, to);
 
             const { data, count, error } = await query;
@@ -100,12 +99,9 @@ export default function HistoryPage() {
             setLoading(false);
         };
 
-        // Trigger fetch. Debounce could be applied to searchTerm if desired, 
-        // but resetting page on criteria modifications is mandatory.
         fetchHistoricalOrders();
     }, [supabase, searchTerm, statusFilter, startDate, endDate, currentPage]);
 
-    // Reset pagination context safely if parameters shift
     const handleFilterChange = (setter: (val: string) => void, value: string) => {
         setter(value);
         setCurrentPage(1);
@@ -121,6 +117,37 @@ export default function HistoryPage() {
         setSelectedOrder(null);
         setStatusFilter("all");
     }
+
+    const handleDeleteOrder = async () => {
+        if (!orderToDelete) return;
+
+        const targetId = orderToDelete.id;
+
+        const previousOrders = [...orders];
+        const previousCount = totalCount;
+
+        setOrders(currentOrders => currentOrders.filter(order => order.id !== targetId));
+        setTotalCount(prev => prev - 1);
+
+        setOrderToDelete(null);
+
+        const result = await permaDeleteOrder(targetId);
+
+        if (result?.error) {
+            setOrders(previousOrders);
+            setTotalCount(previousCount);
+
+            setFeedback({ isSuccess: false, message: "Failed to delete order: " + result.error.message, isVisible: true });
+            setTimeout(() => {
+                setFeedback(prev => prev ? { ...prev, isVisible: false } : null);
+            }, 3000);
+        } else {
+            setFeedback({ isSuccess: true, message: "Order successfully deleted!", isVisible: true });
+            setTimeout(() => {
+                setFeedback(prev => prev ? { ...prev, isVisible: false } : null);
+            }, 3000);
+        }
+    };
 
     return (
         <>
@@ -247,6 +274,50 @@ export default function HistoryPage() {
                         </button>
                     </div>
                 </div>
+                {orderToDelete && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-in fade-in duration-200">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col items-center text-center">
+
+                            {/* Warning Icon Container */}
+                            <div className="h-16 w-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                                <X size={32} strokeWidth={3} />
+                            </div>
+
+                            <h2 className="text-xl font-bold text-gray-900 mb-2">Cancel Order?</h2>
+                            <p className="text-gray-500 text-sm mb-6">
+                                Are you sure you want to cancel the order for <span className="font-bold text-gray-800">{orderToDelete.first_name} {orderToDelete.last_name}</span>? This action cannot be undone.
+                            </p>
+
+                            <div className="flex gap-3 w-full">
+                                <button
+                                    onClick={() => setOrderToDelete(null)}
+                                    disabled={isDeleting}
+                                    className="flex-1 py-3 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+                                >
+                                    CANCEL
+                                </button>
+                                <button
+                                    onClick={handleDeleteOrder}
+                                    disabled={isDeleting}
+                                    className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
+                                >
+                                    {isDeleting ? "DELETING..." : "DELETE"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                <div
+                    className={`
+                    fixed bottom-10 left-19 px-6 py-4 rounded-xl text-kae-light font-bold shadow-2xl z-[100]
+                    transition-all duration-500 ease-out transform
+                    ${feedback?.isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"}
+                    ${feedback?.isSuccess ? "bg-green-500" : "bg-red-500"}
+                `}
+                >
+                    {feedback?.message}
+                </div>
+
             </div >
 
         </>
