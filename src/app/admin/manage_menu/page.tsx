@@ -41,7 +41,6 @@ export default function MenuManagementPage() {
     const [itemToEdit, setItemToEdit] = useState<Partial<Product> | null>(null)
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<Product | null>(null);
 
     const [supabase] = useState(() => createClient());
 
@@ -193,12 +192,12 @@ export default function MenuManagementPage() {
         setIsAddingCategory(false);
     }
 
-    const handleDeleteMenuItem = async () => {
+    const handleDeleteMenuItem = async (product: Product) => {
         const previousProducts = [...products];
         setProducts((prev) => prev.filter((product) => {
-            product.id !== itemToDelete?.id
+            product.id !== product.id
         }))
-        const result = await deleteMenuItem(itemToDelete?.id, itemToDelete?.image_path)
+        const result = await deleteMenuItem(product.id, product.image_path)
     }
 
     return (
@@ -255,7 +254,7 @@ export default function MenuManagementPage() {
                                 <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 flex-grow">
                                     <SquarePen />EDIT
                                 </button>
-                                <button className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
+                                <button onClick={handleDeleteMenuItem(product)} className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
                                     <Trash2 />DELETE
                                 </button>
                             </div>
