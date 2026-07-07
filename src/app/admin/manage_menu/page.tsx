@@ -254,7 +254,7 @@ export default function MenuManagementPage() {
                                 <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 flex-grow">
                                     <SquarePen />EDIT
                                 </button>
-                                <button onClick={handleDeleteMenuItem(product)} className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
+                                <button onClick={() => handleDeleteMenuItem(product)} className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
                                     <Trash2 />DELETE
                                 </button>
                             </div>
