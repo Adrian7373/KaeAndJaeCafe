@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import EditMenuItemModal from "./_components/EditMenuItemModal";
 import NewCategoryModal from "./_components/AddNewCategoryModal";
+import { deleteMenuItem } from "@/app/actions";
 
 export interface Product {
     id: string,
