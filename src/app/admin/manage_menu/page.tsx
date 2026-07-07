@@ -193,8 +193,12 @@ export default function MenuManagementPage() {
         setIsAddingCategory(false);
     }
 
-    const handleDeleteMenuItem = () => {
-
+    const handleDeleteMenuItem = async () => {
+        const previousProducts = [...products];
+        setProducts((prev) => prev.filter((product) => {
+            product.id !== itemToDelete?.id
+        }))
+        const result = await deleteMenuItem(itemToDelete?.id, itemToDelete?.image_path)
     }
 
     return (

@@ -282,7 +282,8 @@ export async function permaDeleteOrder(orderId: string | null) {
     return { success: true }
 }
 
-export async function deleteMenuItem(productId: string, imagePath: string) {
+export async function deleteMenuItem(productId: string | undefined, imagePath: string | undefined) {
+    if (!productId || !imagePath) return
     const supabase = await createServerClient(true);
 
     const { error } = await supabase
