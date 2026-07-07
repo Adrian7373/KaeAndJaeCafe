@@ -193,11 +193,17 @@ export default function MenuManagementPage() {
     }
 
     const handleDeleteMenuItem = async (product: Product) => {
+        setIsDeleting(false);
         const previousProducts = [...products];
         setProducts((prev) => prev.filter((product) => {
             product.id !== product.id
         }))
-        const result = await deleteMenuItem(product.id, product.image_path)
+        const result = await deleteMenuItem(product.id, product.image_path);
+
+        if (result?.error) {
+            alert(result.error)
+            setProducts(previousProducts)
+        }
     }
 
     return (
