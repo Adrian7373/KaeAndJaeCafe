@@ -281,3 +281,28 @@ export async function permaDeleteOrder(orderId: string | null) {
     }
     return { success: true }
 }
+
+export async function deleteMenuItem(productId: string, imagePath: string) {
+    const supabase = await createServerClient(true);
+
+    const { error } = await supabase
+        .from("product")
+        .delete()
+        .eq("id", productId);
+
+    if (error) {
+        return { success: false, error: error }
+    }
+
+    const { error: imageError } = await supabase
+        .storage
+        .from("product_images")
+        .remove([imagePath]);
+
+    if (imageError) {
+        return { success: false, error: "Product deleted but failed to delete image" + imageError }
+    }
+
+    return { success: true }
+
+}
