@@ -40,6 +40,8 @@ export default function MenuManagementPage() {
     const [searchInput, setSearchInput] = useState<string>("");
     const [itemToEdit, setItemToEdit] = useState<Partial<Product> | null>(null)
     const [isAddingCategory, setIsAddingCategory] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<Product | null>(null);
 
     const [supabase] = useState(() => createClient());
 
@@ -189,6 +191,10 @@ export default function MenuManagementPage() {
             setActiveCategoryId("all");
         }
         setIsAddingCategory(false);
+    }
+
+    const handleDeleteMenuItem = () => {
+
     }
 
     return (
