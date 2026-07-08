@@ -125,6 +125,7 @@ export default function HistoryPage() {
         setStartDate("");
         setEndDate("");
         setSearchTerm("");
+        setSearchInput("");
         setSelectedOrder(null);
         setStatusFilter("all");
     }
