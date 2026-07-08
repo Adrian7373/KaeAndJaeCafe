@@ -32,6 +32,7 @@ export default function HistoryPage() {
 
     const supabase = useMemo(() => createClient(), []);
 
+    const [searchInput, setSearchInput] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [startDate, setStartDate] = useState("");
@@ -53,6 +54,16 @@ export default function HistoryPage() {
             return total + Number(item.quantity) * Number(item.price_at_checkout);
         }, 0);
     };
+
+    useEffect(() => {
+        const searchTimeOut = setTimeout(() => {
+            if (searchTerm !== searchInput) {
+                setSearchTerm(searchInput);
+                setCurrentPage(1); // Reset page only when the search actually triggers
+            }
+        }, 500);
+        return () => clearTimeout(searchTimeOut);
+    }, [searchInput, searchTerm]);
 
     useEffect(() => {
         const fetchHistoricalOrders = async () => {
@@ -157,7 +168,7 @@ export default function HistoryPage() {
                     <div className="flex border-1 rounded-md grow-0">
                         <div className="border-r px-2 flex items-center gap-2">
                             <Search className="w-8 h-8" />
-                            <input onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)} value={searchTerm} placeholder="Search customer name..." className="flex-auto py-3 text-md outline-none" type="text" />
+                            <input onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search customer name..." className="flex-auto py-3 text-md outline-none" type="text" />
                         </div>
                         <select value={statusFilter} onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)} className="block px-1 grow-0" name="" id="">
                             <option value="all">All</option>
