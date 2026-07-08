@@ -64,7 +64,7 @@ export default function MenuManagementPage() {
         const fetchMenuData = async () => {
             const [catRes, prodRes] = await Promise.all([
                 supabase.from("product_category").select("name, id"),
-                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(id)")
+                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(id)").eq("is_archived", false)
             ]);
 
             if (catRes.data) {

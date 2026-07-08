@@ -17,7 +17,8 @@ export default async function OrderPage() {
 
     const { data: menuItems, error: menuItemsError } = await supabase
         .from("product")
-        .select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(name)");
+        .select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(name)")
+        .eq("is_archived", false);
 
     if (menuItemsError) {
         throw new Error(menuItemsError.message)
