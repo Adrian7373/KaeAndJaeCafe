@@ -4,6 +4,7 @@ import { CartItem } from "../../context/CartContext";
 import z, { success } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { Product } from "./admin/manage_menu/page";
 
 
 const checkOutSchema = z.object({
@@ -282,14 +283,14 @@ export async function permaDeleteOrder(orderId: string | null) {
     return { success: true }
 }
 
-export async function deleteMenuItem(productId: string) {
-    if (!productId) return
+export async function deleteMenuItem(product: Product | null) {
+    if (!product) return
     const supabase = await createServerClient(true);
 
     const { error } = await supabase
         .from("product")
         .update({ is_archived: true })
-        .eq("id", productId);
+        .eq("id", product.id);
 
     if (error) {
         return { success: false, error: error.message }

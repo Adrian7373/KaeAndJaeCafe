@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from "@/../lib/supabase"
 import { addCategoryAction, toggleProductAvailabilityAction, upsertProductAction } from "@/app/actions";
-import { Plus, Search, SquarePen, Trash2 } from "lucide-react";
+import { Plus, Search, SquarePen, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import EditMenuItemModal from "./_components/EditMenuItemModal";
@@ -33,6 +33,7 @@ export default function MenuManagementPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [textToSearch, setTextToSearch] = useState<string | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<Product | null>(null);
 
     //UI states
     const [activeCategoryId, setActiveCategoryId] = useState<string | null>("all");
@@ -192,17 +193,24 @@ export default function MenuManagementPage() {
         setIsAddingCategory(false);
     }
 
-    const handleDeleteMenuItem = async (productId: string) => {
-        setIsDeleting(false);
+    const handleDeleteMenuItem = async () => {
+        if (!itemToDelete) return;
+
+        setIsDeleting(true);
+
         const previousProducts = [...products];
-        setProducts((prev) => prev.filter((product) => {
-            product.id !== productId
-        }))
-        const result = await deleteMenuItem(productId);
+
+        setProducts((prev) => prev.filter((product) => product.id !== itemToDelete.id));
+
+        const targetProduct = itemToDelete;
+        setItemToDelete(null);
+        setIsDeleting(false);
+
+        const result = await deleteMenuItem(targetProduct);
 
         if (result?.error) {
-            alert(result.error)
-            setProducts(previousProducts)
+            alert(result.error);
+            setProducts(previousProducts);
         }
     }
 
@@ -260,7 +268,7 @@ export default function MenuManagementPage() {
                                 <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 flex-grow">
                                     <SquarePen />EDIT
                                 </button>
-                                <button onClick={() => handleDeleteMenuItem(product.id)} className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
+                                <button onClick={() => setItemToDelete(product)} className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
                                     <Trash2 />DELETE
                                 </button>
                             </div>
@@ -273,6 +281,39 @@ export default function MenuManagementPage() {
             )}
             {isAddingCategory && (
                 <NewCategoryModal toggleClose={toggleClose} onSave={handleNewCategory} />
+            )}
+            {itemToDelete && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col items-center text-center">
+
+                        {/* Warning Icon Container */}
+                        <div className="h-16 w-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                            <X size={32} strokeWidth={3} />
+                        </div>
+
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">Cancel Order?</h2>
+                        <p className="text-gray-500 text-sm mb-6">
+                            Are you sure you want to delete item <span className="font-bold text-gray-800">{itemToDelete?.name}</span>? This action cannot be undone.
+                        </p>
+
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setItemToDelete(null)}
+                                disabled={isDeleting}
+                                className="flex-1 py-3 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
+                            >
+                                CANCEL
+                            </button>
+                            <button
+                                onClick={handleDeleteMenuItem}
+                                disabled={isDeleting}
+                                className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
+                            >
+                                {isDeleting ? "DELETING..." : "DELETE"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
         </>
