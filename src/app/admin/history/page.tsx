@@ -59,7 +59,7 @@ export default function HistoryPage() {
         const searchTimeOut = setTimeout(() => {
             if (searchTerm !== searchInput) {
                 setSearchTerm(searchInput);
-                setCurrentPage(1); // Reset page only when the search actually triggers
+                setCurrentPage(1);
             }
         }, 500);
         return () => clearTimeout(searchTimeOut);
