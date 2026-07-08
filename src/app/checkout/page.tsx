@@ -145,8 +145,6 @@ export default function CheckoutPage() {
                                     currentPin={coordinates}
                                     onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })}
                                 />
-                                <input type="hidden" name="latitude" value={coordinates.lat} />
-                                <input type="hidden" name="longitude" value={coordinates.lng} />
 
                                 <div className="relative mt-2">
                                     <input required name="cityBrgy" id="cityBrgy" type="text" placeholder="City, Barangay" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
@@ -181,6 +179,8 @@ export default function CheckoutPage() {
                             </label>
                         </div>
 
+                        <input type="hidden" name="latitude" value={coordinates.lat} />
+                        <input type="hidden" name="longitude" value={coordinates.lng} />
                         <input type="hidden" name="cartData" value={JSON.stringify(cart)} />
                         <input type="hidden" name="selectedTime" value={JSON.stringify(selectedTime)} />
 
