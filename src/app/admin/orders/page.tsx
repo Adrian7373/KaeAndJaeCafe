@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { cancelOrderAction, updateOrderAction, editOrderItemsAction } from '@/app/actions';
 import { HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
 import EditOrderModal from './_components/EditOrderModal';
+import LocationViewModal from './_components/LocationViewModal';
 
 
 // 1. Strict Types matching your database schema
@@ -29,6 +30,8 @@ export interface Order {
     delivery_address: string;
     payment_method: string;
     pickup_time: string;
+    delivery_lat: number;
+    delivery_long: number;
     order_items?: OrderItem[];
 }
 
@@ -51,6 +54,7 @@ export default function OrdersPage() {
     const [isDeleting, setIsDeleting] = useState(false);
     const [editingOrder, setEditingOrder] = useState<Order | null>(null);
     const [catalog, setCatalog] = useState<Product[]>([]);
+    const [viewLocation, setViewLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
 
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -150,8 +154,20 @@ export default function OrdersPage() {
                         <p className='font-semibold'>{order.payment_method}</p>
                     </div>
                     {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                        <MapPin />
-                        <p>{order.delivery_address}</p>
+                        <div>
+                            <MapPin />
+                            <p>{order.delivery_address}</p>
+                        </div>
+                        <button
+                            onClick={() => setViewLocation({
+                                lat: order.delivery_lat,
+                                lng: order.delivery_long,
+                                name: `${order.first_name} ${order.last_name}`
+                            })}
+                            className="text-blue-600 font-bold text-sm"
+                        >
+                            View Map
+                        </button>
                     </div>) : (<div className='flex gap-2'>
                         <HandPlatter />
                         <p>Pick-up {order.pickup_time}</p>
@@ -199,7 +215,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, order_type, first_name, last_name, pickup_time, contact, delivery_address, payment_method,
+                    id, created_at, status, order_type, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
                     order_items ( quantity, product ( name, price, id ), price_at_checkout )
                 `)
                 .eq('id', orderId)
@@ -239,7 +255,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, order_type, first_name,last_name,pickup_time, contact, delivery_address,payment_method,
+                    id, created_at, status, order_type, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
           order_items ( quantity, product ( name, price, id ), price_at_checkout )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
@@ -354,8 +370,20 @@ export default function OrdersPage() {
                                         <p className='font-semibold'>{order.payment_method}</p>
                                     </div>
                                     {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                                        <MapPin />
-                                        <p>{order.delivery_address}</p>
+                                        <div>
+                                            <MapPin />
+                                            <p>{order.delivery_address}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setViewLocation({
+                                                lat: order.delivery_lat,
+                                                lng: order.delivery_long,
+                                                name: `${order.first_name} ${order.last_name}`
+                                            })}
+                                            className="text-blue-600 font-bold text-sm"
+                                        >
+                                            View Map
+                                        </button>
                                     </div>) : (<div className='flex gap-2'>
                                         <HandPlatter />
                                         <p>Pick-up {order.pickup_time}</p>
@@ -476,6 +504,14 @@ export default function OrdersPage() {
                     catalog={catalog}
                     onClose={() => setEditingOrder(null)}
                     onConfirm={handleEditOrder}
+                />
+            )}
+            {viewLocation && (
+                <LocationViewModal
+                    lat={viewLocation.lat}
+                    lng={viewLocation.lng}
+                    name={viewLocation.name}
+                    onClose={() => setViewLocation(null)}
                 />
             )}
         </div>
