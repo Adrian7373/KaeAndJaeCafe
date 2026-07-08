@@ -319,7 +319,7 @@ export default function HistoryPage() {
                                     disabled={isDeleting}
                                     className="flex-1 py-3 font-bold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
                                 >
-                                    {isDeleting ? "DELETING..." : "DELETE"}
+                                    DELETE
                                 </button>
                             </div>
                         </div>
