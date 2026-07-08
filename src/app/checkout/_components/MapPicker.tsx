@@ -1,12 +1,10 @@
-// components/MapPicker.tsx
 "use client";
 
-import { useState, useRef, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useMemo } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix for Next.js missing marker icon bugs
 const markerIcon = L.icon({
     iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
     iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
@@ -16,55 +14,80 @@ const markerIcon = L.icon({
 });
 
 interface MapPickerProps {
+    hardwareGPS: { lat: number; lng: number; accuracy: number };
+    currentPin: { lat: number; lng: number };
     onLocationSelect: (lat: number, lng: number) => void;
 }
 
-export default function MapPicker({ onLocationSelect }: MapPickerProps) {
-    // Default map center: Cabanatuan City
-    const [position, setPosition] = useState({ lat: 15.4865, lng: 120.9734 });
-    const markerRef = useRef<L.Marker>(null);
+function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371e3;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
 
-    // This fires the exact moment the user lets go of the pin
-    const eventHandlers = useMemo(
-        () => ({
-            dragend() {
-                const marker = markerRef.current;
-                if (marker != null) {
-                    const newPos = marker.getLatLng();
-                    setPosition(newPos);
-                    // Send coordinates back to your checkout form!
-                    onLocationSelect(newPos.lat, newPos.lng);
-                }
-            },
-        }),
-        [onLocationSelect]
-    );
+function ClickableMapEvents({ hardwareGPS, onLocationSelect }: { hardwareGPS: { lat: number, lng: number, accuracy: number }, onLocationSelect: (lat: number, lng: number) => void }) {
+
+    const MAX_ADJUSTMENT_METERS = Math.max(150, hardwareGPS.accuracy);
+
+    useMapEvents({
+        click(e) {
+            const { lat, lng } = e.latlng;
+
+            // Calculate distance from strict hardware GPS to the tap
+            const distance = getDistanceInMeters(hardwareGPS.lat, hardwareGPS.lng, lat, lng);
+
+            if (distance > MAX_ADJUSTMENT_METERS) {
+                alert(`You can only adjust the pin within ${Math.round(MAX_ADJUSTMENT_METERS)} meters of your detected location.`);
+                return;
+            }
+
+            // Move the pin
+            onLocationSelect(lat, lng);
+        },
+    });
+    return null;
+}
+
+export default function MapPicker({ hardwareGPS, currentPin, onLocationSelect }: MapPickerProps) {
+
+    // Default fallback to Cabanatuan City center if GPS is somehow missing momentarily
+    const mapCenter = useMemo(() =>
+        hardwareGPS ? [hardwareGPS.lat, hardwareGPS.lng] : [15.4865, 120.9734],
+        [hardwareGPS]);
+
+    if (!hardwareGPS) return null;
 
     return (
-        // The z-0 ensures the map doesn't overlap your navbar or sticky order buttons
-        <div className="h-64 w-full rounded-xl overflow-hidden z-0 relative border-2 border-gray-200">
+        <div className="h-[300px] w-full rounded-xl overflow-hidden z-0 relative border-2 border-green-400 shadow-inner">
             <MapContainer
-                center={position}
-                zoom={14}
+                center={mapCenter as [number, number]}
+                zoom={17}
                 scrollWheelZoom={true}
                 className="h-full w-full"
             >
-                {/* The free OpenStreetMap tiles */}
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    attribution='&copy; OpenStreetMap'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                <Marker
-                    draggable={true}
-                    eventHandlers={eventHandlers}
-                    position={position}
-                    ref={markerRef}
-                    icon={markerIcon}
-                >
-                    <Popup className="font-bold">
-                        Drag me to your exact location!
-                    </Popup>
+                {/* 1. The Anti-Troll Geofence Circle */}
+                <Circle
+                    center={[hardwareGPS.lat, hardwareGPS.lng]}
+                    radius={Math.max(150, hardwareGPS.accuracy)}
+                    pathOptions={{ color: 'green', fillColor: 'green', fillOpacity: 0.1, weight: 2 }}
+                />
+
+                {/* 2. The Invisible Click Listener */}
+                <ClickableMapEvents hardwareGPS={hardwareGPS} onLocationSelect={onLocationSelect} />
+
+                {/* 3. The Actual Pin */}
+                <Marker position={[currentPin.lat, currentPin.lng]} icon={markerIcon}>
+                    <Popup className="font-bold">Delivery Location</Popup>
                 </Marker>
             </MapContainer>
         </div>
