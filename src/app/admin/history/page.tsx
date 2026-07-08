@@ -120,6 +120,12 @@ export default function HistoryPage() {
 
     const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
 
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [totalPages, currentPage]);
+
     const resetFilterState = () => {
         setCurrentPage(1);
         setStartDate("");
