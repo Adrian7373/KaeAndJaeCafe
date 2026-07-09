@@ -39,7 +39,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
     const scrollRef = useRef<HTMLDivElement | null>(null);
-    const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
+    const totalPrice = cart.reduce((total, item) => total + item.discount_price * item.qty, 0);
 
     const router = useRouter();
 
@@ -98,7 +98,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
         `}} />
 
                         {categories.map((category) => (
-                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`shrink-0 px-3.5 py-2 text-base transition-colors
+                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`shrink-0 px-3.5 py-2 snap-start text-base transition-colors
                                     ${activeTab === category.name
                                     ? "border-b-4 border-kae-pink"
                                     : ""
@@ -124,7 +124,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 {/* Menu list */}
                 <div className="grid grid-cols-2 px-4 py-6 gap-2">
                     {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
-                        <div key={product.id} className="flex flex-col h-full bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                             <div className="relative w-full aspect-square">
                                 <Image
                                     src={product.imageUrl}
@@ -167,7 +167,10 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                                         </div>
                                         <p className="px-2">{item.name}</p>
                                     </div>
-                                    <p className="content-center">₱{item.price}</p>
+                                    <div className="flex flex-col">
+                                        <p className="content-center text-sm line-through text-gray-400">₱{item.price}</p>
+                                        <p className="content-center text-md">₱{item.discount_price}</p>
+                                    </div>
                                 </div>
                             ))
                         )}

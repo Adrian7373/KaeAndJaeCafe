@@ -49,7 +49,7 @@ export default async function OrderPage() {
         <>
             <OrderNavBar />
             <MenuCatalog products={menuProducts} isStoreOpen={isStoreOpen} categories={categories as unknown as Category[]} />
-            <ActiveOrderBanner />
+            <ActiveOrderBanner serverOrderId={activeOrderId} />
             <Footer />
         </>
     )
