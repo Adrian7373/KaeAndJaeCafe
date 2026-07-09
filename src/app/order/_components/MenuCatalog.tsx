@@ -71,7 +71,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
 
     return (
         <>
-            <section>
+            <section className="flex flex-col">
                 {/* Mobile Screensize */}
                 <div className="flex mt-19 justify-center border-b max-w-max">
 
@@ -122,30 +122,32 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 </div>
 
                 {/* Menu list */}
-                <div className="grid grid-cols-2 px-4 py-6 gap-2">
-                    {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
-                        <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                            <div className="relative w-full aspect-square">
-                                <Image
-                                    src={product.imageUrl}
-                                    alt={product.name}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 300px"
-                                />
-                            </div>
-                            <div className="flex flex-col flex-grow p-4 gap-1">
-                                <p>{product.name}</p>
-                                <div className="flex flex-col align-center mt-auto justify-between">
-                                    <p className="line-through text-gray-400 decoration-2 text-sm">₱{product.price}</p>
-                                    <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
-                                    <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
+                <div className="flex-grow max-h-dvh w-full overflow-x-auto">
+                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3">
+                        {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
+                            <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                <div className="relative w-full aspect-square">
+                                    <Image
+                                        src={product.imageUrl}
+                                        alt={product.name}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw, 300px"
+                                    />
+                                </div>
+                                <div className="flex flex-col flex-grow p-4 gap-1">
+                                    <p>{product.name}</p>
+                                    <div className="flex flex-col align-center mt-auto justify-between">
+                                        <p className="line-through text-gray-400 decoration-2 text-sm">₱{product.price}</p>
+                                        <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
+                                        <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
                 <div className={`w-full bg-kae-light p-4 top-[72px] bottom-0 left-0 right-0 z-80 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "fixed"}`}>
-                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5">
+                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5 max-h-[70vh] overflow-x-auto shadow-md">
                         {cart.length === 0 ? (
                             <div className="flex flex-col justify-center items-center gap-5 m-auto">
                                 <p className="text-xl font-semibold">Your Cart is Empty</p>
@@ -157,19 +159,19 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                                     <div className="flex gap-2 items-center">
                                         <div className="flex gap-1">
                                             {item.qty === 1 ? (
-                                                <Trash2 height={"1rem"} width={"1rem"} className="m-auto" onClick={() => decrementItem(item)} />
+                                                <Trash2 className="m-auto w-8 h-8" onClick={() => decrementItem(item)} />
                                             ) : (
-                                                <Minus height={"1rem"} width={"1rem"} className="m-auto" onClick={() => decrementItem(item)} />
+                                                <Minus className="m-auto w-8 h-8" onClick={() => decrementItem(item)} />
                                             )}
 
-                                            <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1">{item.qty}x</p>
-                                            <Plus height={"1rem"} width={"1rem"} className="m-auto" onClick={() => incrementItem(item)} />
+                                            <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1 sm:text-lg">{item.qty}x</p>
+                                            <Plus className="m-auto w-8 h-8" onClick={() => incrementItem(item)} />
                                         </div>
-                                        <p className="px-2">{item.name}</p>
+                                        <p className="px-2 sm:text-lg">{item.name}</p>
                                     </div>
                                     <div className="flex flex-col">
                                         <p className="content-center text-sm line-through text-gray-400">₱{item.price}</p>
-                                        <p className="content-center text-md">₱{item.discount_price}</p>
+                                        <p className="content-center font-semibold text-md sm:text-lg">₱{item.discount_price}</p>
                                     </div>
                                 </div>
                             ))
@@ -177,14 +179,14 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
 
 
                     </div>
-                    <div className="flex flex-col justify-center gap-3">
+                    <div className="flex flex-col justify-center gap-3 mt-auto">
                         {!isStoreOpen && (
                             <p className="text-center">The store is currently closed/on break. Please check again later.</p>
                         )}
                         <div>
-                            <div className="flex justify-between font-bold">
-                                <p>Subtotal</p>
-                                <p>{cart.length === 0 ? "₱0" : `₱${totalPrice}`}</p>
+                            <div className="flex justify-between text-lg px-2   ">
+                                <p className="font-semibold">Subtotal</p>
+                                <p className="font-bold">{cart.length === 0 ? "₱0" : `₱${totalPrice}`}</p>
                             </div>
                         </div>
                         <button

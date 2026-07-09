@@ -162,7 +162,9 @@ export default function CheckoutPage() {
                         ) : (
                             <div className="bg-kae-light px-4 py-4 flex flex-col gap-2 rounded-xl">
                                 <p className="border-b border-gray-400 pb-3 mb-2 text-lg font-bold">Pick-Up time</p>
-                                <TimePicker />
+                                <div className="w-full flex justify-center">
+                                    <TimePicker />
+                                </div>
                             </div>
                         )}
 

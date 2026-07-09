@@ -13,7 +13,7 @@ export default function TopSellersCard({ topSellers }: { topSellers: TopSeller[]
             <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md gap-3 flex flex-col  ">
                 <p className="text-xl">Today's Top Sellers</p>
                 {topSellers.map((item) => (
-                    <div key={item.name} className="flex flex-col items-center py-2 justify-between border-1 border-gray-300 rounded-xl">
+                    <div key={item.name} className="flex flex-col items-center py-2 justify-between border-1 border-gray-300 rounded-xl sm:flex-row sm:justify-evenly">
                         <div className="flex flex-col gap-3 justify-center items-center">
                             <div className="h-25 w-25 rounded-full overflow-hidden bg-gray-100 relative shrink-0">
                                 <Image
@@ -25,7 +25,7 @@ export default function TopSellersCard({ topSellers }: { topSellers: TopSeller[]
                             </div>
                             <p className="text-sm font-medium text-gray-800 content-center">{item.name}</p>
                         </div>
-                        <p className="text-sm content-center text-center"><b>{item.totalSold} Sold</b></p>
+                        <p className="text-md content-center text-center sm:text-xl"><b>{item.totalSold} Sold</b></p>
 
                     </div>
                 ))}
