@@ -136,7 +136,8 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                             <div className="flex flex-col flex-grow p-4 gap-1">
                                 <p>{product.name}</p>
                                 <div className="flex flex-col align-center mt-auto justify-between">
-                                    <p className="font-semibold">₱{product.price}</p>
+                                    <p className="line-through text-gray-400 decoration-2 text-sm">₱{product.price}</p>
+                                    <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
                                     <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
                                 </div>
                             </div>
