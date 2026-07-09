@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Coins, HandPlatter, Loader2, MapPin, Motorbike, MoveRight, Phone, RotateCcw, Search, Square, Wallet, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Coins, Download, HandPlatter, Loader2, MapPin, Motorbike, MoveRight, Phone, RotateCcw, Search, Square, Wallet, X } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { Order } from "../orders/page";
 import { createClient } from "@/../lib/supabase";
@@ -35,8 +35,11 @@ export default function HistoryPage() {
     const [searchInput, setSearchInput] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [orderTypeFilter, setOrderTypeFilter] = useState("all");
+    const [paymentMethodFilter, setPaymentMethodFilter] = useState("all");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+    const [isExporting, setIsExporting] = useState(false);
 
     const [orders, setOrders] = useState<HistoricalOrder[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -53,6 +56,96 @@ export default function HistoryPage() {
         return (orderItems ?? []).reduce((total, item) => {
             return total + Number(item.quantity) * Number(item.price_at_checkout);
         }, 0);
+    };
+
+    const handleExportCSV = async () => {
+        setIsExporting(true);
+
+        try {
+            let query = supabase
+                .from("orders")
+                .select(`
+                    id, created_at, status, order_type, first_name, last_name, delivery_fee, payment_method,
+                    order_items ( quantity, price_at_checkout, product ( name, price ) )
+                `)
+                .in("status", ["success", "cancelled"])
+                .order("created_at", { ascending: false });
+
+            if (searchTerm.trim() !== "") {
+                query = query.or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`);
+            }
+            if (statusFilter !== "all") {
+                query = query.eq("status", statusFilter);
+            }
+            if (orderTypeFilter !== "all") {
+                query = query.eq("order_type", orderTypeFilter);
+            }
+            if (paymentMethodFilter !== "all") {
+                query = query.eq("payment_method", paymentMethodFilter);
+            }
+            if (startDate) {
+                query = query.gte("created_at", `${startDate}T00:00:00+08:00`);
+            }
+            if (endDate) {
+                query = query.lte("created_at", `${endDate}T23:59:59+08:00`);
+            }
+
+            const { data, error } = await query;
+
+            if (error) throw error;
+            if (!data || data.length === 0) {
+                alert("No orders matched your filters to export.");
+                setIsExporting(false);
+                return;
+            }
+
+            const headers = [
+                "Order ID", "Date", "Customer Name", "Order Type",
+                "Status", "Payment Method", "Total Revenue (PHP)", "Items Ordered"
+            ];
+
+            const csvRows = data.map((order: any) => {
+                const date = new Date(order.created_at).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
+                const customer = `${order.first_name} ${order.last_name}`;
+
+                const total = calculateOrderTotal(order.order_items);
+
+                const items = order.order_items?.map((item: any) =>
+                    `${item.quantity}x ${item.product.name}`
+                ).join('; ') || 'No items';
+
+                return [
+                    order.id,
+                    date,
+                    `"${customer}"`,
+                    order.order_type,
+                    order.status,
+                    order.payment_method,
+                    total,
+                    `"${items}"`
+                ].join(',');
+            });
+
+            // 5. Build and Download
+            const csvContent = [headers.join(','), ...csvRows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Cafe_Orders_Export_${new Date().toISOString().split('T')[0]}.csv`);
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error("Export Error:", error);
+            alert("An error occurred while exporting the data.");
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     useEffect(() => {
@@ -84,6 +177,12 @@ export default function HistoryPage() {
             if (statusFilter !== "all") {
                 query = query.eq("status", statusFilter);
             }
+            if (orderTypeFilter !== "all") {
+                query = query.eq("order_type", orderTypeFilter);
+            }
+            if (paymentMethodFilter !== "all") {
+                query = query.eq("payment_method", paymentMethodFilter);
+            }
 
             if (startDate) {
                 query = query.gte("created_at", `${startDate}T00:00:00+08:00`);
@@ -111,7 +210,7 @@ export default function HistoryPage() {
         };
 
         fetchHistoricalOrders();
-    }, [supabase, searchTerm, statusFilter, startDate, endDate, currentPage]);
+    }, [supabase, searchTerm, statusFilter, orderTypeFilter, paymentMethodFilter, startDate, endDate, currentPage]);
 
     const handleFilterChange = (setter: (val: string) => void, value: string) => {
         setter(value);
@@ -134,6 +233,8 @@ export default function HistoryPage() {
         setSearchInput("");
         setSelectedOrder(null);
         setStatusFilter("all");
+        setOrderTypeFilter("all");
+        setPaymentMethodFilter("all");
     }
 
     const handleDeleteOrder = async () => {
@@ -170,7 +271,23 @@ export default function HistoryPage() {
     return (
         <>
             <div className="pt-24 px-6">
-                <p className="text-2xl font-bold">Past Orders</p>
+                <div className="flex gap-3">
+                    <p className="text-2xl font-bold">Past Orders</p>
+                    <button
+                        onClick={handleExportCSV}
+                        disabled={isExporting || totalCount === 0}
+                        className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-xl font-bold transition-colors shadow-sm min-w-[140px]"
+                    >
+                        {isExporting ? (
+                            <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
+                        ) : (
+                            <Download size={18} strokeWidth={2.5} />
+                        )}
+                        <span className="hidden sm:inline">
+                            {isExporting ? "Exporting..." : "Export CSV"}
+                        </span>
+                    </button>
+                </div>
                 <div className="gap-2 flex flex-col my-4">
                     <div className="flex border-1 rounded-md grow-0">
                         <div className="border-r px-2 flex items-center gap-2">
@@ -181,6 +298,18 @@ export default function HistoryPage() {
                             <option value="all">All</option>
                             <option value="success">Success</option>
                             <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div className="flex gap-2">
+                        <select value={orderTypeFilter} onChange={(e) => handleFilterChange(setOrderTypeFilter, e.target.value)} className="flex-1 border-1 border-gray-300 bg-white rounded-md px-2 py-3 outline-none cursor-pointer">
+                            <option value="all">All Order Types</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="pickup">Pick-up</option>
+                        </select>
+                        <select value={paymentMethodFilter} onChange={(e) => handleFilterChange(setPaymentMethodFilter, e.target.value)} className="flex-1 border-1 border-gray-300 bg-white rounded-md px-2 py-3 outline-none cursor-pointer">
+                            <option value="all">All Payments</option>
+                            <option value="cash">Cash</option>
+                            <option value="gcash">GCash</option>
                         </select>
                     </div>
                     {/* Date range picker */}
