@@ -370,7 +370,7 @@ export default function OrdersPage() {
                                         <p className='font-semibold'>{order.payment_method}</p>
                                     </div>
                                     {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                                        <div>
+                                        <div className='flex gap-2'>
                                             <MapPin />
                                             <p>{order.delivery_address}</p>
                                         </div>
