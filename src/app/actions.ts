@@ -89,7 +89,7 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
             order_id: orderId?.id,
             product_id: item.id,
             quantity: item.qty,
-            price_at_checkout: item.price
+            price_at_checkout: item.discount_price
         }
     })
 

@@ -29,7 +29,7 @@ export default function CheckoutPage() {
     const [isDelivery, setIsDelivery] = useState(true);
     const { cart, selectedTime, clearCart } = useCart();
     const router = useRouter();
-    const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
+    const totalPrice = cart.reduce((total, item) => total + item.discount_price * item.qty, 0);
     const [state, formAction, isPending] = useActionState(placeOrder, null);
 
     // --- GEOLOCATION ENFORCER ---

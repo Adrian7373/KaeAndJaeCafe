@@ -15,7 +15,7 @@ export type OrderType = 'delivery' | 'pickup';
 
 export interface OrderItem {
     quantity: number;
-    product: { name: string; price: number; id: string };
+    product: { name: string; discount_price: number; id: string };
     price_at_checkout?: number;
 }
 
@@ -38,7 +38,7 @@ export interface Order {
 export interface Product {
     id: string;
     name: string;
-    price: number;
+    discount_price: number;
 }
 
 
@@ -106,7 +106,7 @@ export default function OrdersPage() {
         const payload = updatedItems.map((item) => ({
             productId: item.product.id,
             quantity: item.quantity,
-            price_at_checkout: item.price_at_checkout ?? item.product.price
+            price_at_checkout: item.price_at_checkout ?? item.product.discount_price
         }));
 
         const result = await editOrderItemsAction(targetOrderId, payload);
@@ -183,7 +183,7 @@ export default function OrdersPage() {
                         <div className='flex justify-between border-b py-2 gap-2' key={index}>
                             <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                             <p className='flex-grow'>{item.product.name}</p>
-                            <p>₱{item.product.price * item.quantity}</p>
+                            <p className='font-bold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
                         </div>
                     ))}
                 </div>
@@ -216,7 +216,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
-                    order_items ( quantity, product ( name, price, id ), price_at_checkout )
+                    order_items ( quantity, product ( name, discount_price, id ), price_at_checkout )
                 `)
                 .eq('id', orderId)
                 .maybeSingle();
@@ -256,7 +256,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
-          order_items ( quantity, product ( name, price, id ), price_at_checkout )
+          order_items ( quantity, product ( name, discount_price, id ), price_at_checkout )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
                 .order('created_at', { ascending: true }); // Oldest orders at the top
@@ -266,7 +266,7 @@ export default function OrdersPage() {
             } else {
                 setOrders((data as unknown as Order[]) || []);
             }
-            const { data: productsData } = await supabase.from('product').select('id, name, price');
+            const { data: productsData } = await supabase.from('product').select('id, name, discount_price');
             setCatalog(productsData as Product[] || []);
             setLoading(false);
         };
@@ -399,7 +399,7 @@ export default function OrdersPage() {
                                         <div className='flex justify-between border-b py-2 gap-2' key={index}>
                                             <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                                             <p className='flex-grow'>{item.product.name}</p>
-                                            <p>₱{item.product.price * item.quantity}</p>
+                                            <p className='font-bold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
                                         </div>
                                     ))}
                                 </div>

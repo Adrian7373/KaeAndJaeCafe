@@ -18,7 +18,7 @@ export default function EditOrderModal({ order, onClose, onConfirm, catalog }: E
         order.order_items
             ? order.order_items.map((item) => ({
                 ...item,
-                price_at_checkout: item.price_at_checkout ?? item.product.price,
+                price_at_checkout: item.price_at_checkout ?? item.product.discount_price,
             }))
             : []
     );
@@ -154,7 +154,7 @@ export default function EditOrderModal({ order, onClose, onConfirm, catalog }: E
                                             <p className="font-extrabold text-[13px] text-black leading-tight">{item.product.name}</p>
                                         </div>
                                         {/* Right: Price */}
-                                        <p className="font-medium text-xs text-black">₱{(item.product.price * item.quantity).toFixed(2)}</p>
+                                        <p className="font-medium text-xs text-black">₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
                                     </div>
                                 ))}
 
@@ -183,7 +183,7 @@ export default function EditOrderModal({ order, onClose, onConfirm, catalog }: E
                                         >
                                             <p className="font-extrabold text-gray-900 text-sm text-left">{product.name}</p>
                                             <div className="flex items-center gap-3">
-                                                <p className="font-medium text-gray-600">₱{product.price.toFixed(2)}</p>
+                                                <p className="font-medium text-gray-600">₱{product.discount_price.toFixed(2)}</p>
                                                 <div className="bg-[#34a853] text-white p-1 rounded-md">
                                                     <Plus size={16} strokeWidth={3} />
                                                 </div>
