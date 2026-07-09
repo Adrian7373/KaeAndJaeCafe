@@ -242,7 +242,7 @@ export default function HistoryPage() {
                                                     <div className='flex justify-between border-b py-2 gap-2' key={index}>
                                                         <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                                                         <p className='flex-grow'>{item.product.name}</p>
-                                                        <p>₱{item.product.price * item.quantity}</p>
+                                                        <p>₱{item.price_at_checkout * item.quantity}</p>
                                                     </div>
                                                 ))}
                                             </div>
