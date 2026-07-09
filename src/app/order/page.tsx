@@ -7,6 +7,7 @@ import ActiveOrderBanner from "./_components/ActiveOrderBanner";
 import Footer from "@/components/Footer";
 import { Product } from "./_components/MenuCatalog";
 import { getStoreStatusAction } from "../actions";
+import { Category } from "./_components/MenuCatalog";
 
 export default async function OrderPage() {
 
@@ -40,10 +41,14 @@ export default async function OrderPage() {
 
     console.log(menuProducts);
 
+    const { data: categories, error: catError } = await supabase
+        .from("product_category")
+        .select("*");
+
     return (
         <>
             <OrderNavBar />
-            <MenuCatalog products={menuProducts} isStoreOpen={isStoreOpen} />
+            <MenuCatalog products={menuProducts} isStoreOpen={isStoreOpen} categories={categories as unknown as Category[]} />
             <ActiveOrderBanner />
             <Footer />
         </>

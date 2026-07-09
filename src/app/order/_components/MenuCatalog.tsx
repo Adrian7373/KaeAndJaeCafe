@@ -20,12 +20,19 @@ export interface Product {
     };
 }
 
+export interface Category {
+    id: string;
+    name: string
+}
+
 export interface MenuCatalogProps {
     products: Product[]
     isStoreOpen: boolean
+    categories: Category[]
 }
 
-export default function MenuCatalog({ products, isStoreOpen }: MenuCatalogProps) {
+
+export default function MenuCatalog({ products, isStoreOpen, categories }: MenuCatalogProps) {
 
     const { cart, addToCart, isOpen, incrementItem, decrementItem, toggleCart } = useCart();
     const [activeTab, setActiveTab] = useState('Chicken');
@@ -33,9 +40,6 @@ export default function MenuCatalog({ products, isStoreOpen }: MenuCatalogProps)
     const [isAtEnd, setIsAtEnd] = useState(false);
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const totalPrice = cart.reduce((total, item) => total + item.price * item.qty, 0);
-
-    const categories = ["Featured", "Group Meals", "Chicken", "Waffles", "Corndogs",
-        "Rice Meals", "Milk Tea", "Fruit Tea", "Noodles"];
 
     const router = useRouter();
 
@@ -94,11 +98,11 @@ export default function MenuCatalog({ products, isStoreOpen }: MenuCatalogProps)
         `}} />
 
                         {categories.map((category) => (
-                            <button onClick={() => setActiveTab(category)} key={category} className={`shrink-0 px-3.5 py-2 text-base transition-colors
-                                    ${activeTab === category
+                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`shrink-0 px-3.5 py-2 text-base transition-colors
+                                    ${activeTab === category.name
                                     ? "border-b-4 border-kae-pink"
                                     : ""
-                                }`}>{category}</button>
+                                }`}>{category.name}</button>
                         ))}
                     </div>
 
