@@ -150,6 +150,8 @@ export default function OrdersPage() {
         },
         colors: {
             squareFill: string;
+            className: string;
+            primaryClassname: string;
         }
     ) => (
         <div key={order.id} className={`border border-${colors.squareFill}-400 shadow-sm p-4 rounded-xl`}>
@@ -159,7 +161,7 @@ export default function OrdersPage() {
                     <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                 </div>
                 <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                <X onClick={() => setOrderToDelete(order)} />
+                <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
             </div>
             <div>
                 <div className={`flex flex-col gap-2 border-t border-${colors.squareFill}-500 py-2`}>
@@ -168,7 +170,7 @@ export default function OrdersPage() {
                         <p className='font-semibold'>{order.payment_method}</p>
                     </div>
                     {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                        <div>
+                        <div className='flex items-center'>
                             <MapPin />
                             <p>{order.delivery_address}</p>
                         </div>
@@ -178,7 +180,7 @@ export default function OrdersPage() {
                                 lng: order.delivery_long,
                                 name: `${order.first_name} ${order.last_name}`
                             })}
-                            className="text-blue-600 font-bold text-sm"
+                            className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
                         >
                             View Map
                         </button>
@@ -208,12 +210,12 @@ export default function OrdersPage() {
             </div>
             <div className='flex gap-2'>
                 <button onClick={() => setEditingOrder(order)}
-                    className={`lassName="w-full mt-3 bg-kae-light text-${colors.squareFill}-500 border-1 border-${colors.squareFill}-200 font-bold py-2 px-4 rounded-lg transition-colors`}>
+                    className={colors.className}>
                     EDIT
                 </button>
                 <button
                     onClick={actionButton.onClick}
-                    className={actionButton.className}
+                    className={colors.primaryClassname}
                 >
                     {actionButton.label}
                 </button>
@@ -379,7 +381,7 @@ export default function OrdersPage() {
                                     <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                                 </div>
                                 <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                                <X onClick={() => setOrderToDelete(order)} />
+                                <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
                             </div>
                             <div>
                                 <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
@@ -388,7 +390,7 @@ export default function OrdersPage() {
                                         <p className='font-semibold'>{order.payment_method}</p>
                                     </div>
                                     {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                                        <div className='flex gap-2'>
+                                        <div className='flex gap-2 items-center'>
                                             <MapPin />
                                             <p>{order.delivery_address}</p>
                                         </div>
@@ -398,7 +400,7 @@ export default function OrdersPage() {
                                                 lng: order.delivery_long,
                                                 name: `${order.first_name} ${order.last_name}`
                                             })}
-                                            className="text-blue-600 font-bold text-sm"
+                                            className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
                                         >
                                             View Map
                                         </button>
@@ -434,12 +436,12 @@ export default function OrdersPage() {
                             </div>
                             <div className='flex gap-2'>
                                 <button onClick={() => setEditingOrder(order)}
-                                    className='lassName="w-full mt-3 bg-kae-light text-orange-500 border-1 border-orange-500 font-bold py-2 px-4 rounded-lg transition-colors'>
+                                    className='hover:text-kae-light hover:bg-orange-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-orange-500 border-1 border-orange-500 font-bold py-2 px-4 rounded-lg transition-colors'>
                                     EDIT
                                 </button>
                                 <button
                                     onClick={() => updateOrderStatus(order.id, 'cooking')}
-                                    className="w-full mt-3 bg-orange-400 text-kae-light font-bold py-2 rounded-lg transition-colors"
+                                    className="hover:bg-orange-600 w-full mt-3 bg-orange-400 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
                                 >
                                     START COOKING
                                 </button>
@@ -458,7 +460,10 @@ export default function OrdersPage() {
                             label: getCookingAction(order).label,
                             className: "w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
                             onClick: () => updateOrderStatus(order.id, getCookingAction(order).nextStatus),
-                        }, { squareFill: "purple" })
+                        }, {
+                            squareFill: "purple", className: 'hover:text-kae-light hover:bg-purple-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-purple-500 border-1 border-purple-500 font-bold py-2 px-4 rounded-lg transition-colors',
+                            primaryClassname: "hover:bg-purple-800 w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
+                        })
                     ))}
                 </div>
             </div>
@@ -473,7 +478,10 @@ export default function OrdersPage() {
                             className: "w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
                             onClick: () => updateOrderStatus(order.id, 'delivering')
 
-                        }, { squareFill: "blue" })
+                        }, {
+                            squareFill: "blue", className: 'hover:text-kae-light hover:bg-blue-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-blue-500 border-1 border-blue-500 font-bold py-2 px-4 rounded-lg transition-colors',
+                            primaryClassname: "hover:bg-blue-800 w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
+                        })
                     ))}
                 </div>
             </div>
@@ -488,7 +496,10 @@ export default function OrdersPage() {
                             className: "w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition-colors",
                             onClick: () => updateOrderStatus(order.id, getFinalAction(order).nextStatus),
 
-                        }, { squareFill: "green" })
+                        }, {
+                            squareFill: "green", className: 'hover:text-kae-light hover:bg-green-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-green-500 border-1 border-green-500 font-bold py-2 px-4 rounded-lg transition-colors',
+                            primaryClassname: "hover:bg-green-800 w-full mt-3 bg-green-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
+                        })
                     ))}
                 </div>
             </div>

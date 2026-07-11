@@ -53,7 +53,7 @@ export default function AdminSideBar() {
             <button
                 onClick={handleToggle}
                 disabled={isLoading}
-                className={`relative h-10 rounded-full transition-colors duration-300 flex items-center justify-center font-black text-white text-xs px-4 shadow-sm
+                className={`relative h-10 cursor-pointer rounded-full transition-colors duration-300 flex items-center justify-center font-black text-white text-xs px-4 shadow-sm
                     ${isMobile ? "w-full" : "w-32"}
                     ${isAcceptingOrders ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}
                     ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
@@ -94,7 +94,7 @@ export default function AdminSideBar() {
                                 className={`font-semibold 2xl:text-lg transition duration-300 py-2 px-3 lg:px-4 rounded-full text-sm lg:text-base whitespace-nowrap
                                     ${isActive
                                         ? "bg-kae-dark text-kae-light shadow-md"
-                                        : "text-kae-dark hover:bg-black/10"
+                                        : "text-kae-dark hover:text-kae-light hover:bg-kae-dark"
                                     }`}
                             >
                                 {tab.name}
