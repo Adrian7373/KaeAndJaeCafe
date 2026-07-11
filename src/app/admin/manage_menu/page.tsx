@@ -226,7 +226,7 @@ export default function MenuManagementPage() {
                             }
                         }} className="py-3 max-w-6/8 text-lg px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
                     </div>
-                    <select className="border-1 px-2 rounded-xl w-[40%] flex-grow bg-kae-light" onChange={(e) => {
+                    <select className="cursor-pointer border-1 px-2 rounded-xl w-[40%] flex-grow bg-kae-light" onChange={(e) => {
                         setActiveCategoryId(e.target.value); if (e.target.value !== "all") {
                             setSearchInput("");
                             setTextToSearch("");
@@ -239,8 +239,8 @@ export default function MenuManagementPage() {
                     </select>
                 </div>
                 <div className="flex px-4 gap-2 justify-center lg:pt-24 2xl:pt-30">
-                    <button onClick={() => setIsAddingCategory(true)} className="bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Category</button>
-                    <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Item</button>
+                    <button onClick={() => setIsAddingCategory(true)} className="hover:bg-green-600 hover:text-kae-light transition-colors duration-300 cursor-pointer bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Category</button>
+                    <button onClick={() => setItemToEdit({})} className="cursor-pointer hover:bg-green-800 transition-colors duration-300 bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Item</button>
                 </div>
             </div>
             {/* Menu Catalog */}
@@ -265,7 +265,7 @@ export default function MenuManagementPage() {
                             </div>
                         </div>
                         <div className="mt-3 flex flex-col gap-2">
-                            <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600" : "bg-red-500"} font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
+                            <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600 hover:bg-green-800" : "bg-red-500 hover:"} font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
                                 {product.is_available === true ? "Available" : "Not Available"}
                             </button>
                             <div className="flex rounded-xl overflow-hidden">
