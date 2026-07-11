@@ -216,33 +216,35 @@ export default function MenuManagementPage() {
 
     return (
         <>
-            <div className="pt-24 px-4 flex gap-1">
-                <div className="flex border-1 rounded-xl items-center px-2 w-[60%] bg-kae-light">
-                    <Search className="w-8 h-8 content-center" />
-                    <input value={searchInput} onChange={(e) => {
-                        setSearchInput(e.target.value); if (e.target.value.trim() !== "") {
-                            setActiveCategoryId("all");
+            <div className="flex flex-col lg:flex-row lg:justify-center">
+                <div className="pt-24 px-4 flex gap-1 max-w-lg mx-auto lg:mx-0">
+                    <div className="flex border-1 rounded-xl items-center px-2 w-[60%] bg-kae-light">
+                        <Search className="w-8 h-8 content-center" />
+                        <input value={searchInput} onChange={(e) => {
+                            setSearchInput(e.target.value); if (e.target.value.trim() !== "") {
+                                setActiveCategoryId("all");
+                            }
+                        }} className="py-3 max-w-6/8 text-lg px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
+                    </div>
+                    <select className="border-1 px-2 rounded-xl w-[40%] flex-grow bg-kae-light" onChange={(e) => {
+                        setActiveCategoryId(e.target.value); if (e.target.value !== "all") {
+                            setSearchInput("");
+                            setTextToSearch("");
                         }
-                    }} className="py-3 max-w-6/8 text-lg px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
+                    }} value={activeCategoryId ?? "all"}>
+                        <option value="all">All items</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                    </select>
                 </div>
-                <select className="border-1 px-2 rounded-xl w-[40%] flex-grow bg-kae-light" onChange={(e) => {
-                    setActiveCategoryId(e.target.value); if (e.target.value !== "all") {
-                        setSearchInput("");
-                        setTextToSearch("");
-                    }
-                }} value={activeCategoryId ?? "all"}>
-                    <option value="all">All items</option>
-                    {categories.map((category) => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="flex px-4 gap-2 justify-center">
-                <button onClick={() => setIsAddingCategory(true)} className="bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600"><Plus /> Add new Category</button>
-                <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600"><Plus /> Add new Item</button>
+                <div className="flex px-4 gap-2 justify-center lg:pt-24">
+                    <button onClick={() => setIsAddingCategory(true)} className="bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Category</button>
+                    <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Item</button>
+                </div>
             </div>
             {/* Menu Catalog */}
-            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
+            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleProducts.map((product) => (
                     <div key={product.id} className="flex flex-col border-1 border-gray-400 shadow-md rounded-xl w-6/8 py-4 px-4 sm:w-full">
                         <div className="relative aspect-square rounded-t-2xl overflow-hidden">
