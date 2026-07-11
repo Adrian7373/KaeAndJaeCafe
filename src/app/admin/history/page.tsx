@@ -52,10 +52,14 @@ export default function HistoryPage() {
 
     const [selectedOrder, setSelectedOrder] = useState<HistoricalOrder | null>(null);
 
-    const calculateOrderTotal = (orderItems: OrderItem[] | undefined) => {
-        return (orderItems ?? []).reduce((total, item) => {
+    const calculateOrderTotal = (orderItems: OrderItem[] | undefined, orderType: string) => {
+        const subtotal = (orderItems ?? []).reduce((total, item) => {
             return total + Number(item.quantity) * Number(item.price_at_checkout);
         }, 0);
+        if (orderType === "delivery") {
+            return subtotal + 49
+        }
+        return subtotal
     };
 
     const handleExportCSV = async () => {
@@ -108,7 +112,7 @@ export default function HistoryPage() {
                 const date = new Date(order.created_at).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
                 const customer = `${order.first_name} ${order.last_name}`;
 
-                const total = calculateOrderTotal(order.order_items);
+                const total = calculateOrderTotal(order.order_items, order.order_type);
 
                 const items = order.order_items?.map((item: any) =>
                     `${item.quantity}x ${item.product.name}`
@@ -314,15 +318,17 @@ export default function HistoryPage() {
                     </div>
                     {/* Date range picker */}
                     <div className="flex items-center justify-between">
-                        <div className=" text-center">
-                            <input value={startDate} onChange={(e) => handleFilterChange(setStartDate, e.target.value)} className="py-2 border-1 rounded-md" type="date" />
-                        </div>
-                        <div className="text-center flex-grow">
-                            <p>To</p>
-                            <MoveRight className="w-full h-8" />
-                        </div>
-                        <div className="text-center">
-                            <input value={endDate} onChange={(e) => handleFilterChange(setEndDate, e.target.value)} className="border-1 py-2 rounded-md" type="date" />
+                        <div className="flex items-center justify-center">
+                            <div className=" text-center">
+                                <input value={startDate} onChange={(e) => handleFilterChange(setStartDate, e.target.value)} className="py-2 border-1 rounded-md" type="date" />
+                            </div>
+                            <div className="text-center flex-grow">
+                                <p>To</p>
+                                <MoveRight className="w-full h-8" />
+                            </div>
+                            <div className="text-center">
+                                <input value={endDate} onChange={(e) => handleFilterChange(setEndDate, e.target.value)} className="border-1 py-2 rounded-md" type="date" />
+                            </div>
                         </div>
                         <button onClick={resetFilterState} className="border-1 px-4 py-2 rounded-md"><RotateCcw /></button>
                     </div>
@@ -339,7 +345,7 @@ export default function HistoryPage() {
                             <p className="font-medium">No archived logs matched these filter parameters.</p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-4 md:grid md:grid-cols-2 md:gap-2">
                             {orders.map((order) => (
                                 <div key={order.id} className={`${order.status === "success" ? "border-green-500" : "border-red-500"} border-2 shadow-sm p-4 rounded-xl`}>
                                     <div className='flex justify-between mb-3'>
@@ -361,34 +367,49 @@ export default function HistoryPage() {
                                             </div>
                                             <div className="flex gap-1">
                                                 <Coins />
-                                                <p>₱{calculateOrderTotal(order.order_items)}</p>
+                                                <p>₱{calculateOrderTotal(order.order_items, order.order_type)}</p>
                                             </div>
                                         </div>
-                                        {selectedOrder === order && (
-                                            <div className='mt-2'>
-                                                <p className='text-md font-semibold'>ORDERS</p>
+                                        <div
+                                            className={`grid transition-all duration-300 ease-in-out ${selectedOrder === order
+                                                ? "grid-rows-[1fr] opacity-100 mt-4"
+                                                : "grid-rows-[0fr] opacity-0 mt-0"
+                                                }`}
+                                        >
+                                            <div className="overflow-hidden">
+                                                <p className='text-md font-semibold mb-2'>ORDERS</p>
                                                 {order.order_items?.map((item, index) => (
-                                                    <div className='flex justify-between border-b py-2 gap-2' key={index}>
-                                                        <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
-                                                        <p className='flex-grow'>{item.product.name}</p>
-                                                        <p>₱{item.price_at_checkout * item.quantity}</p>
+                                                    <div className='flex justify-between border-b border-gray-100 py-2 gap-2' key={index}>
+                                                        <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center text-sm'>
+                                                            {item.quantity}x
+                                                        </p>
+                                                        <p className='flex-grow text-gray-700 font-medium'>{item.product.name}</p>
+                                                        <p className="font-bold text-gray-800">₱{item.price_at_checkout * item.quantity}</p>
                                                     </div>
                                                 ))}
+                                                {order.order_type === "delivery" && (
+                                                    <div className="flex justify-between py-2">
+                                                        <p>Delivery fee</p>
+                                                        <p className="font-bold">₱49</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        </div>
 
                                     </div>
-                                    {selectedOrder === order ? (
-                                        <button onClick={() => setSelectedOrder(null)} className="flex items-center flex-col relative py-1 mx-auto">
-                                            <ChevronUp className="absolute top-5" />
-                                            <p>Hide orders</p>
-                                        </button>
-                                    ) : (
-                                        <button onClick={() => setSelectedOrder(order)} className="flex items-center flex-col relative py-1 mx-auto">
-                                            <p>Show orders</p>
-                                            <ChevronDown className="absolute top-5" />
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setSelectedOrder(selectedOrder === order ? null : order)}
+                                        className="flex flex-col items-center justify-center w-full mt-2 py-2 text-gray-500 hover:text-gray-800 transition-colors"
+                                    >
+                                        <p className="font-semibold text-sm">
+                                            {selectedOrder === order ? "Hide orders" : "Show orders"}
+                                        </p>
+                                        <ChevronDown
+                                            className={`transition-transform duration-300 ease-in-out mt-1 ${selectedOrder === order ? "rotate-180" : "rotate-0"
+                                                }`}
+                                            size={20}
+                                        />
+                                    </button>
 
                                 </div>
                             ))}

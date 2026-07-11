@@ -11,7 +11,7 @@ export default function TopSellersCard({ topSellers }: { topSellers: TopSeller[]
     return (
         <>
             <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md gap-3 flex flex-col  ">
-                <p className="text-xl">Today's Top Sellers</p>
+                <p className="text-sm font-bold text-gray-500 md:text-lg">Today's Top Sellers</p>
                 {topSellers.map((item) => (
                     <div key={item.name} className="flex flex-col items-center py-2 justify-between border-1 border-gray-300 rounded-xl sm:flex-row sm:justify-evenly">
                         <div className="flex flex-col gap-3 justify-center items-center max-w-[50%]">

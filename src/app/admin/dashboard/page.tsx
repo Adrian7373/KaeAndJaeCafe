@@ -132,18 +132,18 @@ export default async function DashboardPage() {
 
             <div className="grid grid-cols-2 gap-3">
                 <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
-                    <p className="text-sm font-bold text-gray-500">Today's Revenue</p>
-                    <p className="text-3xl font-black text-kae-dark">{revenueDisplay}</p>
+                    <p className="text-sm font-bold text-gray-500 md:text-lg">Today's Revenue</p>
+                    <p className="text-3xl font-black text-kae-dark md:text-4xl">{revenueDisplay}</p>
                 </div>
                 <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
-                    <p className="text-sm font-bold text-gray-500">Successful Orders</p>
-                    <p className="text-3xl font-black text-kae-dark">{todaysSuccessfulOrders}</p>
+                    <p className="text-sm font-bold text-gray-500 md:text-lg">Successful Orders</p>
+                    <p className="text-3xl font-black text-kae-dark md:text-4xl">{todaysSuccessfulOrders}</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                 <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md overflow-hidden min-h-65 md:h-full md:max-h-150">
-                    <p className="text-lg font-bold text-kae-dark mb-2">Pending Orders</p>
+                    <p className="text-sm font-bold text-gray-500 md:text-lg">Pending Orders</p>
                     <div className="overflow-auto flex flex-col gap-2">
                         {pendingOrders.length === 0 && (
                             <p className="text-gray-500 text-sm font-medium py-4 text-center">No pending orders yet.</p>

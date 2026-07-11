@@ -255,10 +255,12 @@ export default function MenuManagementPage() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <p className="font-semibold text-lg">{product.name}</p>
-                            <p>Price: ₱{product.price}</p>
-                            <p>Discount Price: ₱{product.discount_price}</p>
-                            <p>Preparation Time: {product.est_prep_time} mins</p>
+                            <p className="font-semibold text-lg md:text-xl">{product.name}</p>
+                            <div className="flex flex-col gap-1 md:text-lg">
+                                <p>Price: ₱{product.price}</p>
+                                <p>Discount Price: ₱{product.discount_price}</p>
+                                <p>Preparation Time: {product.est_prep_time} mins</p>
+                            </div>
                         </div>
                         <div className="mt-3 flex flex-col gap-2">
                             <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600" : "bg-red-500"} font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
