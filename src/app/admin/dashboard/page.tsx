@@ -141,26 +141,28 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md overflow-hidden min-h-65">
-                <p className="text-lg font-bold text-kae-dark mb-2">Pending Orders</p>
-                <div className="overflow-auto flex flex-col gap-2">
-                    {pendingOrders.length === 0 && (
-                        <p className="text-gray-500 text-sm font-medium py-4 text-center">No pending orders yet.</p>
-                    )}
-                    {pendingOrders.map((order) => (
-                        <div className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100" key={order.customerName}>
-                            <Square fill="orange" strokeWidth={0} className="mt-1" />
-                            <div>
-                                <p className="font-bold text-gray-800">{order.customerName}</p>
-                                <p className="text-sm text-gray-600 capitalize">{order.order_type}</p>
-                                <p className="text-xs font-bold text-gray-400">{order.orderTime}</p>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md overflow-hidden min-h-65 md:h-full md:max-h-150">
+                    <p className="text-lg font-bold text-kae-dark mb-2">Pending Orders</p>
+                    <div className="overflow-auto flex flex-col gap-2">
+                        {pendingOrders.length === 0 && (
+                            <p className="text-gray-500 text-sm font-medium py-4 text-center">No pending orders yet.</p>
+                        )}
+                        {pendingOrders.map((order) => (
+                            <div className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100" key={order.customerName}>
+                                <Square fill="orange" strokeWidth={0} className="mt-1" />
+                                <div>
+                                    <p className="font-bold text-gray-800">{order.customerName}</p>
+                                    <p className="text-sm text-gray-600 capitalize">{order.order_type}</p>
+                                    <p className="text-xs font-bold text-gray-400">{order.orderTime}</p>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            <TopSellersCard topSellers={topSellers} />
+                <TopSellersCard topSellers={topSellers} />
+            </div>
             <AutoRefresh />
         </div>
     )

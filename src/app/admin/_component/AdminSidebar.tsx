@@ -1,7 +1,7 @@
 "use client";
 
-import { Menu, Store, X } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Menu, Store, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getStoreStatusAction, toggleStoreStatusAction } from "@/app/actions";
@@ -11,6 +11,7 @@ export default function AdminSideBar() {
 
     const [isAcceptingOrders, setIsAcceptingOrders] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -28,11 +29,9 @@ export default function AdminSideBar() {
         { name: "Order History", href: "/admin/history" }
     ];
 
-    const [isOpen, setIsOpen] = useState(false);
-
     const toggleMenu = () => {
         setIsOpen(!isOpen);
-    }
+    };
 
     const handleToggle = async () => {
         const newStatus = !isAcceptingOrders;
@@ -48,84 +47,118 @@ export default function AdminSideBar() {
         }
     };
 
+    // Reusable Toggle Button Component to avoid code duplication
+    const StoreStatusToggle = ({ isMobile = false }: { isMobile?: boolean }) => (
+        <div className={`flex items-center gap-1 flex-col ${isMobile ? "w-full mt-auto border-t border-gray-200 p-4" : ""}`}>
+            <div className="flex items-center gap-2 text-[#4a1c40] font-bold shrink-0">
+                <span className="text-sm hidden lg:block md:hidden sm:block">
+                    {isMobile ? "ONLINE ORDERS" : "STORE:"}
+                </span>
+            </div>
+            <button
+                onClick={handleToggle}
+                disabled={isLoading}
+                className={`relative h-10 rounded-full transition-colors duration-300 flex items-center justify-center font-black text-white text-xs px-4 shadow-sm
+                    ${isMobile ? "w-full" : "w-32"}
+                    ${isAcceptingOrders ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'}
+                    ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+            >
+                {isAcceptingOrders ? 'ACCEPTING' : 'PAUSED'}
+            </button>
+        </div>
+    );
+
     return (
-        <header className="fixed w-full max-w-9xl z-50">
-            <nav className={`flex py-2 px-4 items-center justify-between bg-kae-pink md:bg-kae-light 2xl:px-30 2xl:py-5`}>
-                <div className="flex items-center gap-3">
-                    <a href="#"><img className="w-15 h-15" src="/logo.svg" alt="Kae and Jae logo" /></a>
-                    <div className="flex flex-col font-pacifico">
+        <header className="fixed top-0 w-full z-50 shadow-sm">
+            <nav className="flex py-2 px-4 items-center justify-between bg-kae-pink 2xl:px-30 2xl:py-5">
+
+                {/* Logo & Branding */}
+                <Link href="/admin/dashboard" className="flex items-center gap-3">
+                    <img className="w-12 h-12 md:w-15 md:h-15" src="/logo.svg" alt="Kae and Jae logo" />
+                    <div className="flex flex-col font-pacifico leading-tight md:hidden">
                         <h1 className="hidden">Kae and Jae</h1>
-                        <h1 className="text-kae-dark text-lg ">Kae and</h1>
-                        <h1 className="text-kae-dark text-lg ">Jae Cafe</h1>
+                        <h1 className="text-kae-dark text-lg md:text-xl">Kae and</h1>
+                        <h1 className="text-kae-dark text-lg md:text-xl">Jae Cafe</h1>
                     </div>
-                </div>
-                <Menu className="h-8 w-8 md:hidden" onClick={toggleMenu} />
-                <div className="gap-5 hidden md:flex items-center">
-                    <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#home">Home</a>
-                    <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#about">About</a>
-                    <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#menu">Menu</a>
-                    <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#testimonials">Testimonials</a>
-                    <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#gallery">Gallery</a>
-                    <a className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" href="#contact">Contact</a>
-                </div>
-            </nav>
-            <div
-                onClick={toggleMenu}
-                className={`fixed inset-0 bg-kae-dark/40 backdrop-blur-sm z-40 transition-all duration-300 md:hidden ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
-            ></div>
+                </Link>
 
-            {/* Hamburger Menu */}
-            <div className={`h-dvh w-6/8 flex flex-col bg-kae-light/60 absolute top-0 right-0 backdrop-blur-md shadow-2xl z-50 border-r border-white/20 transition-all duration-300 ${isOpen ? "flex" : "hidden"} `}>
-                <div className="flex flex-col">
-                    <div className="w-full px-4 py-2 h-[76px] flex items-center h-12 w-12">
-                        <X className="ml-auto" onClick={toggleMenu} />
-                    </div>
-                    <div className="flex flex-col px-4 py-4 items-center gap-2">
-                        {tabs.map((tab) => {
-                            // Check if this tab is the active page
-                            const isActive = pathname === tab.href;
+                {/* Mobile Hamburger Icon */}
+                <button onClick={toggleMenu} className="md:hidden p-2 text-kae-dark hover:bg-black/5 rounded-lg transition-colors">
+                    <Menu className="h-8 w-8" />
+                </button>
 
-                            return (
-                                <Link
-                                    key={tab.name}
-                                    href={tab.href}
-                                    className={`w-full flex font-bold items-center justify-center gap-3 px-4 py-3 rounded-xl transition-all font-xl
-                ${isActive
-                                            ? "bg-kae-purple text-white shadow-md"
-                                            : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                                        }`}
-                                >
-                                    {tab.name}
-                                </Link>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div>
-                    <div className="mt-auto p-4 border-t border-gray-100">
-                        <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
-                            <div className="flex items-center gap-2 text-[#4a1c40] font-bold">
-                                <Store size={18} />
-                                <span className="text-sm">ONLINE ORDERS</span>
-                            </div>
-
-                            <button
-                                onClick={handleToggle}
-                                disabled={isLoading}
-                                className={`relative w-full h-10 rounded-full transition-colors duration-300 flex items-center px-1 ${isAcceptingOrders ? 'bg-green-500' : 'bg-red-500'
+                {/* Desktop Navigation */}
+                <div className="gap-4 lg:gap-6 hidden md:flex items-center">
+                    {tabs.map((tab) => {
+                        const isActive = pathname === tab.href;
+                        return (
+                            <Link
+                                key={tab.name}
+                                href={tab.href}
+                                className={`font-semibold 2xl:text-lg transition duration-300 py-2 px-3 lg:px-4 rounded-full text-sm lg:text-base whitespace-nowrap
+                                    ${isActive
+                                        ? "bg-kae-dark text-kae-light shadow-md"
+                                        : "text-kae-dark hover:bg-black/10"
                                     }`}
                             >
+                                {tab.name}
+                            </Link>
+                        );
+                    })}
 
-                                {/* The Text Label */}
-                                <span className={`absolute w-full text-center text-xs font-black text-white pointer-events-none transition-opacity`}>
-                                    {isAcceptingOrders ? 'ACCEPTING' : 'PAUSED'}
-                                </span>
-                            </button>
-                        </div>
-                    </div>
+                    {/* Vertical Divider */}
+                    <div className="w-px h-8 bg-kae-dark/20 mx-2 hidden lg:block"></div>
+
+                    {/* Desktop Store Status Toggle */}
+                    <StoreStatusToggle />
                 </div>
+            </nav>
+
+            {/* Mobile Menu Overlay */}
+            <div
+                onClick={toggleMenu}
+                className={`fixed inset-0 bg-kae-dark/40 backdrop-blur-sm z-40 transition-opacity duration-300 md:hidden ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                    }`}
+            />
+
+            {/* Mobile Sliding Menu */}
+            <div
+                className={`fixed top-0 right-0 h-dvh w-[80%] max-w-sm bg-kae-light/95 backdrop-blur-xl shadow-2xl z-50 flex flex-col border-l border-white/50 transition-transform duration-300 ease-in-out md:hidden
+                    ${isOpen ? "translate-x-0" : "translate-x-full"}
+                `}
+            >
+                {/* Close Button */}
+                <div className="flex justify-end p-4 border-b border-gray-200/50">
+                    <button onClick={toggleMenu} className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition-colors">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                {/* Mobile Links */}
+                <div className="flex flex-col p-4 gap-3 flex-grow overflow-y-auto">
+                    {tabs.map((tab) => {
+                        const isActive = pathname === tab.href;
+                        return (
+                            <Link
+                                key={tab.name}
+                                href={tab.href}
+                                onClick={() => setIsOpen(false)} // Close menu instantly on click
+                                className={`w-full flex font-bold items-center justify-center gap-3 px-4 py-4 rounded-xl transition-all
+                                    ${isActive
+                                        ? "bg-kae-purple text-white shadow-md"
+                                        : "text-gray-500 hover:bg-gray-200 hover:text-kae-dark"
+                                    }`}
+                            >
+                                {tab.name}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Mobile Store Status Toggle */}
+                <StoreStatusToggle isMobile={true} />
             </div>
         </header>
-    )
+    );
 }

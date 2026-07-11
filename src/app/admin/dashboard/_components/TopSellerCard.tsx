@@ -14,7 +14,7 @@ export default function TopSellersCard({ topSellers }: { topSellers: TopSeller[]
                 <p className="text-xl">Today's Top Sellers</p>
                 {topSellers.map((item) => (
                     <div key={item.name} className="flex flex-col items-center py-2 justify-between border-1 border-gray-300 rounded-xl sm:flex-row sm:justify-evenly">
-                        <div className="flex flex-col gap-3 justify-center items-center">
+                        <div className="flex flex-col gap-3 justify-center items-center max-w-[50%]">
                             <div className="h-25 w-25 rounded-full overflow-hidden bg-gray-100 relative shrink-0">
                                 <Image
                                     src={item.imageUrl}
