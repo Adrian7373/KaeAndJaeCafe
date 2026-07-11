@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/../lib/supabase';
 import { useRouter } from 'next/navigation';
 import { cancelOrderAction, updateOrderAction, editOrderItemsAction } from '@/app/actions';
-import { HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
+import { Coins, HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
 import EditOrderModal from './_components/EditOrderModal';
 import LocationViewModal from './_components/LocationViewModal';
 
@@ -65,6 +65,20 @@ export default function OrdersPage() {
         (o) => (o.status === 'delivering' && !isPickupOrder(o))
             || (o.status === 'prepared' && isPickupOrder(o))
     );
+
+    const calculateTotal = (order: Order) => {
+        const subtotal = (order.order_items || []).reduce((total, item) => {
+
+            const unitPrice = item.price_at_checkout ?? item.product.discount_price ?? 0;
+
+            return total + (unitPrice * item.quantity);
+
+        }, 0);
+        if (order.order_type === 'delivery') {
+            return subtotal + 49;
+        }
+        return subtotal
+    };
 
     const handleDeleteOrder = async () => {
         if (!orderToDelete) return;
@@ -392,6 +406,10 @@ export default function OrdersPage() {
                                         <Phone />
                                         <p>{order.contact}</p>
                                     </div>
+                                    <div className='flex gap-2'>
+                                        <Coins />
+                                        <p className='font-bold'>₱{calculateTotal(order)}</p>
+                                    </div>
                                 </div>
                                 <div className='mt-2'>
                                     <p className='text-md font-semibold'>ORDERS</p>
@@ -399,9 +417,15 @@ export default function OrdersPage() {
                                         <div className='flex justify-between border-b py-2 gap-2' key={index}>
                                             <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                                             <p className='flex-grow'>{item.product.name}</p>
-                                            <p className='font-bold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
+                                            <p className='font-semibold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
                                         </div>
                                     ))}
+                                    {order.order_type === "delivery" && (
+                                        <div className='flex justify-between ml-10 py-2'>
+                                            <p>Delivery Fee</p>
+                                            <p className='font-semibold'>₱49</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className='flex gap-2'>
