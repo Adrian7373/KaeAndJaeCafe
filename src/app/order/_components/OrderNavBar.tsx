@@ -13,7 +13,7 @@ export default function OrderNavBar() {
 
     return (
         <>
-            <header className="fixed w-full max-w-9xl z-50">
+            <header className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-screen-2xl">
                 <nav className="flex py-2 px-4 items-center justify-between bg-kae-pink md:bg-kae-pink 2xl:px-30 2xl:py-5">
                     <div className="flex items-center gap-3">
                         <a href="#"><img className="w-15 h-15" src="/logo.svg" alt="Kae and Jae logo" /></a>
@@ -29,9 +29,18 @@ export default function OrderNavBar() {
                         {isOpen ? (
                             <X onClick={toggleCart} />
                         ) : (
-                            <div className="cursor-pointer rounded-full">
-                                <ShoppingBag ref={cartIconRef} className="hover:text-kae-light transition-colors duration-300" onClick={toggleCart} />
-                                <p className="absolute top-10 2xl:top-13 right-3.5 2xl:right-29.5 text-kae-light rounded-full aspect-square text-[8px] bg-kae-dark px-1">{totalItems}</p>
+
+                            <div className="relative cursor-pointer rounded-full">
+                                <ShoppingBag
+                                    ref={cartIconRef}
+                                    className="hover:text-kae-light transition-colors duration-300"
+                                    onClick={toggleCart}
+                                />
+
+                                {/* 2. Simplified the absolute positioning to just anchor to the icon */}
+                                <p className="absolute -top-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-kae-dark text-[8px] text-kae-light">
+                                    {totalItems}
+                                </p>
                             </div>
                         )}
 

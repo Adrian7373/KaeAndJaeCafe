@@ -65,7 +65,7 @@ export default function AdminSideBar() {
     );
 
     return (
-        <header className="fixed top-0 w-full z-50 shadow-sm">
+        <header className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-screen-2xl">
             <nav className="flex py-2 px-4 items-center justify-between bg-kae-pink 2xl:px-30 2xl:py-5">
 
                 {/* Logo & Branding */}
