@@ -280,7 +280,7 @@ export default function HistoryPage() {
                     <button
                         onClick={handleExportCSV}
                         disabled={isExporting || totalCount === 0}
-                        className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-xl font-bold transition-colors shadow-sm min-w-[140px]"
+                        className="cursor-pointer duration-300 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-xl font-bold transition-colors shadow-sm min-w-[140px]"
                     >
                         {isExporting ? (
                             <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
@@ -298,7 +298,7 @@ export default function HistoryPage() {
                             <Search className="w-8 h-8" />
                             <input onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search customer name..." className="flex-auto py-3 text-md outline-none" type="text" />
                         </div>
-                        <select value={statusFilter} onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)} className="block px-1 grow-0 w-[30%]" name="" id="">
+                        <select value={statusFilter} onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)} className="cursor-pointer block px-1 grow-0 w-[30%]" name="" id="">
                             <option value="all">All</option>
                             <option value="success">Success</option>
                             <option value="cancelled">Cancelled</option>
@@ -317,20 +317,20 @@ export default function HistoryPage() {
                         </select>
                     </div>
                     {/* Date range picker */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-1">
                         <div className="flex items-center justify-center">
                             <div className=" text-center">
-                                <input value={startDate} onChange={(e) => handleFilterChange(setStartDate, e.target.value)} className="py-2 border-1 rounded-md" type="date" />
+                                <input value={startDate} onChange={(e) => handleFilterChange(setStartDate, e.target.value)} className="cursor-pointer py-2 border-1 rounded-md" type="date" />
                             </div>
                             <div className="text-center flex-grow">
                                 <p>To</p>
                                 <MoveRight className="w-full h-8" />
                             </div>
                             <div className="text-center">
-                                <input value={endDate} onChange={(e) => handleFilterChange(setEndDate, e.target.value)} className="border-1 py-2 rounded-md" type="date" />
+                                <input value={endDate} onChange={(e) => handleFilterChange(setEndDate, e.target.value)} className="cursor-pointer border-1 py-2 rounded-md" type="date" />
                             </div>
                         </div>
-                        <button onClick={resetFilterState} className="border-1 px-4 py-2 rounded-md"><RotateCcw /></button>
+                        <button onClick={resetFilterState} className="cursor-pointer hover:bg-gray-200 transition-colors duration-300 border-1 px-4 py-2 rounded-md"><RotateCcw /></button>
                     </div>
                     {/* Date range picker */}
                 </div>
@@ -399,7 +399,7 @@ export default function HistoryPage() {
                                     </div>
                                     <button
                                         onClick={() => setSelectedOrder(selectedOrder === order ? null : order)}
-                                        className="flex flex-col items-center justify-center w-full mt-2 py-2 text-gray-500 hover:text-gray-800 transition-colors"
+                                        className="cursor-pointer flex flex-col items-center justify-center w-full mt-2 py-2 text-gray-500 hover:text-gray-800 transition-colors"
                                     >
                                         <p className="font-semibold text-sm">
                                             {selectedOrder === order ? "Hide orders" : "Show orders"}

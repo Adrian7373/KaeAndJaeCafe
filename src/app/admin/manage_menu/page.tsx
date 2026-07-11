@@ -265,14 +265,14 @@ export default function MenuManagementPage() {
                             </div>
                         </div>
                         <div className="mt-3 flex flex-col gap-2">
-                            <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600 hover:bg-green-800" : "bg-red-500 hover:"} font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
+                            <button onClick={() => handleToggleAvailability(product.id, product.is_available)} className={`${product.is_available === true ? "bg-green-600 hover:bg-green-800" : "bg-red-500 hover:bg-red-700"} transition-colors duration-300 cursor-pointer font-semibold flex gap-2 justify-center items-center text-kae-light px-4 py-2 rounded-xl`}>
                                 {product.is_available === true ? "Available" : "Not Available"}
                             </button>
                             <div className="flex rounded-xl overflow-hidden">
-                                <button onClick={() => toggleEdit(product)} className=" flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 flex-grow">
+                                <button onClick={() => toggleEdit(product)} className="cursor-pointer hover:bg-kae-purple transition-colors duration-300 flex gap-2 justify-center items-center bg-kae-dark text-kae-light px-4 py-2 flex-grow">
                                     <SquarePen />EDIT
                                 </button>
-                                <button onClick={() => setItemToDelete(product)} className=" flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
+                                <button onClick={() => setItemToDelete(product)} className="cursor-pointer hover:bg-red-700 transition-colors duration-300 flex gap-2 justify-center items-center bg-red-400 text-kae-light px-4 py-2">
                                     <Trash2 />DELETE
                                 </button>
                             </div>

@@ -171,14 +171,14 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
                     <button
                         onClick={onClose}
                         disabled={isSaving}
-                        className="flex-1 py-3.5 font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50"
+                        className="cursor-pointer flex-1 py-3.5 font-bold bg-white border border-gray-200 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 duration-300"
                     >
                         CANCEL
                     </button>
                     <button
                         onClick={handleSaveClick}
                         disabled={isSaving}
-                        className="flex-1 py-3.5 bg-[#34a853] text-white font-bold tracking-wide rounded-xl hover:bg-green-600 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
+                        className="cursor-pointer duration-300 flex-1 py-3.5 bg-[#34a853] text-white font-bold tracking-wide rounded-xl hover:bg-green-600 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
                     >
                         {isSaving ? "SAVING..." : "SAVE ITEM"}
                     </button>
