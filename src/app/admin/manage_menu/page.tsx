@@ -217,7 +217,7 @@ export default function MenuManagementPage() {
     return (
         <>
             <div className="pt-24 px-4 flex gap-1">
-                <div className="flex border-1 rounded-xl items-center px-2 max-w-6/10 bg-kae-light">
+                <div className="flex border-1 rounded-xl items-center px-2 w-[60%] bg-kae-light">
                     <Search className="w-8 h-8 content-center" />
                     <input value={searchInput} onChange={(e) => {
                         setSearchInput(e.target.value); if (e.target.value.trim() !== "") {
@@ -225,7 +225,7 @@ export default function MenuManagementPage() {
                         }
                     }} className="py-3 max-w-6/8 text-lg px-2 outline-none content-center" type="text" placeholder="Search Menu..." />
                 </div>
-                <select className="border-1 px-2 rounded-xl flex-grow bg-kae-light" onChange={(e) => {
+                <select className="border-1 px-2 rounded-xl w-[40%] flex-grow bg-kae-light" onChange={(e) => {
                     setActiveCategoryId(e.target.value); if (e.target.value !== "all") {
                         setSearchInput("");
                         setTextToSearch("");
@@ -242,9 +242,9 @@ export default function MenuManagementPage() {
                 <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600"><Plus /> Add new Item</button>
             </div>
             {/* Menu Catalog */}
-            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center">
+            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6">
                 {visibleProducts.map((product) => (
-                    <div key={product.id} className="flex flex-col border-1 rounded-xl w-6/8 py-4 px-4">
+                    <div key={product.id} className="flex flex-col border-1 border-gray-400 shadow-md rounded-xl w-6/8 py-4 px-4 sm:w-full">
                         <div className="relative aspect-square rounded-t-2xl overflow-hidden">
                             <Image
                                 src={product.image_url}
@@ -255,7 +255,7 @@ export default function MenuManagementPage() {
                             />
                         </div>
                         <div className="flex flex-col gap-2">
-                            <p>{product.name}</p>
+                            <p className="font-semibold text-lg">{product.name}</p>
                             <p>Price: ₱{product.price}</p>
                             <p>Discount Price: ₱{product.discount_price}</p>
                             <p>Preparation Time: {product.est_prep_time} mins</p>

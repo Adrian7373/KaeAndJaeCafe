@@ -290,11 +290,11 @@ export default function HistoryPage() {
                 </div>
                 <div className="gap-2 flex flex-col my-4">
                     <div className="flex border-1 rounded-md grow-0">
-                        <div className="border-r px-2 flex items-center gap-2">
+                        <div className="border-r px-2 flex items-center gap-2 w-[70%]">
                             <Search className="w-8 h-8" />
                             <input onChange={(e) => setSearchInput(e.target.value)} value={searchInput} placeholder="Search customer name..." className="flex-auto py-3 text-md outline-none" type="text" />
                         </div>
-                        <select value={statusFilter} onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)} className="block px-1 grow-0" name="" id="">
+                        <select value={statusFilter} onChange={(e) => handleFilterChange(setStatusFilter, e.target.value)} className="block px-1 grow-0 w-[30%]" name="" id="">
                             <option value="all">All</option>
                             <option value="success">Success</option>
                             <option value="cancelled">Cancelled</option>
