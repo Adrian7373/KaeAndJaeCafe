@@ -47,7 +47,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} ${libertinusSerif.variable} ${roboto.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col"><CartProvider>{children}</CartProvider></body>
+      <body className="min-h-full flex flex-col"><CartProvider><main className="max-w-[1536px] mx-auto w-full min-h-screen bg-white shadow-md">{children}</main></CartProvider></body>
     </html>
   );
 }
