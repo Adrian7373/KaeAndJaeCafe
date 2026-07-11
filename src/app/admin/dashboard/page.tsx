@@ -126,23 +126,23 @@ export default async function DashboardPage() {
 
     return (
         <div className="flex flex-col gap-3 pt-22 pb-4 px-4 max-h-dvh">
-            <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
-                <p className="text-2xl font-bold text-kae-dark">Good Morning, Adrian</p>
+            <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl">
+                <p className="text-2xl font-bold text-kae-dark lg:text-3xl">Good Morning, Adrian</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-                <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
+                <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl">
                     <p className="text-sm font-bold text-gray-500 md:text-lg">Today's Revenue</p>
                     <p className="text-3xl font-black text-kae-dark md:text-4xl">{revenueDisplay}</p>
                 </div>
-                <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md">
+                <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl">
                     <p className="text-sm font-bold text-gray-500 md:text-lg">Successful Orders</p>
                     <p className="text-3xl font-black text-kae-dark md:text-4xl">{todaysSuccessfulOrders}</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-md overflow-hidden min-h-65 md:h-full md:max-h-150">
+                <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl overflow-hidden min-h-65 md:h-full md:max-h-150">
                     <p className="text-sm font-bold text-gray-500 md:text-lg">Pending Orders</p>
                     <div className="overflow-auto flex flex-col gap-2">
                         {pendingOrders.length === 0 && (

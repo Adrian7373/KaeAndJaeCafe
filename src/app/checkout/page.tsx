@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     }, []);
 
     return (
-        <>
+        <div className="flex flex-col items-center">
             <header className="fixed w-full max-w-9xl z-50">
                 <nav className="flex py-2 px-4 items-center justify-between bg-kae-pink md:bg-kae-pink 2xl:px-30 2xl:py-5">
                     <div onClick={() => router.back()} className="flex h-10 items-center cursor-pointer">
@@ -75,7 +75,7 @@ export default function CheckoutPage() {
                 </nav>
             </header>
 
-            <div className="mt-14 px-4 py-5 flex flex-col gap-4">
+            <div className="mt-14 px-4 py-5 flex flex-col gap-4 justify-center w-full max-w-2xl">
 
                 {/* --- THE GPS LOCK UX --- */}
                 {!isLocationVerified ? (
@@ -201,7 +201,8 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* Floating Checkout Footer */}
-                        <div className="fixed flex flex-col justify-center gap-3 bottom-0 left-0 px-4 py-4 bg-white border-t border-gray-200 w-full z-45 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                        {/* Floating Checkout Footer */}
+                        <div className="fixed flex flex-col justify-center gap-3 bottom-0 inset-x-0 mx-auto w-full max-w-2xl px-4 py-4 bg-white border-t sm:border-x border-gray-200 z-45 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:rounded-t-2xl">
                             {state?.error && (
                                 <div className="bg-red-100 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 shadow-sm animate-in fade-in slide-in-from-bottom-2">
                                     ⚠️ {state.error}
@@ -223,12 +224,12 @@ export default function CheckoutPage() {
                             </div>
                             <button disabled={cart.length === 0 || isPending} type="submit" className={`flex justify-center gap-2 items-center px-6 py-4 text-white font-bold text-xl rounded-xl transition-all ${cart.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-kae-dark hover:bg-gray-800 shadow-lg active:scale-95"}`}>
                                 {isPending && <div className="rounded-full border-white border-t-transparent animate-spin w-5 h-5 border-2"></div>}
-                                Proceed to Checkout
+                                Place Order
                             </button>
                         </div>
                     </form>
                 )}
             </div>
-        </>
+        </div>
     );
 }

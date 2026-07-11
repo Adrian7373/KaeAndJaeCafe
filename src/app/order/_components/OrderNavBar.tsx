@@ -24,12 +24,12 @@ export default function OrderNavBar() {
                         </div>
                     </div>
                     <div className="gap-5 flex items-center">
-                        <button className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" onClick={() => router.push("/")}>Home</button>
+                        <button className="text-kae-dark font-semibold 2xl:text-lg transition duration-300 cursor-pointer hover:bg-kae-dark hover:text-kae-light lg:py-2 lg:px-4 rounded-full" onClick={() => router.push("/")}>Home</button>
 
                         {isOpen ? (
                             <X onClick={toggleCart} />
                         ) : (
-                            <div>
+                            <div className="cursor-pointer">
                                 <ShoppingBag ref={cartIconRef} onClick={toggleCart} />
                                 <p className="absolute top-10 right-3.5 text-kae-light rounded-full aspect-square text-[8px] bg-kae-dark px-1">{totalItems}</p>
                             </div>

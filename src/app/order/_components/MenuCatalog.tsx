@@ -98,7 +98,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
         `}} />
 
                         {categories.map((category) => (
-                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`shrink-0 px-3.5 py-2 snap-start text-base transition-colors
+                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`shrink-0 px-3.5 py-2 snap-start text-base transition-colors lg:text-lg
                                     ${activeTab === category.name
                                     ? "border-b-4 border-kae-pink"
                                     : ""
@@ -123,7 +123,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
 
                 {/* Menu list */}
                 <div className="flex-grow max-h-dvh w-full overflow-x-auto">
-                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3">
+                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                         {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
                             <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <div className="relative w-full aspect-square">
@@ -139,19 +139,31 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                                     <div className="flex flex-col align-center mt-auto justify-between">
                                         <p className="line-through text-gray-400 decoration-2 text-sm">₱{product.price}</p>
                                         <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
-                                        <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md">Add to Cart</button>
+                                        <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md hover:bg-kae-purple transition-colors duration-200 cursor-pointer">Add to Cart</button>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
-                <div className={`w-full bg-kae-light p-4 top-[72px] bottom-0 left-0 right-0 z-80 min-h-10/12 flex flex-col ${!isOpen ? "hidden" : "fixed"}`}>
-                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5 max-h-[70vh] overflow-x-auto shadow-md">
+                {/* CART Overlay*/}
+                <div
+                    className={`
+                        fixed top-[75px] bottom-0 right-0 z-[80] 
+                        w-full md:w-[450px]  lg:w-[600px]
+                        bg-kae-light p-4 flex flex-col 
+                        shadow-2xl md:shadow-[-4px_0_20px_-5px_rgba(0,0,0,0.15)] md:border-l border-gray-300
+                        transition-transform duration-300 ease-in-out
+                        ${isOpen ? "translate-x-0" : "translate-x-full"}
+                    `}
+                >
+                    <div className="flex flex-col bg-kae-light w-full flex-grow pt-5 overflow-y-auto">
                         {cart.length === 0 ? (
                             <div className="flex flex-col justify-center items-center gap-5 m-auto">
                                 <p className="text-xl font-semibold">Your Cart is Empty</p>
-                                <button onClick={toggleCart} className="px-4 py-2 bg-kae-dark text-kae-light text-lg rounded-lg">+ Add items</button>
+                                <button onClick={toggleCart} className="px-4 py-2 bg-kae-dark text-kae-light text-lg rounded-lg cursor-pointer hover:bg-kae-purple transition-colors duration-200">
+                                    + Add items
+                                </button>
                             </div>
                         ) : (
                             cart?.map((item) => (
@@ -159,13 +171,13 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                                     <div className="flex gap-2 items-center">
                                         <div className="flex gap-1">
                                             {item.qty === 1 ? (
-                                                <Trash2 className="m-auto w-8 h-8" onClick={() => decrementItem(item)} />
+                                                <Trash2 className="m-auto w-8 h-8 cursor-pointer" onClick={() => decrementItem(item)} />
                                             ) : (
-                                                <Minus className="m-auto w-8 h-8" onClick={() => decrementItem(item)} />
+                                                <Minus className="m-auto w-8 h-8 cursor-pointer" onClick={() => decrementItem(item)} />
                                             )}
 
                                             <p className="h-max m-auto px-1 rounded-lg bg-kae-purple text-kae-light pr-1.5 pb-1 sm:text-lg">{item.qty}x</p>
-                                            <Plus className="m-auto w-8 h-8" onClick={() => incrementItem(item)} />
+                                            <Plus className="m-auto w-8 h-8 cursor-pointer" onClick={() => incrementItem(item)} />
                                         </div>
                                         <p className="px-2 sm:text-lg">{item.name}</p>
                                     </div>
@@ -176,23 +188,25 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                                 </div>
                             ))
                         )}
-
-
                     </div>
-                    <div className="flex flex-col justify-center gap-3 mt-auto">
+
+                    <div className="flex flex-col justify-center gap-3 mt-auto pt-4 bg-kae-light border-t border-gray-200">
                         {!isStoreOpen && (
-                            <p className="text-center">The store is currently closed/on break. Please check again later.</p>
+                            <p className="text-center text-sm font-bold text-red-500">The store is currently closed. Please check again later.</p>
                         )}
                         <div>
-                            <div className="flex justify-between text-lg px-2   ">
+                            <div className="flex justify-between text-lg px-2">
                                 <p className="font-semibold">Subtotal</p>
-                                <p className="font-bold">{cart.length === 0 ? "₱0" : `₱${totalPrice}`}</p>
+                                <p className="font-bold">{cart.length === 0 ? "₱0" : `₱${totalPrice.toFixed(2)}`}</p>
                             </div>
                         </div>
                         <button
                             disabled={cart.length === 0 || !isStoreOpen}
                             onClick={() => { toggleCart(); router.push("/checkout") }}
-                            className={`px-6 py-3 text-kae-light text-xl rounded-lg ${(cart.length === 0 || !isStoreOpen) ? "bg-gray-500 cursor-not-allowed" : "bg-kae-dark"
+                            className={`px-6 py-3 text-kae-light font-bold text-xl rounded-lg transition-colors duration-200 
+                                ${(cart.length === 0 || !isStoreOpen)
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-kae-dark hover:bg-kae-purple shadow-md active:scale-95 cursor-pointer"
                                 }`}
                         >
                             Proceed to Checkout

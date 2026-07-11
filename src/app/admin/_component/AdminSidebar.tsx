@@ -50,11 +50,6 @@ export default function AdminSideBar() {
     // Reusable Toggle Button Component to avoid code duplication
     const StoreStatusToggle = ({ isMobile = false }: { isMobile?: boolean }) => (
         <div className={`flex items-center gap-1 flex-col ${isMobile ? "w-full mt-auto border-t border-gray-200 p-4" : ""}`}>
-            <div className="flex items-center gap-2 text-[#4a1c40] font-bold shrink-0">
-                <span className="text-sm hidden lg:block md:hidden sm:block">
-                    {isMobile ? "ONLINE ORDERS" : "STORE:"}
-                </span>
-            </div>
             <button
                 onClick={handleToggle}
                 disabled={isLoading}
@@ -108,7 +103,7 @@ export default function AdminSideBar() {
                     })}
 
                     {/* Vertical Divider */}
-                    <div className="w-px h-8 bg-kae-dark/20 mx-2 hidden lg:block"></div>
+                    <div className="w-px h-8 bg-kae-dark/20 mx-2 block"></div>
 
                     {/* Desktop Store Status Toggle */}
                     <StoreStatusToggle />

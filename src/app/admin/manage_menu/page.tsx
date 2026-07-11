@@ -242,7 +242,7 @@ export default function MenuManagementPage() {
                 <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600"><Plus /> Add new Item</button>
             </div>
             {/* Menu Catalog */}
-            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6">
+            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
                 {visibleProducts.map((product) => (
                     <div key={product.id} className="flex flex-col border-1 border-gray-400 shadow-md rounded-xl w-6/8 py-4 px-4 sm:w-full">
                         <div className="relative aspect-square rounded-t-2xl overflow-hidden">
