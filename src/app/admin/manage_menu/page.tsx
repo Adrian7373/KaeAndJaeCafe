@@ -217,7 +217,7 @@ export default function MenuManagementPage() {
     return (
         <>
             <div className="flex flex-col lg:flex-row lg:justify-center">
-                <div className="pt-24 px-4 flex gap-1 max-w-lg mx-auto lg:mx-0">
+                <div className="pt-24 2xl:pt-30 px-4 flex gap-1 max-w-lg mx-auto lg:mx-0">
                     <div className="flex border-1 rounded-xl items-center px-2 w-[60%] bg-kae-light">
                         <Search className="w-8 h-8 content-center" />
                         <input value={searchInput} onChange={(e) => {
@@ -238,13 +238,13 @@ export default function MenuManagementPage() {
                         ))}
                     </select>
                 </div>
-                <div className="flex px-4 gap-2 justify-center lg:pt-24">
+                <div className="flex px-4 gap-2 justify-center lg:pt-24 2xl:pt-30">
                     <button onClick={() => setIsAddingCategory(true)} className="bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Category</button>
                     <button onClick={() => setItemToEdit({})} className="bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Item</button>
                 </div>
             </div>
             {/* Menu Catalog */}
-            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="w-full grid grid-cols-1 gap-3 px-4 py-4 place-items-center sm:grid-cols-2 sm:px-6 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {visibleProducts.map((product) => (
                     <div key={product.id} className="flex flex-col border-1 border-gray-400 shadow-md rounded-xl w-6/8 py-4 px-4 sm:w-full">
                         <div className="relative aspect-square rounded-t-2xl overflow-hidden">

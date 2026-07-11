@@ -274,7 +274,7 @@ export default function HistoryPage() {
 
     return (
         <>
-            <div className="pt-24 px-6 flex flex-col items-center">
+            <div className="pt-24 2xl:pt-29 px-6 flex flex-col items-center">
                 <div className="flex gap-3">
                     <p className="text-2xl font-bold">Past Orders</p>
                     <button
@@ -345,7 +345,7 @@ export default function HistoryPage() {
                             <p className="font-medium">No archived logs matched these filter parameters.</p>
                         </div>
                     ) : (
-                        <div className="space-y-4 md:grid md:grid-cols-2 md:gap-2 lg:grid-cols-3">
+                        <div className="space-y-4 md:grid md:grid-cols-2 md:gap-2 lg:grid-cols-3 2xl:grid-cols-4">
                             {orders.map((order) => (
                                 <div key={order.id} className={`${order.status === "success" ? "border-green-500" : "border-red-500"} border-2 shadow-sm p-4 rounded-xl`}>
                                     <div className='flex justify-between mb-3'>

@@ -125,7 +125,7 @@ export default async function DashboardPage() {
     const revenueDisplay = `₱${Math.round(todaysRevenue).toLocaleString()}`;
 
     return (
-        <div className="flex flex-col gap-3 pt-22 pb-4 px-4 max-h-dvh">
+        <div className="flex flex-col gap-3 pt-22 pb-4 px-4 sm:px-10 lg:px-15 lg:pt-26 2xl:pt-32 max-h-dvh">
             <div className="border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl">
                 <p className="text-2xl font-bold text-kae-dark lg:text-3xl">Good Morning, Adrian</p>
             </div>
@@ -142,14 +142,14 @@ export default async function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl overflow-hidden min-h-65 md:h-full md:max-h-150">
-                    <p className="text-sm font-bold text-gray-500 md:text-lg">Pending Orders</p>
+                <div className="max-h-100 flex-grow flex flex-col border-1 border-gray-200 bg-kae-light shadow-lg p-4 rounded-xl overflow-hidden min-h-65 md:h-full md:max-h-150 md:p-6">
+                    <p className="text-sm font-bold text-gray-500 md:text-lg mb-5">Pending Orders</p>
                     <div className="overflow-auto flex flex-col gap-2">
                         {pendingOrders.length === 0 && (
                             <p className="text-gray-500 text-sm font-medium py-4 text-center">No pending orders yet.</p>
                         )}
                         {pendingOrders.map((order) => (
-                            <div className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100" key={order.customerName}>
+                            <div className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-400" key={order.customerName}>
                                 <Square fill="orange" strokeWidth={0} className="mt-1" />
                                 <div>
                                     <p className="font-bold text-gray-800">{order.customerName}</p>
