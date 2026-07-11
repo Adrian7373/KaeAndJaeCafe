@@ -29,9 +29,9 @@ export default function OrderNavBar() {
                         {isOpen ? (
                             <X onClick={toggleCart} />
                         ) : (
-                            <div className="cursor-pointer">
-                                <ShoppingBag ref={cartIconRef} onClick={toggleCart} />
-                                <p className="absolute top-10 right-3.5 text-kae-light rounded-full aspect-square text-[8px] bg-kae-dark px-1">{totalItems}</p>
+                            <div className="cursor-pointer rounded-full">
+                                <ShoppingBag ref={cartIconRef} className="hover:text-kae-light transition-colors duration-300" onClick={toggleCart} />
+                                <p className="absolute top-10 2xl:top-13 right-3.5 2xl:right-29.5 text-kae-light rounded-full aspect-square text-[8px] bg-kae-dark px-1">{totalItems}</p>
                             </div>
                         )}
 

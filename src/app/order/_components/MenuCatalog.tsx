@@ -73,7 +73,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
         <>
             <section className="flex flex-col">
                 {/* Mobile Screensize */}
-                <div className="flex mt-19 justify-center border-b max-w-max">
+                <div className="flex mt-19 justify-center border-b 2xl:mt-25">
 
                     {/* Left Chevron */}
                     <button
@@ -89,7 +89,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                     </button>
 
                     {/* Menu Categories */}
-                    <div ref={scrollRef} onScroll={checkScroll} className="flex flex-1 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-2"
+                    <div ref={scrollRef} onScroll={checkScroll} className="flex flex-1 overflow-x-auto scrollbar-hide snap-x snap-mandatory px-2 xl:justify-center"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
 
                         <style dangerouslySetInnerHTML={{
@@ -98,7 +98,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
         `}} />
 
                         {categories.map((category) => (
-                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`shrink-0 px-3.5 py-2 snap-start text-base transition-colors lg:text-lg
+                            <button onClick={() => setActiveTab(category.name)} key={category.id} className={`cursor-pointer hover:bg-gray-200 shrink-0 px-3.5 xl:px-5 py-2 snap-start text-base transition-colors lg:text-lg
                                     ${activeTab === category.name
                                     ? "border-b-4 border-kae-pink"
                                     : ""
@@ -122,8 +122,8 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 </div>
 
                 {/* Menu list */}
-                <div className="flex-grow max-h-dvh w-full overflow-x-auto">
-                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                <div className="flex-grow max-h-dvh w-full overflow-x-auto 2xl:flex">
+                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8">
                         {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
                             <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <div className="relative w-full aspect-square">
@@ -135,11 +135,11 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                                     />
                                 </div>
                                 <div className="flex flex-col flex-grow p-4 gap-1">
-                                    <p>{product.name}</p>
+                                    <p className="2xl:text-md">{product.name}</p>
                                     <div className="flex flex-col align-center mt-auto justify-between">
-                                        <p className="line-through text-gray-400 decoration-2 text-sm">₱{product.price}</p>
+                                        <p className="line-through text-gray-400 decoration-2 text-sm 2xl:text-lg">₱{product.price}</p>
                                         <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
-                                        <button onClick={(e) => addToCart(product, e)} className="bg-kae-dark text-kae-light px-2 py-1 rounded-md hover:bg-kae-purple transition-colors duration-200 cursor-pointer">Add to Cart</button>
+                                        <button onClick={(e) => addToCart(product, e)} className="bg-kae-purple text-kae-light px-2 py-1 rounded-md hover:bg-purple-700 transition-colors duration-200 cursor-pointer">Add to Cart</button>
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +150,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 <div
                     className={`
                         fixed top-[75px] bottom-0 right-0 z-[80] 
-                        w-full md:w-[450px]  lg:w-[550px]
+                        w-full md:w-[450px]  lg:w-[550px] 2xl: top-[100px]
                         bg-kae-light p-4 flex flex-col 
                         shadow-2xl md:shadow-[-4px_0_20px_-5px_rgba(0,0,0,0.15)] md:border-l border-gray-300
                         transition-transform duration-300 ease-in-out
