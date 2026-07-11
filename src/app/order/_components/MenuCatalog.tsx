@@ -123,7 +123,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
 
                 {/* Menu list */}
                 <div className="flex-grow max-h-dvh w-full overflow-x-auto 2xl:flex">
-                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8">
+                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 xl:px-15 2xl:px-30">
                         {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
                             <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <div className="relative w-full aspect-square">
