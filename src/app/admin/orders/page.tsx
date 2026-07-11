@@ -367,10 +367,10 @@ export default function OrdersPage() {
     if (loading) return <div className="p-8 text-center font-bold text-gray-500">Loading live orders...</div>;
 
     return (
-        <div className="flex flex-row w-screen pt-20 2xl:pt-27 bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
+        <div className="flex flex-row w-full pt-20 2xl:pt-27 bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
 
             {/* PENDING COLUMN */}
-            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start md:w-[50vw] xl:w-[25vw]">
+            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start w-full md:w-1/2 xl:w-1/4">
                 <h2 className="font-bold text-orange-500 mb-4 tracking-wider text-sm">PENDING ({pendingOrders.length})</h2>
                 <div className="space-y-4">
                     {pendingOrders.map((order) => (
@@ -452,7 +452,7 @@ export default function OrdersPage() {
             </div>
 
             {/* COOKING COLUMN */}
-            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-purple-600 snap-start md:w-[50vw] xl:w-[25vw]">
+            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-purple-600 snap-start w-full md:w-1/2 xl:w-1/4">
                 <h2 className="font-bold text-purple-600 mb-4 tracking-wider text-sm">COOKING ({cookingOrders.length})</h2>
                 <div className="space-y-4">
                     {cookingOrders.map((order) => (
@@ -469,7 +469,7 @@ export default function OrdersPage() {
             </div>
 
             {/* PREPARED COLUMN */}
-            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-blue-500 snap-start md:w-[50vw] xl:w-[25vw]">
+            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-blue-500 snap-start w-full md:w-1/2 xl:w-1/4">
                 <h2 className="font-bold text-blue-500 mb-4 tracking-wider text-sm">PREPARED ({preparedOrders.length})</h2>
                 <div className="space-y-4">
                     {preparedOrders.map((order) => (
@@ -487,7 +487,7 @@ export default function OrdersPage() {
             </div>
 
             {/* DELIVERING COLUMN */}
-            <div className="flex-shrink-0 w-screen bg-white rounded-lg shadow-sm p-4 border-t-4 border-green-500 snap-start md:w-[50vw] xl:w-[25vw]">
+            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-green-500 snap-start w-full md:w-1/2 xl:w-1/4">
                 <h2 className="font-bold text-green-500 mb-4 tracking-wider text-sm">DELIVERING ({deliveringOrders.length})</h2>
                 <div className="space-y-4">
                     {deliveringOrders.map((order) => (
