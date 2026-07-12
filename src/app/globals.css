@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --breakpoint-3xl: 1920px;
   /* The Core Brand Colors */
   --color-kae-purple: #5c0a8a;
   /* The deep, rich violet background */
