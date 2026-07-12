@@ -71,7 +71,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
 
     return (
         <>
-            <section className="flex flex-col">
+            <section className="flex flex-col min-h-dvh">
                 {/* Mobile Screensize */}
                 <div className="flex mt-19 justify-center border-b 2xl:mt-25">
 
@@ -122,29 +122,50 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 </div>
 
                 {/* Menu list */}
+                {/* Menu list */}
                 <div className="flex-grow max-h-dvh w-full overflow-x-auto">
-                    <div className="w-full grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 xl:px-15 2xl:px-30 min-[1920px]:grid-cols-8">
-                        {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
-                            <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                <div className="relative w-full aspect-square">
-                                    <Image
-                                        src={product.imageUrl}
-                                        alt={product.name}
-                                        fill
-                                        sizes="(max-width: 768px) 100vw, 300px"
-                                    />
+                    {(() => {
+                        // 1. Filter the products first
+                        const filteredProducts = products.filter(
+                            product => product.is_available && product.product_category?.name === activeTab
+                        );
+
+                        // 2. If no products match, show the empty state
+                        if (filteredProducts.length === 0) {
+                            return (
+                                <div className="w-full flex flex-col items-center justify-center py-24 px-4 text-center">
+                                    <p className="text-2xl font-bold text-gray-400">No products in this category yet</p>
+                                    <p className="text-gray-500 mt-2">Check back later or explore other categories!</p>
                                 </div>
-                                <div className="flex flex-col flex-grow p-4 gap-1">
-                                    <p className="2xl:text-md">{product.name}</p>
-                                    <div className="flex flex-col align-center mt-auto justify-between">
-                                        <p className="line-through text-gray-400 decoration-2 text-sm 2xl:text-lg">₱{product.price}</p>
-                                        <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
-                                        <button onClick={(e) => addToCart(product, e)} className="bg-kae-purple text-kae-light px-2 py-1 rounded-md hover:bg-purple-700 transition-colors duration-200 cursor-pointer">Add to Cart</button>
+                            );
+                        }
+
+                        // 3. Otherwise, render the grid
+                        return (
+                            <div className="w-full grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 xl:px-15 2xl:px-30 min-[1920px]:grid-cols-8">
+                                {filteredProducts.map((product) => (
+                                    <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="relative w-full aspect-square">
+                                            <Image
+                                                src={product.imageUrl}
+                                                alt={product.name}
+                                                fill
+                                                sizes="(max-width: 768px) 100vw, 300px"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col flex-grow p-4 gap-1">
+                                            <p className="2xl:text-md">{product.name}</p>
+                                            <div className="flex flex-col align-center mt-auto justify-between">
+                                                <p className="line-through text-gray-400 decoration-2 text-sm 2xl:text-lg">₱{product.price}</p>
+                                                <p className="font-semibold text-lg">₱{product.discount_price.toFixed(2)}</p>
+                                                <button onClick={(e) => addToCart(product, e)} className="bg-kae-purple text-kae-light px-2 py-1 rounded-md hover:bg-purple-700 transition-colors duration-200 cursor-pointer">Add to Cart</button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        );
+                    })()}
                 </div>
                 {/* CART Overlay*/}
                 <div
