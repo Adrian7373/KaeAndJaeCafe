@@ -35,7 +35,7 @@ export interface MenuCatalogProps {
 export default function MenuCatalog({ products, isStoreOpen, categories }: MenuCatalogProps) {
 
     const { cart, addToCart, isOpen, incrementItem, decrementItem, toggleCart } = useCart();
-    const [activeTab, setActiveTab] = useState('Chicken');
+    const [activeTab, setActiveTab] = useState('All Items');
     const [isAtStart, setIsAtStart] = useState(true);
     const [isAtEnd, setIsAtEnd] = useState(false);
     const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -97,6 +97,17 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
           .scrollbar-hide::-webkit-scrollbar { display: none; }
         `}} />
 
+                        <button
+                            onClick={() => setActiveTab('All Items')}
+                            className={`cursor-pointer hover:bg-gray-200 shrink-0 px-3.5 xl:px-5 py-2 snap-start text-base transition-colors lg:text-lg
+                                ${activeTab === 'All Items'
+                                    ? "border-b-4 border-kae-pink font-bold"
+                                    : "text-gray-600"
+                                }`}
+                        >
+                            All Items
+                        </button>
+
                         {categories.map((category) => (
                             <button onClick={() => setActiveTab(category.name)} key={category.id} className={`cursor-pointer hover:bg-gray-200 shrink-0 px-3.5 xl:px-5 py-2 snap-start text-base transition-colors lg:text-lg
                                     ${activeTab === category.name
@@ -122,15 +133,23 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 </div>
 
                 {/* Menu list */}
-                {/* Menu list */}
                 <div className="flex-grow max-h-dvh w-full overflow-x-auto">
                     {(() => {
-                        // 1. Filter the products first
-                        const filteredProducts = products.filter(
-                            product => product.is_available && product.product_category?.name === activeTab
-                        );
+                        const filteredProducts = products
+                            .filter(product => {
+                                if (!product.is_available) return false;
+                                if (activeTab === 'All Items') return true;
+                                return product.product_category?.name === activeTab;
+                            })
+                            .sort((a, b) => {
+                                if (activeTab === 'All Items') {
+                                    const catA = a.product_category?.name || "";
+                                    const catB = b.product_category?.name || "";
+                                    return catA.localeCompare(catB);
+                                }
+                                return 0;
+                            });
 
-                        // 2. If no products match, show the empty state
                         if (filteredProducts.length === 0) {
                             return (
                                 <div className="w-full flex flex-col items-center justify-center py-24 px-4 text-center">
@@ -140,7 +159,6 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                             );
                         }
 
-                        // 3. Otherwise, render the grid
                         return (
                             <div className="w-full grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 xl:px-15 2xl:px-30 min-[1920px]:grid-cols-8">
                                 {filteredProducts.map((product) => (
