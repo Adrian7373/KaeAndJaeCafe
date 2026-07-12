@@ -12,7 +12,7 @@ export default function NavBar({ bgColorMobile, bgColorMd }: { bgColorMobile: st
     }
 
     return (
-        <header className="fixed w-full max-w-9xl z-50">
+        <header className="fixed inset-x-0 top-0 z-50 mx-auto w-full max-w-screen-2xl">
             <nav className={`flex py-2 px-4 items-center justify-between ${bgColorMobile} md:${bgColorMd} 2xl:px-30 2xl:py-5`}>
                 <div className="flex items-center gap-3">
                     <a href="#"><img className="w-15 h-15" src="/logo.svg" alt="Kae and Jae logo" /></a>
