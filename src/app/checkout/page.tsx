@@ -195,7 +195,7 @@ export default function CheckoutPage() {
                                         <p className="h-max px-2 py-0.5 rounded-lg bg-kae-purple text-kae-light font-bold text-sm">{item.qty}x</p>
                                         <p className="font-medium">{item.name}</p>
                                     </div>
-                                    <p className="font-bold">₱{item.price * item.qty}</p>
+                                    <p className="font-bold">₱{item.discount_price * item.qty}</p>
                                 </div>
                             ))}
                         </div>
