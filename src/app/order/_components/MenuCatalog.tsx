@@ -122,8 +122,8 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 </div>
 
                 {/* Menu list */}
-                <div className="flex-grow max-h-dvh w-full overflow-x-auto 2xl:flex">
-                    <div className="grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 xl:px-15 2xl:px-30">
+                <div className="flex-grow max-h-dvh w-full overflow-x-auto">
+                    <div className="w-full grid grid-cols-2 px-4 py-6 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 xl:px-15 2xl:px-30 min-[1920px]:grid-cols-8">
                         {products.filter(product => product.is_available && product.product_category?.name === activeTab).map((product) => (
                             <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <div className="relative w-full aspect-square">
@@ -150,7 +150,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories }: MenuC
                 <div
                     className={`
                         fixed top-[75px] bottom-0 right-0 z-[80] 
-                        w-full md:w-[450px]  lg:w-[550px] 2xl: top-[100px]
+                        w-full md:w-[450px]  lg:w-[550px] 2xl:top-[100px]
                         bg-kae-light p-4 flex flex-col 
                         shadow-2xl md:shadow-[-4px_0_20px_-5px_rgba(0,0,0,0.15)] md:border-l border-gray-300
                         transition-transform duration-300 ease-in-out
