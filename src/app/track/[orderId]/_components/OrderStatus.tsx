@@ -184,7 +184,7 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                                                 onClick={() => handleRemoveItem(item.id)}
                                                 className="w-full bg-red-500 text-white py-3 rounded-lg font-bold"
                                             >
-                                                Remove Item & Update Total
+                                                Remove Item
                                             </button>
                                             <button
                                                 //onClick={() => setShowReplacementCatalog(true)}
