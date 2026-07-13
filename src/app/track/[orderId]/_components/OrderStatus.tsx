@@ -1,14 +1,16 @@
 "use client";
 import { ArrowLeft, Bike, CircleCheck, CircleCheckBig, Hamburger, Menu, Store } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OrderAnimation from "./OrderAnimation";
 import { useRouter } from "next/navigation";
 import TrackingClientFeatures from "./TrackingClientFeatures";
+import { DeleteOrderItem } from "@/app/actions";
 
 export interface Order {
     id: string,
     quantity: number,
     price_at_checkout: number,
+    status: string,
     product: {
         name: string
         est_prep_time: string
@@ -25,7 +27,7 @@ interface OrderStatusProps {
         orderTimestamp: string,
         maxEstPrepTime: string,
         delivery_fee: number,
-        orders: Order[] | null
+        orders: Order[]
     }
 }
 
@@ -47,9 +49,29 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
     const isStepComplete = (stepRank: number) => statusRank >= stepRank;
 
     const [isShowingDetails, setIsShowingDetails] = useState(false);
+    const [actionRequiredOrders, setActionRequiredOrders] = useState<Order[]>([]);
 
     const toggleShow = () => {
         setIsShowingDetails(prev => !prev);
+    }
+
+    useEffect(() => {
+        const filterActionRequired = () => {
+            const filtered = orders.filter((order) => order.status === 'action_required');
+            console.log("Filtered orders:", filtered);
+            setActionRequiredOrders(filtered);
+        };
+
+        filterActionRequired();
+    }, [orders]);
+
+    const handleRemoveItem = async (itemId: string) => {
+
+        const response = await DeleteOrderItem(itemId);
+        if (response?.error) {
+            alert("Failed to remove item" + response.error)
+        }
+
     }
 
     return (
@@ -146,6 +168,39 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                         <TrackingClientFeatures orderId={orderId} />
                     </div>
                 </div>
+                {actionRequiredOrders.length > 0 && (
+                    <div className="fixed inset-0 z-[100] bg-kae-dark/80 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+                            <h3 className="text-xl font-bold mb-4">Item Unavailable</h3>
+                            <p className="text-gray-600 mb-6">
+                                Sorry! One or many of your items is out of stock. Would you like to:
+                            </p>
+                            <div className="flex flex-col max-h-md overflow-x-auto">
+                                {actionRequiredOrders.map((item) => (
+                                    <div key={item.id} className="flex flex-col border-b py-2 items-center">
+                                        <p className="text-lg font-semibold">{item.product.name}</p>
+                                        <div className="flex gap-1">
+                                            <button
+                                                onClick={() => handleRemoveItem(item.id)}
+                                                className="w-full bg-red-500 text-white py-3 rounded-lg font-bold"
+                                            >
+                                                Remove Item & Update Total
+                                            </button>
+                                            <button
+                                                //onClick={() => setShowReplacementCatalog(true)}
+                                                className="w-full bg-kae-purple text-white py-3 rounded-lg font-bold"
+                                            >
+                                                Choose a Replacement
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                            </div>
+
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     )

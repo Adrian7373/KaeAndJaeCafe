@@ -20,7 +20,7 @@ export default async function TrackPage({ params }: { params: { orderId: string 
 
     const { data: orderDetails, error: orderDetailsError } = await supabase
         .from("order_items")
-        .select("id, quantity, price_at_checkout, product(name, est_prep_time)")
+        .select("id, quantity, status, price_at_checkout, product(name, est_prep_time)")
         .eq("order_id", orderId);
 
     if (!orderDetails || orderDetailsError) {
