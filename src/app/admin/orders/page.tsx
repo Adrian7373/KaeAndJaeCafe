@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { createClient } from '@/../lib/supabase';
 import { useRouter } from 'next/navigation';
-import { cancelOrderAction, updateOrderAction, editOrderItemsAction } from '@/app/actions';
-import { Bell, BellOff, Coins, HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
+import { cancelOrderAction, updateOrderAction, editOrderItemsAction, RemoveOrderItem } from '@/app/actions';
+import { Bell, BellOff, Coins, HandPlatter, MapPin, Phone, Square, SquareX, Wallet, X } from 'lucide-react';
 import EditOrderModal from './_components/EditOrderModal';
 import LocationViewModal from './_components/LocationViewModal';
+import RemoveItemModal from './_components/RemoveItemModal';
 
 
 // 1. Strict Types matching your database schema
@@ -14,6 +15,7 @@ export type OrderStatus = 'pending' | 'cooking' | 'prepared' | 'delivering' | 's
 export type OrderType = 'delivery' | 'pickup';
 
 export interface OrderItem {
+    id?: string
     quantity: number;
     product: { name: string; discount_price: number; id: string };
     price_at_checkout?: number;
@@ -66,6 +68,9 @@ export default function OrdersPage() {
     const [catalog, setCatalog] = useState<Product[]>([]);
     const [viewLocation, setViewLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
     const [showedNote, setShowedNote] = useState("");
+    const [itemToRemove, setItemToRemove] = useState<OrderItem | null>(null);
+    const [orderIdItemToRemove, setOrderIdItemToRemove] = useState("");
+    const [isDeletingItem, setIsDeletingItem] = useState(false);
 
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -76,6 +81,35 @@ export default function OrdersPage() {
         (o) => (o.status === 'delivering' && !isPickupOrder(o))
             || (o.status === 'prepared' && isPickupOrder(o))
     );
+
+    const cancelRemoveItem = () => {
+        setItemToRemove(null);
+        setIsDeletingItem(false);
+    }
+
+    const removeItem = async (itemId: string, orderId: string) => {
+        const previousOrders = [...orders];
+
+        // Optimistic Update
+        setOrders((prevOrders) =>
+            prevOrders.map((order) =>
+                order.id === orderId
+                    ? {
+                        ...order,
+                        order_items: order.order_items?.filter((item) => item.id !== itemId),
+                    }
+                    : order
+            )
+        );
+        setIsDeleting(false);
+
+        const response = await RemoveOrderItem(itemId)
+        if (response?.error) {
+            setOrders(previousOrders)
+        }
+        setItemToRemove(null);
+
+    }
 
     const toggleCustomerNote = (orderId: string) => {
         if (orderId === showedNote) {
@@ -112,6 +146,7 @@ export default function OrdersPage() {
                 audio.onended = null;
             }
         };
+
 
         playNext();
     };
@@ -258,6 +293,7 @@ export default function OrdersPage() {
                             <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
                             <p className='flex-grow'>{item.product.name}</p>
                             <p className='font-bold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
+                            <SquareX className='h-8 w-8' fill='red' onClick={() => { setItemToRemove(item); setOrderIdItemToRemove(order.id); setIsDeletingItem(true); }} />
                         </div>
                     ))}
                     {order.order_type === "delivery" && (
@@ -296,7 +332,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
-                    order_items ( quantity, product ( name, discount_price, id ), price_at_checkout )
+                    order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout )
                 `)
                 .eq('id', orderId)
                 .maybeSingle();
@@ -336,7 +372,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
-          order_items ( quantity, product ( name, discount_price, id ), price_at_checkout )
+          order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
                 .order('created_at', { ascending: true }); // Oldest orders at the top
@@ -631,12 +667,22 @@ export default function OrdersPage() {
                     onConfirm={handleEditOrder}
                 />
             )}
+            {/* Map Overlay */}
             {viewLocation && (
                 <LocationViewModal
                     lat={viewLocation.lat}
                     lng={viewLocation.lng}
                     name={viewLocation.name}
                     onClose={() => setViewLocation(null)}
+                />
+            )}
+            {/* Remove Item Modal */}
+            {itemToRemove && (
+                <RemoveItemModal
+                    orderItem={itemToRemove}
+                    orderId={orderIdItemToRemove}
+                    onClose={cancelRemoveItem}
+                    onProceed={removeItem}
                 />
             )}
         </div>
