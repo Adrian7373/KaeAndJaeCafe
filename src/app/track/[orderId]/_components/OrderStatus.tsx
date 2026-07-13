@@ -1,10 +1,13 @@
 "use client";
-import { ArrowLeft, Bike, CircleCheck, CircleCheckBig, Hamburger, Menu, Store } from "lucide-react";
+import { ArrowLeft, Bike, CircleCheck, CircleCheckBig, Hamburger, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import OrderAnimation from "./OrderAnimation";
 import { useRouter } from "next/navigation";
 import TrackingClientFeatures from "./TrackingClientFeatures";
 import { DeleteOrderItem } from "@/app/actions";
+import MenuCatalog from "@/app/order/_components/MenuCatalog";
+import { Product, Category } from "@/app/order/_components/MenuCatalog";
+
 
 export interface Order {
     id: string,
@@ -16,6 +19,7 @@ export interface Order {
         est_prep_time: string
     }
 }
+
 interface OrderStatusProps {
     orderStatus: {
         orderType: string,
@@ -29,9 +33,11 @@ interface OrderStatusProps {
         delivery_fee: number,
         orders: Order[]
     }
+    availableProducts?: Product[],
+    availableCategories?: Category[]
 }
 
-export default function OrderStatus({ orderStatus }: OrderStatusProps) {
+export default function OrderStatus({ orderStatus, availableProducts, availableCategories }: OrderStatusProps) {
     const { first_name, status, payment_method, orderType, orders, orderTotal, orderId, orderTimestamp, maxEstPrepTime, delivery_fee } = orderStatus;
     const normalizedStatus = status.toLowerCase();
     const normalizedOrderType = orderType?.toLowerCase();
@@ -51,6 +57,10 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
     const [isShowingDetails, setIsShowingDetails] = useState(false);
     const [actionRequiredOrders, setActionRequiredOrders] = useState<Order[]>([]);
 
+    // NEW STATES FOR REPLACEMENT FLOW
+    const [showReplacementCatalog, setShowReplacementCatalog] = useState(false);
+    const [itemToReplace, setItemToReplace] = useState<Order | null>(null);
+
     const toggleShow = () => {
         setIsShowingDetails(prev => !prev);
     }
@@ -58,7 +68,6 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
     useEffect(() => {
         const filterActionRequired = () => {
             const filtered = orders.filter((order) => order.status === 'action_required');
-            console.log("Filtered orders:", filtered);
             setActionRequiredOrders(filtered);
         };
 
@@ -66,20 +75,34 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
     }, [orders]);
 
     const handleRemoveItem = async (itemId: string) => {
-
         const response = await DeleteOrderItem(itemId);
         if (response?.error) {
-            alert("Failed to remove item" + response.error)
+            alert("Failed to remove item: " + response.error)
+        } else {
+            router.refresh();
         }
-
     }
+
+    const handleSelectReplacement = async (newProduct: Product) => {
+        if (!itemToReplace) return;
+
+        console.log(`Replacing ${itemToReplace.product.name} with ${newProduct.name}`);
+
+        // TODO: Create and call a Server Action here to update the database
+        // await ReplaceOrderItemAction(itemToReplace.id, newProduct.id, newProduct.discount_price);
+
+        // Close modal and refresh UI
+        setShowReplacementCatalog(false);
+        setItemToReplace(null);
+        router.refresh();
+    };
 
     return (
         <>
             <div className="flex flex-col min-h-dvh items-center">
                 <header className="w-full">
                     <nav className="flex justify-between items-center bg-kae-pink px-4 py-4">
-                        <ArrowLeft onClick={() => router.push("/order")} className="h-8 w-8" />
+                        <ArrowLeft onClick={() => router.push("/order")} className="h-8 w-8 cursor-pointer" />
                     </nav>
                 </header>
                 <div className="max-w-lg lg:max-w-5xl flex flex-col xl:flex-row xl:my-auto xl:gap-20">
@@ -163,41 +186,75 @@ export default function OrderStatus({ orderStatus }: OrderStatusProps) {
                         </div>
                         <div className="flex justify-between border-1 border-gray-400 rounded-xl px-4 py-3">
                             <p className={`${isShowingDetails && "order-3"} content-center font-semibold`}>Total: ₱{(orderTotal + delivery_fee).toFixed(2)}</p>
-                            <button onClick={toggleShow} className={`text-kae-dark ${isShowingDetails && "order-0"} bg-kae-pink px-2 py-1 rounded-lg text-kae-lightz`}>{isShowingDetails ? "Order Status" : "Order Details"}</button>
+                            <button onClick={toggleShow} className={`text-kae-dark ${isShowingDetails && "order-0"} bg-kae-pink px-2 py-1 rounded-lg font-bold cursor-pointer transition-colors hover:bg-pink-300`}>{isShowingDetails ? "Order Status" : "Order Details"}</button>
                         </div>
                         <TrackingClientFeatures orderId={orderId} />
                     </div>
                 </div>
+
+                {/* UNAVAILABLE ITEMS MODAL */}
                 {actionRequiredOrders.length > 0 && (
                     <div className="fixed inset-0 z-[100] bg-kae-dark/80 flex items-center justify-center p-4">
                         <div className="bg-white rounded-2xl p-6 w-full max-w-md">
                             <h3 className="text-xl font-bold mb-4">Item Unavailable</h3>
                             <p className="text-gray-600 mb-6">
-                                Sorry! One or many of your items is out of stock. Would you like to:
+                                Sorry! One or more of your items is out of stock. Would you like to:
                             </p>
-                            <div className="flex flex-col max-h-md overflow-x-auto">
+                            <div className="flex flex-col max-h-[60vh] overflow-y-auto">
                                 {actionRequiredOrders.map((item) => (
-                                    <div key={item.id} className="flex flex-col border-b py-2 items-center">
-                                        <p className="text-lg font-semibold">{item.product.name}</p>
-                                        <div className="flex gap-1">
+                                    <div key={item.id} className="flex flex-col border-b border-gray-200 pb-4 mb-4 items-center last:border-0">
+                                        <p className="text-lg font-semibold mb-3">{item.product.name}</p>
+                                        <div className="flex gap-2 w-full">
                                             <button
                                                 onClick={() => handleRemoveItem(item.id)}
-                                                className="w-full bg-red-500 text-white py-3 rounded-lg font-bold"
+                                                className="flex-1 bg-red-500 text-white py-3 rounded-lg font-bold transition-colors hover:bg-red-600"
                                             >
                                                 Remove Item
                                             </button>
                                             <button
-                                                //onClick={() => setShowReplacementCatalog(true)}
-                                                className="w-full bg-kae-purple text-white py-3 rounded-lg font-bold"
+                                                onClick={() => {
+                                                    setItemToReplace(item);
+                                                    setShowReplacementCatalog(true);
+                                                }}
+                                                className="flex-1 bg-kae-purple text-white py-3 rounded-lg font-bold transition-colors hover:bg-purple-800"
                                             >
-                                                Choose a Replacement
+                                                Replace
                                             </button>
                                         </div>
                                     </div>
                                 ))}
-
                             </div>
+                        </div>
+                    </div>
+                )}
 
+                {/* FULLSCREEN MENU CATALOG FOR REPLACEMENTS */}
+                {showReplacementCatalog && (
+                    <div className="fixed inset-0 z-[200] bg-white overflow-hidden flex flex-col">
+                        <div className="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm">
+                            <h2 className="font-bold text-lg text-kae-dark">Select a Replacement</h2>
+                            <button
+                                onClick={() => {
+                                    setShowReplacementCatalog(false);
+                                    setItemToReplace(null);
+                                }}
+                                className="bg-gray-200 px-4 py-2 rounded-lg font-bold text-gray-700 hover:bg-gray-300 transition-colors cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+
+                        {/* 
+                        Menu Catalog 
+                        */}
+                        <div className="flex-1 overflow-y-auto">
+                            {/* <MenuCatalog 
+                                products={[]} 
+                                categories={[]} 
+                                isStoreOpen={true}
+                                mode="replacement"
+                                onSelectReplacement={handleSelectReplacement}
+                            /> */}
                         </div>
                     </div>
                 )}
