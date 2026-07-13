@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { createClient } from '@/../lib/supabase';
 import { useRouter } from 'next/navigation';
 import { cancelOrderAction, updateOrderAction, editOrderItemsAction } from '@/app/actions';
-import { Coins, HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
+import { Bell, BellOff, Coins, HandPlatter, MapPin, Phone, Square, Wallet, X } from 'lucide-react';
 import EditOrderModal from './_components/EditOrderModal';
 import LocationViewModal from './_components/LocationViewModal';
 
@@ -32,6 +32,7 @@ export interface Order {
     pickup_time: string;
     delivery_lat: number;
     delivery_long: number;
+    customer_note: string;
     order_items?: OrderItem[];
 }
 
@@ -48,6 +49,15 @@ export default function OrdersPage() {
 
     const supabase = useMemo(() => createClient(), []);
 
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+    const isEnabledRef = useRef(notificationsEnabled);
+
+    useEffect(() => {
+        isEnabledRef.current = notificationsEnabled;
+    }, [notificationsEnabled]);
+
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
@@ -55,6 +65,7 @@ export default function OrdersPage() {
     const [editingOrder, setEditingOrder] = useState<Order | null>(null);
     const [catalog, setCatalog] = useState<Product[]>([]);
     const [viewLocation, setViewLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
+    const [showedNote, setShowedNote] = useState("");
 
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -65,6 +76,45 @@ export default function OrdersPage() {
         (o) => (o.status === 'delivering' && !isPickupOrder(o))
             || (o.status === 'prepared' && isPickupOrder(o))
     );
+
+    const toggleCustomerNote = (orderId: string) => {
+        if (orderId === showedNote) {
+            setShowedNote("");
+        } else {
+            setShowedNote(orderId)
+        }
+    }
+
+    useEffect(() => {
+        audioRef.current = new Audio('/sounds/order-notif.mp3');
+    }, []);
+
+    const playNotificationSound = () => {
+        if (!isEnabledRef.current || !audioRef.current) return;
+
+        const audio = audioRef.current;
+
+        audio.onended = null;
+
+        let playCount = 0;
+        const maxPlays = 3;
+
+        const playNext = () => {
+            playCount++;
+            audio.currentTime = 0;
+            audio.play().catch(e => console.error("Playback failed:", e));
+        };
+
+        audio.onended = () => {
+            if (playCount < maxPlays) {
+                playNext();
+            } else {
+                audio.onended = null;
+            }
+        };
+
+        playNext();
+    };
 
     const calculateTotal = (order: Order) => {
         const subtotal = (order.order_items || []).reduce((total, item) => {
@@ -194,7 +244,11 @@ export default function OrdersPage() {
                     </div>
                     <div className='flex gap-2'>
                         <Coins />
-                        <p className='font-bold'>₱{calculateTotal(order)}</p>
+                        <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
+                    </div>
+                    <div className='flex gap-2' hidden={order.order_type === "pickup"}>
+                        <button className='border-1 border-gray-300 px-2 py-1 rounded-lg' onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
+                        <div hidden={showedNote !== order.id}>{order.customer_note}</div>
                     </div>
                 </div>
                 <div className='mt-2'>
@@ -206,6 +260,12 @@ export default function OrdersPage() {
                             <p className='font-bold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
                         </div>
                     ))}
+                    {order.order_type === "delivery" && (
+                        <div className='flex justify-between ml-10 py-2'>
+                            <p>Delivery Fee</p>
+                            <p className='font-semibold'>₱49</p>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className='flex gap-2'>
@@ -235,7 +295,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, order_type, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
+                    id, created_at, status, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
                     order_items ( quantity, product ( name, discount_price, id ), price_at_checkout )
                 `)
                 .eq('id', orderId)
@@ -275,7 +335,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, order_type, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
+                    id, created_at, status, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
           order_items ( quantity, product ( name, discount_price, id ), price_at_checkout )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
@@ -300,6 +360,7 @@ export default function OrdersPage() {
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'orders' },
                 async (payload) => {
+                    playNotificationSound();
                     const insertedOrder = await fetchOrderWithItems((payload.new as { id: string }).id);
 
                     if (!insertedOrder) {
@@ -371,7 +432,28 @@ export default function OrdersPage() {
 
             {/* PENDING COLUMN */}
             <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start w-full md:w-1/2 xl:w-1/4">
-                <h2 className="font-bold text-orange-500 mb-4 tracking-wider text-sm">PENDING ({pendingOrders.length})</h2>
+                <div className='flex items-center gap-2'>
+                    <h2 className="font-bold text-orange-500 mb-4 tracking-wider text-sm">PENDING ({pendingOrders.length})</h2>
+                    <button
+                        onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                        className={`mb-3 flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${notificationsEnabled
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                    >
+                        {notificationsEnabled ? (
+                            <>
+                                <Bell size={18} />
+                                Alerts ON
+                            </>
+                        ) : (
+                            <>
+                                <BellOff size={18} />
+                                Alerts OFF
+                            </>
+                        )}
+                    </button>
+                </div>
                 <div className="space-y-4">
                     {pendingOrders.map((order) => (
                         <div key={order.id} className="border border-orange-500 shadow-sm p-4 rounded-xl">
@@ -414,7 +496,11 @@ export default function OrdersPage() {
                                     </div>
                                     <div className='flex gap-2'>
                                         <Coins />
-                                        <p className='font-bold'>₱{calculateTotal(order)}</p>
+                                        <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
+                                    </div>
+                                    <div hidden={order.order_type === "pickup"}>
+                                        <button onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
+                                        <div hidden={showedNote !== order.id}>{order.customer_note}</div>
                                     </div>
                                 </div>
                                 <div className='mt-2'>
