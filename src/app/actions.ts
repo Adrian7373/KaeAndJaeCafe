@@ -299,3 +299,20 @@ export async function deleteMenuItem(product: Product | null) {
     return { success: true }
 
 }
+
+export async function RemoveOrderItem(itemId: string) {
+    if (!itemId) return;
+
+    const supabase = await createServerClient(true);
+
+    const { error } = await supabase
+        .from("order_items")
+        .update({ status: "action_required" })
+        .eq("id", itemId)
+
+    if (error) {
+        return { success: false, error: error }
+    }
+    return { success: true }
+
+}
