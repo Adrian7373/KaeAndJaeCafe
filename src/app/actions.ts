@@ -300,6 +300,7 @@ export async function deleteMenuItem(product: Product | null) {
 
 }
 
+//Just Sets the status to "action_required"
 export async function RemoveOrderItem(itemId: string) {
     if (!itemId) return;
 
@@ -315,4 +316,20 @@ export async function RemoveOrderItem(itemId: string) {
     }
     return { success: true }
 
+}
+
+//Permanently Delete an order_item record from database
+export async function DeleteOrderItem(itemId: string) {
+    if (!itemId) return;
+
+    const supabase = await createServerClient(true);
+    const { error } = await supabase
+        .from("order_items")
+        .delete()
+        .eq("id", itemId)
+
+    if (error) {
+        return { success: false, error: error }
+    }
+    return { success: true }
 }
