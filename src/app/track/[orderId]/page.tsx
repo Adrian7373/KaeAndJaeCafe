@@ -2,6 +2,7 @@ import OrderStatus from "./_components/OrderStatus";
 import { createServerClient } from "@/../lib/supabase-server";
 import AutoRefresh from "./_components/RefreshComponent";
 import { Order } from "./_components/OrderStatus";
+import { Product, Category } from "@/app/order/_components/MenuCatalog";
 
 export default async function TrackPage({ params }: { params: { orderId: string } }) {
 
@@ -26,6 +27,19 @@ export default async function TrackPage({ params }: { params: { orderId: string 
     if (!orderDetails || orderDetailsError) {
         throw new Error(`Failed to get order items: ${orderDetailsError.message}`)
     }
+
+    const { data: menuItems, error: menuItemsError } = await supabase
+        .from("product")
+        .select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(name)")
+        .eq("is_archived", false);
+
+    if (menuItemsError) {
+        throw new Error(menuItemsError.message)
+    }
+
+    const { data: categories, error: catError } = await supabase
+        .from("product_category")
+        .select("*");
 
     const typedOrderDetails = (orderDetails as unknown as Order[]) || [];
 
