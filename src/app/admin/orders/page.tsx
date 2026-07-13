@@ -19,6 +19,7 @@ export interface OrderItem {
     quantity: number;
     product: { name: string; discount_price: number; id: string };
     price_at_checkout?: number;
+    status: string;
 }
 
 export interface Order {
@@ -288,14 +289,29 @@ export default function OrdersPage() {
                 </div>
                 <div className='mt-2'>
                     <p className='text-md font-semibold'>ORDERS</p>
-                    {order.order_items?.map((item, index) => (
-                        <div className='flex justify-between border-b py-2 gap-2' key={index}>
-                            <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
-                            <p className='flex-grow'>{item.product.name}</p>
-                            <p className='font-bold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
-                            <SquareX className='h-8 w-8' fill='red' onClick={() => { setItemToRemove(item); setOrderIdItemToRemove(order.id); setIsDeletingItem(true); }} />
-                        </div>
-                    ))}
+                    {order.order_items
+                        ?.filter((item) => item.status !== 'action_required') // Add this filter
+                        .map((item, index) => (
+                            <div className='flex justify-between border-b py-2 gap-2' key={index}>
+                                <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>
+                                    {item.quantity}x
+                                </p>
+                                <p className='flex-grow'>{item.product.name}</p>
+                                <p className='font-bold'>
+                                    ₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}
+                                </p>
+                                <SquareX
+                                    className='h-8 w-8'
+                                    fill='red'
+                                    onClick={() => {
+                                        setItemToRemove(item);
+                                        setOrderIdItemToRemove(order.id);
+                                        setIsDeletingItem(true);
+                                    }}
+                                />
+                            </div>
+                        ))
+                    }
                     {order.order_type === "delivery" && (
                         <div className='flex justify-between ml-10 py-2'>
                             <p>Delivery Fee</p>
@@ -332,7 +348,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
-                    order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout )
+                    order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
                 `)
                 .eq('id', orderId)
                 .maybeSingle();
@@ -372,7 +388,7 @@ export default function OrdersPage() {
                 .from('orders')
                 .select(`
                     id, created_at, status, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
-          order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout )
+          order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
                 .order('created_at', { ascending: true }); // Oldest orders at the top
