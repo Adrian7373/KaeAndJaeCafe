@@ -83,7 +83,7 @@ export default async function TrackPage({ params }: { params: { orderId: string 
     return (
         <>
             <AutoRefresh />
-            <OrderStatus orderStatus={orderStatus} />
+            <OrderStatus orderStatus={orderStatus} availableCategories={categories || []} availableProducts={menuItems} />
         </>
     )
 }

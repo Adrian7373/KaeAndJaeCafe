@@ -244,17 +244,15 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
                             </button>
                         </div>
 
-                        {/* 
-                        Menu Catalog 
-                        */}
+                        {/* Menu Catalog */}
                         <div className="flex-1 overflow-y-auto">
-                            {/* <MenuCatalog 
-                                products={[]} 
-                                categories={[]} 
+                            <MenuCatalog
+                                products={availableProducts || []}
+                                categories={availableCategories || []}
                                 isStoreOpen={true}
                                 mode="replacement"
                                 onSelectReplacement={handleSelectReplacement}
-                            /> */}
+                            />
                         </div>
                     </div>
                 )}

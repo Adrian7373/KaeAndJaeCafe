@@ -7,7 +7,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export interface Product {
-    imageUrl: string;
+    imageUrl?: string;
     id: string;
     name: string;
     image_path: string;
@@ -167,7 +167,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories, mode = 
                                     <div key={product.id} className="flex flex-col h-full bg-white border border-gray-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                         <div className="relative w-full aspect-square">
                                             <Image
-                                                src={product.imageUrl}
+                                                src={product.imageUrl || ""}
                                                 alt={product.name}
                                                 fill
                                                 sizes="(max-width: 768px) 100vw, 300px"
