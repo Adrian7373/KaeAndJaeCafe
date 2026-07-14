@@ -37,6 +37,16 @@ export default async function TrackPage({ params }: { params: { orderId: string 
         throw new Error(menuItemsError.message)
     }
 
+    const menuItemsWithUrls = menuItems.map((item) => {
+        // Replace 'products' with the actual name of your Supabase storage bucket!
+        const { data } = supabase.storage.from('product_images').getPublicUrl(item.image_path);
+
+        return {
+            ...item,
+            imageUrl: data.publicUrl
+        };
+    });
+
     const { data: categories, error: catError } = await supabase
         .from("product_category")
         .select("*");
@@ -83,7 +93,7 @@ export default async function TrackPage({ params }: { params: { orderId: string 
     return (
         <>
             <AutoRefresh />
-            <OrderStatus orderStatus={orderStatus} availableCategories={categories || []} availableProducts={menuItems} />
+            <OrderStatus orderStatus={orderStatus} availableCategories={categories || []} availableProducts={menuItemsWithUrls as unknown as Product[]} />
         </>
     )
 }
