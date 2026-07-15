@@ -39,7 +39,12 @@ export default function EditOrderModal({ order, onClose, onConfirm, catalog }: E
             }
 
             // Brand new item
-            return [...prev, { quantity: 1, product }];
+            return [...prev, {
+                quantity: 1,
+                product,
+                status: '',
+                price_at_checkout: product.discount_price
+            }];
         });
 
         // Snap back to the order view immediately
