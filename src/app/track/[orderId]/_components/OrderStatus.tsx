@@ -31,6 +31,7 @@ interface OrderStatusProps {
         orderTimestamp: string,
         maxEstPrepTime: string,
         delivery_fee: number,
+        is_paid: boolean,
         orders: Order[]
     }
     availableProducts?: Product[],
@@ -38,7 +39,7 @@ interface OrderStatusProps {
 }
 
 export default function OrderStatus({ orderStatus, availableProducts, availableCategories }: OrderStatusProps) {
-    const { first_name, status, payment_method, orderType, orders, orderTotal, orderId, orderTimestamp, maxEstPrepTime, delivery_fee } = orderStatus;
+    const { is_paid, first_name, status, payment_method, orderType, orders, orderTotal, orderId, orderTimestamp, maxEstPrepTime, delivery_fee } = orderStatus;
     const normalizedStatus = status.toLowerCase();
     const normalizedOrderType = orderType?.toLowerCase();
     const isPickupOrder = normalizedOrderType === "pickup";
@@ -177,6 +178,12 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
                         <div className={`${!isShowingDetails && "hidden"} flex flex-col gap-4`}>
                             <p className="text-center">Your Order</p>
                             <div className="border-1 px-4 py-2 border-gray-400 rounded-xl">
+                                {/* The PAID Badge */}
+                                {is_paid && (
+                                    <div className="absolute top-2 right-4 bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-full text-xs font-black tracking-widest shadow-sm">
+                                        PAID VIA GCASH
+                                    </div>
+                                )}
                                 <p>Order for <b>{first_name}</b></p>
                                 <p>Order type: <b>{orderType}</b></p>
                                 <p>Date ordered: <b>{orderTimestamp}</b></p>
