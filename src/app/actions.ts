@@ -31,25 +31,34 @@ const checkOutSchema = z.object({
 
 type ActionState = {
     error: string | null,
-    success: boolean | null
+    success: boolean | null,
+    checkoutUrl?: string,
+    orderId?: string
 }
 
 export async function placeOrder(prevState: ActionState | null, formData: FormData): Promise<ActionState> {
     const rawData = Object.fromEntries(formData.entries());
     const validatedFields = checkOutSchema.safeParse(rawData)
+
     if (!validatedFields.success) {
         console.error("Validation Failed:", validatedFields.error.flatten().fieldErrors);
         const fieldErrors = validatedFields.error.flatten().fieldErrors;
         const summary = Object.values(fieldErrors).flat().slice(0, 3).join("; ") || "Please check your inputs and try again.";
         return { success: false, error: summary } as any;
     }
+
     const cleanData = validatedFields.data;
     const normalizedOrderType = cleanData.orderType.toLowerCase();
 
-    //Retrieving selected time and cart items
+    // Retrieving selected time and cart items
     const selectedTime = formData.get("selectedTime");
     const rawCart = formData.get("cartData") as string;
     const cartArray = JSON.parse(rawCart);
+
+    // Calculate the total amount securely on the server
+    const cartTotal = cartArray.reduce((total: number, item: any) => total + (item.discount_price * item.qty), 0);
+    const deliveryFee = normalizedOrderType === "delivery" ? 49 : 0;
+    const totalAmount = cartTotal + deliveryFee;
 
     // Inserting order details first to get order_id
     const supabase = await createServerClient(true);
@@ -59,6 +68,9 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
         .map((s) => (typeof s === "string" ? s.trim() : ""))
         .filter(Boolean);
     const deliveryAddress = addressParts.length ? addressParts.join(", ") : null;
+
+    const paymentType = formData.get("paymentType") as string;
+    const isDelivery = formData.get("orderType") === "delivery";
 
     const { data: orderId, error: orderIdError } = await supabase
         .from("orders")
@@ -74,9 +86,10 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
             delivery_long: cleanData.longitude,
             customer_note: cleanData.notes,
             status: "pending",
-            delivery_fee: normalizedOrderType === "delivery" ? 49 : 0
+            delivery_fee: deliveryFee
         })
         .select("id").maybeSingle();
+
     if (orderIdError || orderId === null) {
         return {
             success: false,
@@ -84,7 +97,7 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
         } as any
     };
 
-    const validatedCart = cartArray.map((item: CartItem) => {
+    const validatedCart = cartArray.map((item: any) => {
         return {
             order_id: orderId?.id,
             product_id: item.id,
@@ -93,7 +106,7 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
         }
     })
 
-    //Inserting the cart to order_items using the order_id
+    // Inserting the cart to order_items using the order_id
     const { error: orderFillError } = await supabase
         .from("order_items")
         .insert(validatedCart)
@@ -103,7 +116,6 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
             success: false,
             error: `Failed to fill order: ${orderFillError.message}`,
         } as any;
-
     }
 
     const cookieStore = await cookies();
@@ -112,7 +124,68 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
         httpOnly: true,
     });
 
-    redirect(`/track/${orderId.id}`);
+    if (paymentType === "gcash") {
+        const secretKey = process.env.PAYMONGO_SECRET_KEY;
+        const encodedKey = Buffer.from(`${secretKey}:`).toString('base64');
+
+        // Ensure total is in centavos (e.g. 100 pesos = 10000)
+        const amountInCentavos = Math.round(totalAmount * 100);
+
+        const payload = {
+            data: {
+                attributes: {
+                    billing: {
+                        name: `${formData.get("firstName")} ${formData.get("lastName")}`,
+                        phone: formData.get("contact") as string,
+                    },
+                    send_email_receipt: false,
+                    show_description: true,
+                    show_line_items: false,
+                    payment_method_types: ["gcash"],
+                    description: `Cafe Order #${orderId.id}`,
+                    line_items: [
+                        {
+                            name: `Order #${orderId.id}`,
+                            amount: amountInCentavos,
+                            currency: "PHP",
+                            quantity: 1
+                        }
+                    ],
+                    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/order/${orderId.id}`,
+                    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout`
+                }
+            }
+        };
+
+        try {
+            const response = await fetch('https://api.paymongo.com/v1/checkout_sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${encodedKey}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return { success: false, error: "Payment gateway error. Please try again." } as any;
+            }
+
+            // Return the URL to the client component's useEffect
+            return {
+                success: true,
+                checkoutUrl: data.data.attributes.checkout_url
+            } as any;
+
+        } catch (error) {
+            return { success: false, error: "Failed to connect to payment gateway." } as any;
+        }
+    }
+
+    return { success: true, orderId: orderId.id } as any;
+
 }
 
 export async function loginAdmin(prevState: any, formData: FormData) {
@@ -348,4 +421,71 @@ export async function ReplaceOrderItem(itemToReplaceId: string, newProductId: st
         return { success: false, error: error }
     }
     return { success: true }
+}
+
+//Gcash Checkout
+export async function createGCashCheckout(
+    orderId: string,
+    totalAmount: number,
+    customerName: string,
+    customerPhone: string
+) {
+    const secretKey = process.env.PAYMONGO_SECRET_KEY;
+
+    const encodedKey = Buffer.from(`${secretKey}:`).toString('base64');
+
+    const payload = {
+        data: {
+            attributes: {
+                billing: {
+                    name: customerName,
+                    phone: customerPhone,
+                },
+                send_email_receipt: false,
+                show_description: true,
+                show_line_items: false,
+                payment_method_types: ["gcash"],
+                description: `Cafe Order #${orderId}`,
+                line_items: [
+                    {
+                        name: `Order #${orderId}`,
+                        amount: Math.round(totalAmount * 100),
+                        currency: "PHP",
+                        quantity: 1
+                    }
+                ],
+                // Where to send the user after they pay (or cancel)
+                success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/track/${orderId}`,
+                cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout`
+            }
+        }
+    };
+
+    try {
+        const response = await fetch('https://api.paymongo.com/v1/checkout_sessions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${encodedKey}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error("Paymongo Error:", data.errors);
+            return { success: false, error: "Payment initialization failed." };
+        }
+
+        // Return the checkout URL so the client can redirect the user
+        return {
+            success: true,
+            checkoutUrl: data.data.attributes.checkout_url
+        };
+
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        return { success: false, error: "Failed to connect to payment gateway." };
+    }
 }
