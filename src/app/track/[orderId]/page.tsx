@@ -38,7 +38,6 @@ export default async function TrackPage({ params }: { params: { orderId: string 
     }
 
     const menuItemsWithUrls = menuItems.map((item) => {
-        // Replace 'products' with the actual name of your Supabase storage bucket!
         const { data } = supabase.storage.from('product_images').getPublicUrl(item.image_path);
 
         return {

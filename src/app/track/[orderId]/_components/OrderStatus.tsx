@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import OrderAnimation from "./OrderAnimation";
 import { useRouter } from "next/navigation";
 import TrackingClientFeatures from "./TrackingClientFeatures";
-import { DeleteOrderItem } from "@/app/actions";
+import { DeleteOrderItem, ReplaceOrderItem } from "@/app/actions";
 import MenuCatalog from "@/app/order/_components/MenuCatalog";
 import { Product, Category } from "@/app/order/_components/MenuCatalog";
 
@@ -56,6 +56,7 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
 
     const [isShowingDetails, setIsShowingDetails] = useState(false);
     const [actionRequiredOrders, setActionRequiredOrders] = useState<Order[]>([]);
+    const [userFeedback, setUserFeedback] = useState("");
 
     // NEW STATES FOR REPLACEMENT FLOW
     const [showReplacementCatalog, setShowReplacementCatalog] = useState(false);
@@ -64,6 +65,15 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
     const toggleShow = () => {
         setIsShowingDetails(prev => !prev);
     }
+
+    useEffect(() => {
+        const feedbackTimeout = setTimeout(() => {
+            setUserFeedback("")
+        }, 3000)
+        return () => {
+            clearTimeout(feedbackTimeout);
+        };
+    }, [userFeedback])
 
     useEffect(() => {
         const filterActionRequired = () => {
@@ -88,11 +98,18 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
 
         console.log(`Replacing ${itemToReplace.product.name} with ${newProduct.name}`);
 
-        // TODO: Create and call a Server Action here to update the database
-        // await ReplaceOrderItemAction(itemToReplace.id, newProduct.id, newProduct.discount_price);
-
-        // Close modal and refresh UI
+        setActionRequiredOrders((prev) => prev.filter((item) => {
+            item.id !== itemToReplace.id;
+        }))
         setShowReplacementCatalog(false);
+
+        const response = await ReplaceOrderItem(itemToReplace.id, newProduct.id, newProduct.discount_price);
+        if (response?.error) {
+            setUserFeedback("Failed to replace item. " + response.error)
+        } else {
+            setUserFeedback("Item successfully replaced!")
+        }
+
         setItemToReplace(null);
         router.refresh();
     };
@@ -253,6 +270,43 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
                                 mode="replacement"
                                 onSelectReplacement={handleSelectReplacement}
                             />
+                        </div>
+                    </div>
+                )}
+                {userFeedback && (
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm transition-opacity"
+                    >
+                        {/* Modal Content Box */}
+                        <div
+                            className="w-full max-w-sm scale-100 transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                            onClick={(e) => e.stopPropagation()} // Prevents overlay click from triggering when clicking inside the box
+                        >
+                            <div className="flex flex-col items-center text-center">
+
+                                {/* Success Icon (SVG) */}
+                                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+                                    <svg
+                                        className="h-8 w-8 text-green-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="2"
+                                        stroke="currentColor"
+                                        aria-hidden="true"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+
+                                {/* Text Content */}
+                                <h3 className="text-lg font-bold tracking-tight text-gray-900">
+                                    {userFeedback}
+                                </h3>
+                            </div>
                         </div>
                     </div>
                 )}
