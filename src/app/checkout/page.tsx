@@ -32,6 +32,10 @@ export default function CheckoutPage() {
     const totalPrice = cart.reduce((total, item) => total + item.discount_price * item.qty, 0);
     const [state, formAction, isPending] = useActionState(placeOrder, null);
 
+    if (cart.length === 0) {
+        router.push("/order")
+    }
+
     // --- GEOLOCATION ENFORCER ---
     const requestLocation = () => {
         setIsLocating(true);
