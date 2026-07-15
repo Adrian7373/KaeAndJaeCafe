@@ -68,6 +68,20 @@ export default function CheckoutPage() {
         requestLocation();
     }, []);
 
+    useEffect(() => {
+        if (state?.success) {
+            clearCart(); // Clear the cart since the order is placed!
+
+            if (state.checkoutUrl) {
+                // If GCash, redirect to the external Paymongo page
+                window.location.href = state.checkoutUrl;
+            } else if (state.orderId) {
+                // If Cash, redirect to your internal tracking page
+                router.push(`/order/${state.orderId}`);
+            }
+        }
+    }, [state, router, clearCart]);
+
     return (
         <div className="flex flex-col items-center">
             <header className="fixed w-full max-w-9xl z-50">
