@@ -239,101 +239,113 @@ export default function OrdersPage() {
             className: string;
             primaryClassname: string;
         }
-    ) => (
-        <div key={order.id} className={`border border-${colors.squareFill}-400 shadow-sm p-4 rounded-xl`}>
-            <div className='flex justify-between mb-3'>
-                <div className='flex'>
-                    <Square fill={colors.squareFill} strokeWidth={0} />
-                    <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
-                </div>
-                <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
-            </div>
-            <div>
-                <div className={`flex flex-col gap-2 border-t border-${colors.squareFill}-500 py-2`}>
-                    <div className='flex gap-2'>
-                        <Wallet />
-                        <p className='font-semibold'>{order.payment_method}</p>
+    ) => {
+        const hasActionRequired = order.order_items?.some(item => item.status === 'action_required');
+        return (
+            <div key={order.id} className={`border border-${colors.squareFill}-400 shadow-sm p-4 rounded-xl`}>
+                <div className='flex justify-between mb-3'>
+                    <div className='flex'>
+                        <Square fill={colors.squareFill} strokeWidth={0} />
+                        <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                     </div>
-                    {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                        <div className='flex items-center'>
-                            <MapPin />
-                            <p>{order.delivery_address}</p>
+                    <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                    <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
+                </div>
+
+                {/* THE WARNING BANNER */}
+                {hasActionRequired && (
+                    <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm font-bold flex items-center justify-center animate-pulse">
+                        ⚠️ Waiting for customer to update items
+                    </div>
+                )}
+
+                <div>
+                    <div className={`flex flex-col gap-2 border-t border-${colors.squareFill}-500 py-2`}>
+                        <div className='flex gap-2'>
+                            <Wallet />
+                            <p className='font-semibold'>{order.payment_method}</p>
                         </div>
-                        <button
-                            onClick={() => setViewLocation({
-                                lat: order.delivery_lat,
-                                lng: order.delivery_long,
-                                name: `${order.first_name} ${order.last_name}`
-                            })}
-                            className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
-                        >
-                            View Map
-                        </button>
-                    </div>) : (<div className='flex gap-2'>
-                        <HandPlatter />
-                        <p>Pick-up {order.pickup_time}</p>
-                    </div>)}
-                    <div className='flex gap-2'>
-                        <Phone />
-                        <p>{order.contact}</p>
-                    </div>
-                    <div className='flex gap-2'>
-                        <Coins />
-                        <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
-                    </div>
-                    <div className='flex gap-2' hidden={order.order_type === "pickup"}>
-                        <button className='border-1 border-gray-300 px-2 py-1 rounded-lg' onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
-                        <div hidden={showedNote !== order.id}>{order.customer_note}</div>
-                    </div>
-                </div>
-                <div className='mt-2'>
-                    <p className='text-md font-semibold'>ORDERS</p>
-                    {order.order_items
-                        ?.filter((item) => item.status !== 'action_required') // Add this filter
-                        .map((item, index) => (
-                            <div className='flex justify-between border-b py-2 gap-2' key={index}>
-                                <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>
-                                    {item.quantity}x
-                                </p>
-                                <p className='flex-grow'>{item.product.name}</p>
-                                <p className='font-bold'>
-                                    ₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}
-                                </p>
-                                <SquareX
-                                    className='h-8 w-8'
-                                    fill='red'
-                                    onClick={() => {
-                                        setItemToRemove(item);
-                                        setOrderIdItemToRemove(order.id);
-                                        setIsDeletingItem(true);
-                                    }}
-                                />
+                        {order.order_type === "delivery" ? (<div className='flex gap-2'>
+                            <div className='flex items-center'>
+                                <MapPin />
+                                <p>{order.delivery_address}</p>
                             </div>
-                        ))
-                    }
-                    {order.order_type === "delivery" && (
-                        <div className='flex justify-between ml-10 py-2'>
-                            <p>Delivery Fee</p>
-                            <p className='font-semibold'>₱49</p>
+                            <button
+                                onClick={() => setViewLocation({
+                                    lat: order.delivery_lat,
+                                    lng: order.delivery_long,
+                                    name: `${order.first_name} ${order.last_name}`
+                                })}
+                                className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
+                            >
+                                View Map
+                            </button>
+                        </div>) : (<div className='flex gap-2'>
+                            <HandPlatter />
+                            <p>Pick-up {order.pickup_time}</p>
+                        </div>)}
+                        <div className='flex gap-2'>
+                            <Phone />
+                            <p>{order.contact}</p>
                         </div>
-                    )}
+                        <div className='flex gap-2'>
+                            <Coins />
+                            <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
+                        </div>
+                        <div className='flex gap-2' hidden={order.order_type === "pickup"}>
+                            <button className='border-1 border-gray-300 px-2 py-1 rounded-lg' onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
+                            <div hidden={showedNote !== order.id}>{order.customer_note}</div>
+                        </div>
+                    </div>
+                    <div className='mt-2'>
+                        <p className='text-md font-semibold'>ORDERS</p>
+                        {(order.order_items || [])
+                            .filter((item) => item.status !== 'action_required')
+                            .map((item, index) => (
+                                <div className='flex justify-between border-b py-2 gap-2' key={index}>
+                                    <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>
+                                        {item.quantity}x
+                                    </p>
+                                    <p className='flex-grow'>{item.product.name}</p>
+                                    <p className='font-bold'>
+                                        ₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}
+                                    </p>
+                                    <SquareX
+                                        className='h-8 w-8'
+                                        fill='red'
+                                        onClick={() => {
+                                            setItemToRemove(item);
+                                            setOrderIdItemToRemove(order.id);
+                                            setIsDeletingItem(true);
+                                        }}
+                                    />
+                                </div>
+                            ))
+                        }
+                        {order.order_type === "delivery" && (
+                            <div className='flex justify-between ml-10 py-2'>
+                                <p>Delivery Fee</p>
+                                <p className='font-semibold'>₱49</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className='flex gap-2'>
+                    <button onClick={() => setEditingOrder(order)}
+                        className={colors.className}>
+                        EDIT
+                    </button>
+                    <button
+                        onClick={actionButton.onClick}
+                        disabled={hasActionRequired}
+                        className={`${colors.primaryClassname} ${hasActionRequired ? 'opacity-50 cursor-not-allowed hover:bg-gray-400 bg-gray-400 border-gray-400' : ''}`}
+                    >
+                        {actionButton.label}
+                    </button>
                 </div>
             </div>
-            <div className='flex gap-2'>
-                <button onClick={() => setEditingOrder(order)}
-                    className={colors.className}>
-                    EDIT
-                </button>
-                <button
-                    onClick={actionButton.onClick}
-                    className={colors.primaryClassname}
-                >
-                    {actionButton.label}
-                </button>
-            </div>
-        </div>
-    );
+        );
+    };
 
     const upsertOrderInState = (nextOrder: Order) => {
         setOrders((currentOrders) => {
@@ -441,6 +453,43 @@ export default function OrdersPage() {
             )
             .on(
                 'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'order_items' },
+                async (payload) => {
+                    playNotificationSound();
+                    const orderId = (payload.new as { order_id?: string }).order_id;
+
+                    if (!orderId) return;
+
+                    // Re-fetch to get the newly attached product details
+                    const refreshedOrder = await fetchOrderWithItems(orderId);
+
+                    if (refreshedOrder) {
+                        upsertOrderInState(refreshedOrder);
+                    }
+                }
+            )
+            // 2. ADD DELETE LISTENER FOR REMOVALS
+            .on(
+                'postgres_changes',
+                { event: 'DELETE', schema: 'public', table: 'order_items' },
+                (payload) => {
+                    const deletedItemId = (payload.old as { id?: string }).id;
+
+                    if (!deletedItemId) return;
+
+                    // Filter the item out of the state locally
+                    setOrders((currentOrders) =>
+                        currentOrders.map((order) => ({
+                            ...order,
+                            order_items: order.order_items?.filter(
+                                (item) => item.id !== deletedItemId
+                            ),
+                        }))
+                    );
+                }
+            )
+            .on(
+                'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'orders' },
                 (payload) => {
                     const updatedOrder = payload.new as Order;
@@ -507,85 +556,110 @@ export default function OrdersPage() {
                     </button>
                 </div>
                 <div className="space-y-4">
-                    {pendingOrders.map((order) => (
-                        <div key={order.id} className="border border-orange-500 shadow-sm p-4 rounded-xl">
-                            <div className='flex justify-between mb-3'>
-                                <div className='flex'>
-                                    <Square fill='orange' strokeWidth={0} />
-                                    <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
+                    {pendingOrders.map((order) => {
+                        const hasActionRequired = order.order_items?.some(item => item.status === 'action_required');
+                        return (
+                            <div key={order.id} className="border border-orange-500 shadow-sm p-4 rounded-xl">
+                                <div className='flex justify-between mb-3'>
+                                    <div className='flex'>
+                                        <Square fill='orange' strokeWidth={0} />
+                                        <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
+                                    </div>
+                                    <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                                    <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
                                 </div>
-                                <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                                <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
-                            </div>
-                            <div>
-                                <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
-                                    <div className='flex gap-2'>
-                                        <Wallet />
-                                        <p className='font-semibold'>{order.payment_method}</p>
+
+                                {/* THE WARNING BANNER */}
+                                {hasActionRequired && (
+                                    <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm font-bold flex items-center justify-center animate-pulse">
+                                        ⚠️ Waiting for customer to update items
                                     </div>
-                                    {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                                        <div className='flex gap-2 items-center'>
-                                            <MapPin />
-                                            <p>{order.delivery_address}</p>
+                                )}
+
+                                <div>
+                                    <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
+                                        <div className='flex gap-2'>
+                                            <Wallet />
+                                            <p className='font-semibold'>{order.payment_method}</p>
                                         </div>
-                                        <button
-                                            onClick={() => setViewLocation({
-                                                lat: order.delivery_lat,
-                                                lng: order.delivery_long,
-                                                name: `${order.first_name} ${order.last_name}`
-                                            })}
-                                            className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
-                                        >
-                                            View Map
-                                        </button>
-                                    </div>) : (<div className='flex gap-2'>
-                                        <HandPlatter />
-                                        <p>Pick-up {order.pickup_time}</p>
-                                    </div>)}
-                                    <div className='flex gap-2'>
-                                        <Phone />
-                                        <p>{order.contact}</p>
+                                        {order.order_type === "delivery" ? (<div className='flex gap-2'>
+                                            <div className='flex gap-2 items-center'>
+                                                <MapPin />
+                                                <p>{order.delivery_address}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => setViewLocation({
+                                                    lat: order.delivery_lat,
+                                                    lng: order.delivery_long,
+                                                    name: `${order.first_name} ${order.last_name}`
+                                                })}
+                                                className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
+                                            >
+                                                View Map
+                                            </button>
+                                        </div>) : (<div className='flex gap-2'>
+                                            <HandPlatter />
+                                            <p>Pick-up {order.pickup_time}</p>
+                                        </div>)}
+                                        <div className='flex gap-2'>
+                                            <Phone />
+                                            <p>{order.contact}</p>
+                                        </div>
+                                        <div className='flex gap-2'>
+                                            <Coins />
+                                            <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
+                                        </div>
+                                        <div hidden={order.order_type === "pickup"}>
+                                            <button onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
+                                            <div hidden={showedNote !== order.id}>{order.customer_note}</div>
+                                        </div>
                                     </div>
-                                    <div className='flex gap-2'>
-                                        <Coins />
-                                        <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
-                                    </div>
-                                    <div hidden={order.order_type === "pickup"}>
-                                        <button onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
-                                        <div hidden={showedNote !== order.id}>{order.customer_note}</div>
+                                    <div className='mt-2'>
+                                        <p className='text-md font-semibold'>ORDERS</p>
+                                        {(order.order_items || [])
+                                            .filter((item) => item.status !== 'action_required')
+                                            .map((item, index) => (
+                                                <div className='flex justify-between border-b py-2 gap-2' key={index}>
+                                                    <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
+                                                    <p className='flex-grow'>{item.product.name}</p>
+                                                    <p className='font-semibold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
+                                                    <SquareX
+                                                        className='h-8 w-8'
+                                                        strokeWidth={1}
+                                                        fill='red'
+                                                        onClick={() => {
+                                                            setItemToRemove(item);
+                                                            setOrderIdItemToRemove(order.id);
+                                                            setIsDeletingItem(true);
+                                                        }}
+                                                    />
+                                                </div>
+
+                                            ))}
+                                        {order.order_type === "delivery" && (
+                                            <div className='flex justify-between ml-10 py-2'>
+                                                <p>Delivery Fee</p>
+                                                <p className='font-semibold'>₱49</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <div className='mt-2'>
-                                    <p className='text-md font-semibold'>ORDERS</p>
-                                    {order.order_items?.map((item, index) => (
-                                        <div className='flex justify-between border-b py-2 gap-2' key={index}>
-                                            <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
-                                            <p className='flex-grow'>{item.product.name}</p>
-                                            <p className='font-semibold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
-                                        </div>
-                                    ))}
-                                    {order.order_type === "delivery" && (
-                                        <div className='flex justify-between ml-10 py-2'>
-                                            <p>Delivery Fee</p>
-                                            <p className='font-semibold'>₱49</p>
-                                        </div>
-                                    )}
+                                <div className='flex gap-2'>
+                                    <button onClick={() => setEditingOrder(order)}
+                                        className='hover:text-kae-light hover:bg-orange-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-orange-500 border-1 border-orange-500 font-bold py-2 px-4 rounded-lg transition-colors'>
+                                        EDIT
+                                    </button>
+                                    <button
+                                        onClick={() => updateOrderStatus(order.id, 'cooking')}
+                                        disabled={hasActionRequired}
+                                        className={`w-full mt-3 font-bold py-2 rounded-lg transition-colors duration-300 ${hasActionRequired ? 'bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400' : 'bg-orange-400 text-kae-light hover:bg-orange-600'}`}
+                                    >
+                                        START COOKING
+                                    </button>
                                 </div>
                             </div>
-                            <div className='flex gap-2'>
-                                <button onClick={() => setEditingOrder(order)}
-                                    className='hover:text-kae-light hover:bg-orange-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-orange-500 border-1 border-orange-500 font-bold py-2 px-4 rounded-lg transition-colors'>
-                                    EDIT
-                                </button>
-                                <button
-                                    onClick={() => updateOrderStatus(order.id, 'cooking')}
-                                    className="hover:bg-orange-600 w-full mt-3 bg-orange-400 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
-                                >
-                                    START COOKING
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
 
