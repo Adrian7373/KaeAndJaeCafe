@@ -333,3 +333,19 @@ export async function DeleteOrderItem(itemId: string) {
     }
     return { success: true }
 }
+
+export async function ReplaceOrderItem(itemToReplaceId: string, newProductId: string, newProductPrice: number) {
+    if (!itemToReplaceId || !newProductId || !newProductPrice) return;
+
+    const supabase = await createServerClient(true);
+
+    const { error } = await supabase
+        .from("order_items")
+        .update({ product_id: newProductId, price_at_checkout: newProductPrice, status: "" })
+        .eq("id", itemToReplaceId)
+
+    if (error) {
+        return { success: false, error: error }
+    }
+    return { success: true }
+}
