@@ -427,6 +427,20 @@ export default function OrdersPage() {
 
         fetchActiveOrders();
 
+        // --- ROBUST HELPER FUNCTIONS ---
+        // These safely lowercase and trim the payment method to stop case-sensitive leaks
+        const isUnpaidEwallet = (order: Order | null) => {
+            if (!order) return true; // Block nulls safely
+            const method = (order.payment_method || '').toLowerCase().trim();
+            return method === 'gcash' && order.is_paid !== true;
+        };
+
+        const isPaidEwallet = (order: Order) => {
+            const method = (order.payment_method || '').toLowerCase().trim();
+            return method === 'gcash' && order.is_paid === true;
+        };
+
+
         // Set up the Realtime Subscription
         const orderChannel = supabase
             .channel('public:orders')
@@ -434,14 +448,16 @@ export default function OrdersPage() {
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'orders' },
                 async (payload) => {
-                    playNotificationSound();
                     const insertedOrder = await fetchOrderWithItems((payload.new as { id: string }).id);
 
-                    if (!insertedOrder || (insertedOrder.payment_method === 'gcash' && !insertedOrder.is_paid)) {
+                    // 1. Block unpaid GCash orders securely
+                    if (isUnpaidEwallet(insertedOrder)) {
                         return;
                     }
 
-                    upsertOrderInState(insertedOrder);
+                    // 2. Play sound ONLY if it passes the block
+                    playNotificationSound();
+                    upsertOrderInState(insertedOrder!);
                 }
             )
             .on(
@@ -449,14 +465,15 @@ export default function OrdersPage() {
                 { event: 'INSERT', schema: 'public', table: 'order_items' },
                 async (payload) => {
                     const orderId = (payload.new as { order_id?: string }).order_id;
-
-                    if (!orderId) {
-                        return;
-                    }
+                    if (!orderId) return;
 
                     const refreshedOrder = await fetchOrderWithItems(orderId);
 
                     if (refreshedOrder) {
+                        if (isUnpaidEwallet(refreshedOrder)) return;
+
+                        // We intentionally don't play sound here so it doesn't double-ring 
+                        // from the initial 'orders' INSERT.
                         upsertOrderInState(refreshedOrder);
                     }
                 }
@@ -465,20 +482,20 @@ export default function OrdersPage() {
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'order_items' },
                 async (payload) => {
-                    playNotificationSound();
                     const orderId = (payload.new as { order_id?: string }).order_id;
-
                     if (!orderId) return;
 
-                    // Re-fetch to get the newly attached product details
                     const refreshedOrder = await fetchOrderWithItems(orderId);
 
                     if (refreshedOrder) {
+                        if (isUnpaidEwallet(refreshedOrder)) return;
+
+                        // Removed the errant playNotificationSound() here so it doesn't 
+                        // blast a sound every time an item is replaced/updated.
                         upsertOrderInState(refreshedOrder);
                     }
                 }
             )
-            // 2. ADD DELETE LISTENER FOR REMOVALS
             .on(
                 'postgres_changes',
                 { event: 'DELETE', schema: 'public', table: 'order_items' },
@@ -487,7 +504,6 @@ export default function OrdersPage() {
 
                     if (!deletedItemId) return;
 
-                    // Filter the item out of the state locally
                     setOrders((currentOrders) =>
                         currentOrders.map((order) => ({
                             ...order,
@@ -504,21 +520,23 @@ export default function OrdersPage() {
                 async (payload) => {
                     const updatedOrder = payload.new as Order;
 
-                    // If a GCash order was just paid, it isn't on the screen yet. We need to fetch and add it.
-                    if (updatedOrder.payment_method === 'gcash' && updatedOrder.is_paid) {
+                    // If a GCash order was finally paid, grab it and show it to the staff!
+                    if (isPaidEwallet(updatedOrder)) {
                         const fullOrder = await fetchOrderWithItems(updatedOrder.id);
-                        playNotificationSound();
-                        // Check if it's already in the state array to prevent duplicates
-                        setOrders((current) => {
-                            const exists = current.some(o => o.id === updatedOrder.id);
-                            if (!exists && fullOrder) {
-                                playNotificationSound(); // Ring the bell now that payment arrived!
-                                return [...current, fullOrder].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-                            }
-                            return current;
-                        });
+
+                        if (fullOrder) {
+                            setOrders((current) => {
+                                const exists = current.some(o => o.id === updatedOrder.id);
+                                if (!exists) {
+                                    playNotificationSound(); // Ring the bell ONCE!
+                                    return [...current, fullOrder].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+                                }
+                                return current;
+                            });
+                        }
                     }
 
+                    // Process normal status updates
                     setOrders((currentOrders) =>
                         currentOrders.map((order) =>
                             order.id === updatedOrder.id ? { ...order, status: updatedOrder.status } : order
@@ -528,7 +546,6 @@ export default function OrdersPage() {
             )
             .subscribe();
 
-        // Cleanup subscription on unmount
         return () => {
             supabase.removeChannel(orderChannel);
         };
