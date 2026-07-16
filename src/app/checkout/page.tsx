@@ -40,7 +40,7 @@ export default function CheckoutPage() {
             if (state.checkoutUrl) {
                 window.location.href = state.checkoutUrl;
             } else {
-                router.push(`/order/${state.orderId}`);
+                router.push(`/track/${state.orderId}`);
             }
         }
     }, [state?.success, state?.orderId, state?.checkoutUrl, router]);
