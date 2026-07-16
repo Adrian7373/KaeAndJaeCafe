@@ -111,8 +111,8 @@ export async function placeOrder(prevState: any, formData: FormData): Promise<an
             const encodedKey = Buffer.from(`${secretKey}:`).toString('base64');
             const amountInCentavos = Math.round(totalAmount * 100);
 
-            const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-            const safeBaseUrl = rawSiteUrl.replace(/\/$/, "");
+            const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+            const safeBaseUrl = rawSiteUrl?.replace(/\/$/, "");
 
             const payload = {
                 data: {
@@ -405,71 +405,4 @@ export async function ReplaceOrderItem(itemToReplaceId: string, newProductId: st
         return { success: false, error: error }
     }
     return { success: true }
-}
-
-//Gcash Checkout
-export async function createGCashCheckout(
-    orderId: string,
-    totalAmount: number,
-    customerName: string,
-    customerPhone: string
-) {
-    const secretKey = process.env.PAYMONGO_SECRET_KEY;
-
-    const encodedKey = Buffer.from(`${secretKey}:`).toString('base64');
-
-    const payload = {
-        data: {
-            attributes: {
-                billing: {
-                    name: customerName,
-                    phone: customerPhone,
-                },
-                send_email_receipt: false,
-                show_description: true,
-                show_line_items: false,
-                payment_method_types: ["gcash"],
-                description: `Cafe Order #${orderId}`,
-                line_items: [
-                    {
-                        name: `Order #${orderId}`,
-                        amount: Math.round(totalAmount * 100),
-                        currency: "PHP",
-                        quantity: 1
-                    }
-                ],
-                // Where to send the user after they pay (or cancel)
-                success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/track/${orderId}`,
-                cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout`
-            }
-        }
-    };
-
-    try {
-        const response = await fetch('https://api.paymongo.com/v1/checkout_sessions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${encodedKey}`
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error("Paymongo Error:", data.errors);
-            return { success: false, error: "Payment initialization failed." };
-        }
-
-        // Return the checkout URL so the client can redirect the user
-        return {
-            success: true,
-            checkoutUrl: data.data.attributes.checkout_url
-        };
-
-    } catch (error) {
-        console.error("Fetch Error:", error);
-        return { success: false, error: "Failed to connect to payment gateway." };
-    }
 }
