@@ -177,7 +177,7 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
 
                         <div className={`${!isShowingDetails && "hidden"} flex flex-col gap-4`}>
                             <p className="text-center">Your Order</p>
-                            <div className="border-1 px-4 py-2 border-gray-400 rounded-xl">
+                            <div className="relative border-1 px-4 py-2 border-gray-400 rounded-xl">
                                 {/* The PAID Badge */}
                                 {is_paid && (
                                     <div className="absolute top-2 right-4 bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-full text-xs font-black tracking-widest shadow-sm">
