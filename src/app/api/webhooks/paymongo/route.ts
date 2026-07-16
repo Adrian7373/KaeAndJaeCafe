@@ -1,24 +1,50 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@/../lib/supabase-server';
+import { createAdminClient } from '@/../lib/supabase-server';
 
 export async function POST(req: Request) {
-    const body = await req.json();
-    const event = body.data?.attributes?.type;
+    try {
+        const body = await req.json();
 
-    // Only process successful payments
-    if (event === 'checkout.session.payment.paid') {
-        const orderId = body.data.attributes.data.attributes.description.split('#')[1];
+        const eventType = body.data?.attributes?.type;
+        const description = body.data?.attributes?.data?.attributes?.description || "";
 
-        const supabase = await createServerClient(true);
+        const orderId = description.split('#')[1]?.trim();
 
-        // Update your order to reflect that it is paid
-        const { error } = await supabase
-            .from('orders')
-            .update({ is_paid: true })
-            .eq('id', orderId);
+        if (!orderId) {
+            console.error("WEBHOOK_ERROR: No orderId found. Description was:", description);
+            return NextResponse.json({ error: 'No order ID' }, { status: 400 });
+        }
 
-        if (error) return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+        console.log(`WEBHOOK_PROCESSING_ORDER: ${orderId} | EVENT: ${eventType}`);
+
+        const supabase = createAdminClient();
+
+        if (eventType === 'checkout_session.payment.paid') {
+            const { error } = await supabase
+                .from('orders')
+                .update({ is_paid: true })
+                .eq('id', orderId);
+
+            if (error) throw error;
+            console.log("SUCCESSFULLY_UPDATED_ORDER_TO_PAID:", orderId);
+
+        } else if (eventType === 'checkout_session.payment.failed' || eventType === 'checkout_session.expired') {
+            const { error } = await supabase
+                .from('orders')
+                .update({ is_paid: false })
+                .eq('id', orderId);
+
+            if (error) throw error;
+            console.log(`ORDER_PAYMENT_FAILED_OR_EXPIRED:`, orderId);
+
+        } else {
+            console.log("UNHANDLED_WEBHOOK_EVENT:", eventType);
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (err) {
+        console.error("WEBHOOK_FATAL_ERROR:", err);
+        return NextResponse.json({ error: 'Fatal error' }, { status: 500 });
     }
-
-    return NextResponse.json({ received: true });
 }
