@@ -1,55 +1,39 @@
-# Kae & Jae Cafe
+# Kae & Jae Cafe - Ordering System
 
-A modern web application built for Kae & Jae Cafe, showcasing their menu and a gallery of their offerings. The site is live and deployed at [Kae & Jae Cafe](https://kaeandjaecafe.vercel.app/).
+A modern, full-stack web application built to streamline online ordering, delivery, and secure payments for a local cafe. This project serves as a comprehensive e-commerce solution for the business.
+
+## 🌐 Live Application
+
+You can view the live production site here: [Kae and Jae Cafe](https://kaeandjaecafe.vercel.app/)
 
 ## 🚀 Tech Stack
 
-This project was built with modern, end-to-end type-safe web technologies to ensure a fast and responsive user experience:
-* **Framework:** Next.js
-* **Language:** TypeScript
-* **Styling Ecosystem:** Tailwindcss
-* **Code Quality:** ESLint
-
-## 🛠️ Getting Started
-
-To run this project locally on your machine, follow these steps:
-
-1. **Clone the repository and navigate into the project directory:**
-```bash
-   cd KaeAndJaeCafe
-
-```
-
-2. **Install the dependencies:**
-Ensure you have Node.js installed, then run:
-
-```bash
-   npm install
-
-```
-
-3. **Start the development server:**
-
-```bash
-   npm run dev
-
-```
-
-4. **View the application:**
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
-
-## 📂 Project Structure
-
-* `/public`: Contains all static assets, including cafe gallery photos and vector graphics for the menu items.
+* **Framework:** Next.js (App Router) & React
 
 
-* `next.config.ts`: Configuration file for Next.js.
+* **Styling:** Tailwind CSS & PostCSS
 
 
-* `eslint.config.mjs`: Linting rules to maintain code quality.
+* **Backend & Database:** Supabase (PostgreSQL) & Next.js Server Actions
 
 
+* **State Management:** React Context API (`CartContext.tsx`)
 
----
 
-*Made by Adrian Ablaza*
+* **Payment Gateway:** PayMongo API (GCash & Cash on Delivery)
+
+## ✨ Key Features
+
+* **Interactive Digital Menu:** Dynamic rendering of cafe offerings including Rice Meals, Burgers, Sandwiches, Corndogs, and Nachos with high-quality visual assets.
+
+
+* **Real-time Cart Management:** Utilizes a custom global `CartContext` to handle complex order logic, quantity adjustments, and pricing calculations.
+
+
+* **Geolocation Verification:** Integrates browser Geolocation APIs to verify customer coordinates, ensuring delivery accuracy and fraud prevention.
+* **Secure Payment Routing:** Implements server-side payment generation via PayMongo for secure, streamlined GCash transactions.
+* **Webhook Integration:** Automatically synchronizes payment statuses between PayMongo and the Supabase database to track order fulfillment.
+
+## 👨‍💻 Author
+
+**Made with ❤️ by Adrian Ablaza**
