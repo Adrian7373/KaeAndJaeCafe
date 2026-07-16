@@ -412,6 +412,7 @@ export default function OrdersPage() {
           order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
+                .or('payment_method.eq.cash,is_paid.eq.true')
                 .order('created_at', { ascending: true }); // Oldest orders at the top
 
             if (error) {
@@ -436,7 +437,7 @@ export default function OrdersPage() {
                     playNotificationSound();
                     const insertedOrder = await fetchOrderWithItems((payload.new as { id: string }).id);
 
-                    if (!insertedOrder) {
+                    if (!insertedOrder || (insertedOrder.payment_method === 'gcash' && !insertedOrder.is_paid)) {
                         return;
                     }
 
@@ -500,8 +501,24 @@ export default function OrdersPage() {
             .on(
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'orders' },
-                (payload) => {
+                async (payload) => {
                     const updatedOrder = payload.new as Order;
+
+                    // If a GCash order was just paid, it isn't on the screen yet. We need to fetch and add it.
+                    if (updatedOrder.payment_method === 'gcash' && updatedOrder.is_paid) {
+                        const fullOrder = await fetchOrderWithItems(updatedOrder.id);
+                        playNotificationSound();
+                        // Check if it's already in the state array to prevent duplicates
+                        setOrders((current) => {
+                            const exists = current.some(o => o.id === updatedOrder.id);
+                            if (!exists && fullOrder) {
+                                playNotificationSound(); // Ring the bell now that payment arrived!
+                                return [...current, fullOrder].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+                            }
+                            return current;
+                        });
+                    }
+
                     setOrders((currentOrders) =>
                         currentOrders.map((order) =>
                             order.id === updatedOrder.id ? { ...order, status: updatedOrder.status } : order
