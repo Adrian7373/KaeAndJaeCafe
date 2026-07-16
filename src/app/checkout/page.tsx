@@ -192,8 +192,8 @@ export default function CheckoutPage() {
                                 <span className="grow-1 font-bold">Cash</span>
                             </label>
                             <label className="border-1 border-gray-500 rounded-xl px-4 py-4 flex gap-2 cursor-pointer" htmlFor="gcash">
-                                <input required name="paymentType" id="gcash" type="radio" value="gcash" className="accent-kae-purple w-5 h-5" />
-                                <span className="grow-1 font-bold">Gcash</span>
+                                <input disabled required name="paymentType" id="gcash" type="radio" value="gcash" className="accent-kae-purple w-5 h-5" />
+                                <span className="grow-1 font-bold line-through text-gray-400">Gcash</span><span className="font-bold"> Coming soon!</span>
                             </label>
                         </div>
 
