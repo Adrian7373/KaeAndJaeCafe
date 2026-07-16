@@ -36,6 +36,7 @@ export interface Order {
     delivery_lat: number;
     delivery_long: number;
     customer_note: string;
+    is_paid: boolean;
     order_items?: OrderItem[];
 }
 
@@ -242,7 +243,15 @@ export default function OrdersPage() {
     ) => {
         const hasActionRequired = order.order_items?.some(item => item.status === 'action_required');
         return (
-            <div key={order.id} className={`border border-${colors.squareFill}-400 shadow-sm p-4 rounded-xl`}>
+            <div key={order.id} className={`relative border border-${colors.squareFill}-400 shadow-sm p-4 rounded-xl`}>
+
+                {/* The PAID Badge */}
+                {order.is_paid && (
+                    <div className="absolute top-16 right-4 bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-full text-xs font-black tracking-widest shadow-sm">
+                        PAID VIA GCASH
+                    </div>
+                )}
+
                 <div className='flex justify-between mb-3'>
                     <div className='flex'>
                         <Square fill={colors.squareFill} strokeWidth={0} />
@@ -359,7 +368,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
+                    id, created_at, status, is_paid, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
                     order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
                 `)
                 .eq('id', orderId)
@@ -399,7 +408,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
+                    id, created_at, status, is_paid, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
           order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
@@ -559,7 +568,13 @@ export default function OrdersPage() {
                     {pendingOrders.map((order) => {
                         const hasActionRequired = order.order_items?.some(item => item.status === 'action_required');
                         return (
-                            <div key={order.id} className="border border-orange-500 shadow-sm p-4 rounded-xl">
+                            <div key={order.id} className="relative border border-orange-500 shadow-sm p-4 rounded-xl">
+                                {/* The PAID Badge */}
+                                {order.is_paid && (
+                                    <div className="absolute top-16 right-4 bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-full text-xs font-black tracking-widest shadow-sm">
+                                        PAID VIA GCASH
+                                    </div>
+                                )}
                                 <div className='flex justify-between mb-3'>
                                     <div className='flex'>
                                         <Square fill='orange' strokeWidth={0} />
