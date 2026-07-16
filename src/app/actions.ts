@@ -36,41 +36,33 @@ type ActionState = {
     orderId?: string
 }
 
-export async function placeOrder(prevState: ActionState | null, formData: FormData): Promise<ActionState> {
+export async function placeOrder(prevState: any, formData: FormData): Promise<any> {
     const rawData = Object.fromEntries(formData.entries());
-    const validatedFields = checkOutSchema.safeParse(rawData)
+    const validatedFields = checkOutSchema.safeParse(rawData);
 
     if (!validatedFields.success) {
-        console.error("Validation Failed:", validatedFields.error.flatten().fieldErrors);
         const fieldErrors = validatedFields.error.flatten().fieldErrors;
         const summary = Object.values(fieldErrors).flat().slice(0, 3).join("; ") || "Please check your inputs and try again.";
-        return { success: false, error: summary } as any;
+        return { success: false, error: summary };
     }
 
     const cleanData = validatedFields.data;
     const normalizedOrderType = cleanData.orderType.toLowerCase();
 
-    // Retrieving selected time and cart items
     const selectedTime = formData.get("selectedTime");
     const rawCart = formData.get("cartData") as string;
     const cartArray = JSON.parse(rawCart);
 
-    // Calculate the total amount securely on the server
     const cartTotal = cartArray.reduce((total: number, item: any) => total + (item.discount_price * item.qty), 0);
     const deliveryFee = normalizedOrderType === "delivery" ? 49 : 0;
     const totalAmount = cartTotal + deliveryFee;
 
-    // Inserting order details first to get order_id
     const supabase = await createServerClient(true);
 
-    // Build a safe delivery address: trim parts, omit empty, or set null
-    const addressParts = [cleanData?.cityBrgy, cleanData?.street]
-        .map((s) => (typeof s === "string" ? s.trim() : ""))
-        .filter(Boolean);
+    const addressParts = [cleanData?.cityBrgy, cleanData?.street].map((s) => (typeof s === "string" ? s.trim() : "")).filter(Boolean);
     const deliveryAddress = addressParts.length ? addressParts.join(", ") : null;
 
     const paymentType = formData.get("paymentType") as string;
-    const isDelivery = formData.get("orderType") === "delivery";
 
     const { data: orderId, error: orderIdError } = await supabase
         .from("orders")
@@ -91,101 +83,93 @@ export async function placeOrder(prevState: ActionState | null, formData: FormDa
         .select("id").maybeSingle();
 
     if (orderIdError || orderId === null) {
-        return {
-            success: false,
-            error: `Failed to place order: ${orderIdError?.message}`
-        } as any
-    };
+        return { success: false, error: `Failed to place order: ${orderIdError?.message}` };
+    }
 
-    const validatedCart = cartArray.map((item: any) => {
-        return {
-            order_id: orderId?.id,
-            product_id: item.id,
-            quantity: item.qty,
-            price_at_checkout: item.discount_price
-        }
-    })
+    const validatedCart = cartArray.map((item: any) => ({
+        order_id: orderId.id,
+        product_id: item.id,
+        quantity: item.qty,
+        price_at_checkout: item.discount_price
+    }));
 
-    // Inserting the cart to order_items using the order_id
-    const { error: orderFillError } = await supabase
-        .from("order_items")
-        .insert(validatedCart)
+    const { error: orderFillError } = await supabase.from("order_items").insert(validatedCart);
 
     if (orderFillError) {
-        return {
-            success: false,
-            error: `Failed to fill order: ${orderFillError.message}`,
-        } as any;
+        return { success: false, error: `Failed to fill order: ${orderFillError.message}` };
     }
 
     const cookieStore = await cookies();
-    cookieStore.set("active_order_id", orderId.id, {
-        maxAge: 7200,
-        httpOnly: true,
-    });
+    cookieStore.set("active_order_id", orderId.id, { maxAge: 7200, httpOnly: true });
 
+    // --- GCASH LOGIC ---
     if (paymentType === "gcash") {
-        const secretKey = process.env.PAYMONGO_SECRET_KEY;
-        const encodedKey = Buffer.from(`${secretKey}:`).toString('base64');
-
-        // Ensure total is in centavos (e.g. 100 pesos = 10000)
-        const amountInCentavos = Math.round(totalAmount * 100);
-
-        const payload = {
-            data: {
-                attributes: {
-                    billing: {
-                        name: `${formData.get("firstName")} ${formData.get("lastName")}`,
-                        phone: formData.get("contact") as string,
-                    },
-                    send_email_receipt: false,
-                    show_description: true,
-                    show_line_items: false,
-                    payment_method_types: ["gcash"],
-                    description: `Cafe Order #${orderId.id}`,
-                    line_items: [
-                        {
-                            name: `Order #${orderId.id}`,
-                            amount: amountInCentavos,
-                            currency: "PHP",
-                            quantity: 1
-                        }
-                    ],
-                    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/order/${orderId.id}`,
-                    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout`
-                }
-            }
-        };
+        let checkoutUrl = "";
 
         try {
+            const secretKey = process.env.PAYMONGO_SECRET_KEY;
+            const encodedKey = Buffer.from(`${secretKey}:`).toString('base64');
+            const amountInCentavos = Math.round(totalAmount * 100);
+
+            const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+            const safeBaseUrl = rawSiteUrl.replace(/\/$/, "");
+
+            const payload = {
+                data: {
+                    attributes: {
+                        billing: {
+                            name: `${cleanData.firstName} ${cleanData.lastName}`.trim(),
+                            phone: cleanData.contact,
+                            email: ""
+                        },
+                        payment_method_types: ["gcash"],
+                        send_email_receipt: false,
+                        show_description: true,
+                        show_line_items: true,
+                        description: `Cafe Order #${orderId.id}`,
+                        line_items: [
+                            {
+                                name: `Order ${orderId.id}`,
+                                amount: amountInCentavos,
+                                currency: "PHP",
+                                quantity: 1
+                            }
+                        ],
+                        success_url: `${safeBaseUrl}/track/${orderId.id}`,
+                        cancel_url: `${safeBaseUrl}/order`
+                    }
+                }
+            };
+
             const response = await fetch('https://api.paymongo.com/v1/checkout_sessions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Basic ${encodedKey}`
                 },
+                cache: 'no-store',
                 body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                return { success: false, error: "Payment gateway error. Please try again." } as any;
+                const errorMessage = data.errors?.[0]?.detail || "Payment gateway error.";
+                return { success: false, error: errorMessage };
             }
 
-            // Return the URL to the client component's useEffect
-            return {
-                success: true,
-                checkoutUrl: data.data.attributes.checkout_url
-            } as any;
-
+            checkoutUrl = data.data.attributes.checkout_url;
         } catch (error) {
-            return { success: false, error: "Failed to connect to payment gateway." } as any;
+            return { success: false, error: "Failed to connect to payment gateway." };
+        }
+
+        if (checkoutUrl) {
+            return { success: true, orderId: orderId.id, checkoutUrl };
         }
     }
 
-    return { success: true, orderId: orderId.id } as any;
-
+    // --- CASH LOGIC ---
+    return { success: true, orderId: orderId.id };
 }
 
 export async function loginAdmin(prevState: any, formData: FormData) {
