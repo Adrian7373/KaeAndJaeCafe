@@ -1,6 +1,6 @@
 "use client";
 import { AlertTriangle, ChevronLeft, MapPin } from "lucide-react";
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useState, useEffect, useRef } from "react";
 import TimePicker from "./_components/TimePicker";
 import { useCart } from "../../../context/CartContext";
 import { useRouter } from "next/navigation";
@@ -31,10 +31,21 @@ export default function CheckoutPage() {
     const router = useRouter();
     const totalPrice = cart.reduce((total, item) => total + item.discount_price * item.qty, 0);
     const [state, formAction, isPending] = useActionState(placeOrder, null);
+    const hasHandledSuccess = useRef(false);
 
-    if (cart.length === 0) {
-        router.push("/order")
-    }
+    useEffect(() => {
+        if (state?.success && state?.orderId && !hasHandledSuccess.current) {
+            hasHandledSuccess.current = true;
+
+            if (state.checkoutUrl) {
+                window.location.href = state.checkoutUrl;
+            } else {
+                router.push(`/order/${state.orderId}`);
+            }
+        }
+    }, [state?.success, state?.orderId, state?.checkoutUrl, router]);
+
+
 
     // --- GEOLOCATION ENFORCER ---
     const requestLocation = () => {
@@ -68,19 +79,6 @@ export default function CheckoutPage() {
         requestLocation();
     }, []);
 
-    useEffect(() => {
-        if (state?.success) {
-            clearCart(); // Clear the cart since the order is placed!
-
-            if (state.checkoutUrl) {
-                // If GCash, redirect to the external Paymongo page
-                window.location.href = state.checkoutUrl;
-            } else if (state.orderId) {
-                // If Cash, redirect to your internal tracking page
-                router.push(`/order/${state.orderId}`);
-            }
-        }
-    }, [state, router, clearCart]);
 
     return (
         <div className="flex flex-col items-center">
