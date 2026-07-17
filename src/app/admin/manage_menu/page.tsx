@@ -9,6 +9,7 @@ import NewCategoryModal from "./_components/AddNewCategoryModal";
 import { deleteMenuItem } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import DeleteCategoryModal from "./_components/DeleteCategoryButton";
+import { useAuth } from "../../../../context/AuthContext";
 
 export interface Product {
     id: string,
@@ -33,6 +34,10 @@ export interface Category {
 export default function MenuManagementPage() {
 
     const router = useRouter();
+    const { role } = useAuth();
+    if (role !== "owner") {
+        router.push("/admin/dashboard")
+    }
     const [supabase] = useState(() => createClient());
 
     useEffect(() => {
