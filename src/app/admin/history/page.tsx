@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Order } from "../orders/page";
 import { createClient } from "@/../lib/supabase";
 import { permaDeleteOrder } from "@/app/actions";
+import { useRouter } from "next/navigation";
 
 export interface OrderItem {
     quantity: number;
@@ -31,6 +32,17 @@ interface Feedback {
 export default function HistoryPage() {
 
     const supabase = useMemo(() => createClient(), []);
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (!user || error) {
+                router.push("/login")
+            }
+        };
+        checkAuth();
+    }, [supabase, router]);
 
     const [searchInput, setSearchInput] = useState("");
     const [searchTerm, setSearchTerm] = useState("");

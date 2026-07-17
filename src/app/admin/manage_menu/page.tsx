@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import EditMenuItemModal from "./_components/EditMenuItemModal";
 import NewCategoryModal from "./_components/AddNewCategoryModal";
 import { deleteMenuItem } from "@/app/actions";
+import { useRouter } from "next/navigation";
 
 export interface Product {
     id: string,
@@ -29,6 +30,19 @@ export interface Category {
 
 export default function MenuManagementPage() {
 
+    const router = useRouter();
+    const [supabase] = useState(() => createClient());
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (!user || error) {
+                router.push("/login")
+            }
+        };
+        checkAuth();
+    }, [supabase, router]);
+
     // Data States
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -42,8 +56,6 @@ export default function MenuManagementPage() {
     const [itemToEdit, setItemToEdit] = useState<Partial<Product> | null>(null)
     const [isAddingCategory, setIsAddingCategory] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    const [supabase] = useState(() => createClient());
 
     const toggleEdit = (item: Product) => {
         setItemToEdit(item);

@@ -119,8 +119,8 @@ export default function AdminSideBar() {
 
                     {/* Desktop Store Status Toggle */}
                     <StoreStatusToggle />
-                    <button className="text-red-500 font-black flex text-sm justify-center items-center px-2">
-                        <LogOut className="h-4 w-4" />
+                    <button onClick={logoutUser} className="cursor-pointer hover:bg-red-500 hover:text-kae-light transition-colors duraion-300 rounded-full text-red-500 font-black flex text-sm justify-center gap-2 items-center px-2 mx-4 py-3 mb-2">
+                        {isLoggingOut ? <div className="rounded-full border-red-600 border-t-transparent animate-spin w-5 h-5 border-2"></div> : <LogOut className="h-4 w-4" />}
                         Logout
                     </button>
                 </div>
