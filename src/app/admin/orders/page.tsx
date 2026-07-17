@@ -8,6 +8,7 @@ import { Bell, BellOff, Coins, HandPlatter, MapPin, Phone, Square, SquareX, Wall
 import EditOrderModal from './_components/EditOrderModal';
 import LocationViewModal from './_components/LocationViewModal';
 import RemoveItemModal from './_components/RemoveItemModal';
+import { useAuth } from '../../../../context/AuthContext';
 
 
 // 1. Strict Types matching your database schema
@@ -50,8 +51,8 @@ export interface Product {
 export default function OrdersPage() {
 
     const router = useRouter();
-
     const supabase = useMemo(() => createClient(), []);
+    const { role } = useAuth();
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -66,7 +67,6 @@ export default function OrdersPage() {
     const [loading, setLoading] = useState(true);
     const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [editingOrder, setEditingOrder] = useState<Order | null>(null);
     const [catalog, setCatalog] = useState<Product[]>([]);
     const [viewLocation, setViewLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
     const [showedNote, setShowedNote] = useState("");
@@ -190,33 +190,6 @@ export default function OrdersPage() {
         setOrderToDelete(null);
     };
 
-    const handleEditOrder = async (updatedItems: OrderItem[]) => {
-        if (!editingOrder) return;
-
-        const targetOrderId = editingOrder.id;
-
-        setEditingOrder(null);
-
-        const previousOrders = [...orders];
-        setOrders((currentOrders) =>
-            currentOrders.map((order) =>
-                order.id === targetOrderId ? { ...order, order_items: updatedItems } : order
-            )
-        );
-
-        const payload = updatedItems.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-            price_at_checkout: item.price_at_checkout ?? item.product.discount_price
-        }));
-
-        const result = await editOrderItemsAction(targetOrderId, payload);
-
-        if (!result.success) {
-            alert("Failed to save edits: " + result.error);
-            setOrders(previousOrders);
-        }
-    };
 
     const getCookingAction = (order: Order) => ({
         label: isPickupOrder(order) ? 'READY FOR PICKUP' : 'ORDER PREPARED',
@@ -258,7 +231,10 @@ export default function OrdersPage() {
                         <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                     </div>
                     <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                    <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
+                    {role === "owner" && (
+                        <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
+                    )}
+
                 </div>
 
                 {/* THE WARNING BANNER */}
@@ -319,15 +295,18 @@ export default function OrdersPage() {
                                     <p className='font-bold'>
                                         ₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}
                                     </p>
-                                    <SquareX
-                                        className='h-8 w-8'
-                                        fill='red'
-                                        onClick={() => {
-                                            setItemToRemove(item);
-                                            setOrderIdItemToRemove(order.id);
-                                            setIsDeletingItem(true);
-                                        }}
-                                    />
+                                    {role !== "rider" && (
+                                        <SquareX
+                                            className='h-8 w-8'
+                                            fill='red'
+                                            onClick={() => {
+                                                setItemToRemove(item);
+                                                setOrderIdItemToRemove(order.id);
+                                                setIsDeletingItem(true);
+                                            }}
+                                        />
+                                    )}
+
                                 </div>
                             ))
                         }
@@ -340,17 +319,16 @@ export default function OrdersPage() {
                     </div>
                 </div>
                 <div className='flex gap-2'>
-                    <button onClick={() => setEditingOrder(order)}
-                        className={colors.className}>
-                        EDIT
-                    </button>
-                    <button
-                        onClick={actionButton.onClick}
-                        disabled={hasActionRequired}
-                        className={`${colors.primaryClassname} ${hasActionRequired ? 'opacity-50 cursor-not-allowed hover:bg-gray-400 bg-gray-400 border-gray-400' : ''}`}
-                    >
-                        {actionButton.label}
-                    </button>
+                    {role !== "rider" && (
+                        <button
+                            onClick={actionButton.onClick}
+                            disabled={hasActionRequired}
+                            className={`${colors.primaryClassname} ${hasActionRequired ? 'opacity-50 cursor-not-allowed hover:bg-gray-400 bg-gray-400 border-gray-400' : ''}`}
+                        >
+                            {actionButton.label}
+                        </button>
+                    )}
+
                 </div>
             </div>
         );
@@ -405,7 +383,7 @@ export default function OrdersPage() {
 
     useEffect(() => {
         const fetchActiveOrders = async () => {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('orders')
                 .select(`
                     id, created_at, status, is_paid, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
@@ -414,6 +392,12 @@ export default function OrdersPage() {
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
                 .or('payment_method.eq.cash,is_paid.eq.true')
                 .order('created_at', { ascending: true }); // Oldest orders at the top
+
+            if (role === "rider") {
+                query = query.eq('status', 'delivering');
+            }
+
+            const { data, error } = await query
 
             if (error) {
                 console.error("Error fetching initial orders:", error.message);
@@ -440,58 +424,44 @@ export default function OrdersPage() {
             return method === 'gcash' && order.is_paid === true;
         };
 
+        const orderChannel = supabase.channel('public:orders');
 
-        // Set up the Realtime Subscription
-        const orderChannel = supabase
-            .channel('public:orders')
-            .on(
-                'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'orders' },
-                async (payload) => {
-                    const insertedOrder = await fetchOrderWithItems((payload.new as { id: string }).id);
-
-                    // 1. Block unpaid GCash orders securely
-                    if (isUnpaidEwallet(insertedOrder)) {
-                        return;
+        if (role !== 'rider') {
+            orderChannel
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'orders' },
+                    async (payload) => {
+                        const insertedOrder = await fetchOrderWithItems((payload.new as { id: string }).id);
+                        if (isUnpaidEwallet(insertedOrder)) return;
+                        playNotificationSound();
+                        upsertOrderInState(insertedOrder!);
                     }
-
-                    // 2. Play sound ONLY if it passes the block
-                    playNotificationSound();
-                    upsertOrderInState(insertedOrder!);
-                }
-            )
-            .on(
-                'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'order_items' },
-                async (payload) => {
-                    const orderId = (payload.new as { order_id?: string }).order_id;
-                    if (!orderId) return;
-
-                    const refreshedOrder = await fetchOrderWithItems(orderId);
-
-                    if (refreshedOrder) {
-                        if (isUnpaidEwallet(refreshedOrder)) return;
-
-                        // We intentionally don't play sound here so it doesn't double-ring 
-                        // from the initial 'orders' INSERT.
-                        upsertOrderInState(refreshedOrder);
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'order_items' },
+                    async (payload) => {
+                        const orderId = (payload.new as { order_id?: string }).order_id;
+                        if (!orderId) return;
+                        const refreshedOrder = await fetchOrderWithItems(orderId);
+                        if (refreshedOrder && !isUnpaidEwallet(refreshedOrder)) {
+                            upsertOrderInState(refreshedOrder);
+                        }
                     }
-                }
-            )
+                );
+        }
+
+        // 2. Shared UPDATE/DELETE subscriptions
+        orderChannel
             .on(
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'order_items' },
                 async (payload) => {
                     const orderId = (payload.new as { order_id?: string }).order_id;
                     if (!orderId) return;
-
                     const refreshedOrder = await fetchOrderWithItems(orderId);
-
-                    if (refreshedOrder) {
-                        if (isUnpaidEwallet(refreshedOrder)) return;
-
-                        // Removed the errant playNotificationSound() here so it doesn't 
-                        // blast a sound every time an item is replaced/updated.
+                    if (refreshedOrder && !isUnpaidEwallet(refreshedOrder)) {
                         upsertOrderInState(refreshedOrder);
                     }
                 }
@@ -501,34 +471,37 @@ export default function OrdersPage() {
                 { event: 'DELETE', schema: 'public', table: 'order_items' },
                 (payload) => {
                     const deletedItemId = (payload.old as { id?: string }).id;
-
                     if (!deletedItemId) return;
-
                     setOrders((currentOrders) =>
                         currentOrders.map((order) => ({
                             ...order,
-                            order_items: order.order_items?.filter(
-                                (item) => item.id !== deletedItemId
-                            ),
+                            order_items: order.order_items?.filter((item) => item.id !== deletedItemId),
                         }))
                     );
                 }
             )
             .on(
                 'postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'orders' },
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'orders',
+                    filter: role === 'rider' ? 'status=eq.delivering' : undefined
+                },
                 async (payload) => {
                     const updatedOrder = payload.new as Order;
 
-                    // If a GCash order was finally paid, grab it and show it to the staff!
-                    if (isPaidEwallet(updatedOrder)) {
-                        const fullOrder = await fetchOrderWithItems(updatedOrder.id);
+                    const fullOrder = await fetchOrderWithItems(updatedOrder.id);
+                    if (!fullOrder) return;
 
+                    // Handle GCash payment updates (Non-rider logic)
+                    if (role !== 'rider' && isPaidEwallet(updatedOrder)) {
+                        const fullOrder = await fetchOrderWithItems(updatedOrder.id);
                         if (fullOrder) {
                             setOrders((current) => {
                                 const exists = current.some(o => o.id === updatedOrder.id);
                                 if (!exists) {
-                                    playNotificationSound(); // Ring the bell ONCE!
+                                    playNotificationSound();
                                     return [...current, fullOrder].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
                                 }
                                 return current;
@@ -536,12 +509,22 @@ export default function OrdersPage() {
                         }
                     }
 
-                    // Process normal status updates
-                    setOrders((currentOrders) =>
-                        currentOrders.map((order) =>
-                            order.id === updatedOrder.id ? { ...order, status: updatedOrder.status } : order
-                        )
-                    );
+                    // Process standard status updates for everyone
+                    setOrders((currentOrders) => {
+                        const isCurrentlyInList = currentOrders.some(o => o.id === updatedOrder.id);
+                        const exists = currentOrders.some(o => o.id === fullOrder.id);
+
+                        if (exists) {
+                            // Update the existing order with the full hydrated data
+                            return currentOrders.map(o => o.id === fullOrder.id ? fullOrder : o);
+                        } else {
+                            // If it's a new order appearing in the list (e.g., just moved to 'delivering'), add it
+                            if (role === 'rider') playNotificationSound();
+                            return [...currentOrders, fullOrder].sort((a, b) =>
+                                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                            );
+                        }
+                    });
                 }
             )
             .subscribe();
@@ -549,7 +532,7 @@ export default function OrdersPage() {
         return () => {
             supabase.removeChannel(orderChannel);
         };
-    }, []);
+    }, [role]);
 
     const updateOrderStatus = async (orderId: string, newStatus: OrderStatus) => {
 
@@ -575,177 +558,184 @@ export default function OrdersPage() {
         <div className="flex flex-row w-full pt-20 2xl:pt-27 bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
 
             {/* PENDING COLUMN */}
-            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start w-full md:w-1/2 xl:w-1/4">
-                <div className='flex items-center gap-2'>
-                    <h2 className="font-bold text-orange-500 mb-4 tracking-wider text-sm">PENDING ({pendingOrders.length})</h2>
-                    <button
-                        onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                        className={`mb-3 flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${notificationsEnabled
-                            ? "bg-green-100 text-green-700 hover:bg-green-200"
-                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
-                    >
-                        {notificationsEnabled ? (
-                            <>
-                                <Bell size={18} />
-                                Alerts ON
-                            </>
-                        ) : (
-                            <>
-                                <BellOff size={18} />
-                                Alerts OFF
-                            </>
-                        )}
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    {pendingOrders.map((order) => {
-                        const hasActionRequired = order.order_items?.some(item => item.status === 'action_required');
-                        return (
-                            <div key={order.id} className="relative border border-orange-500 shadow-sm p-4 rounded-xl">
-                                {/* The PAID Badge */}
-                                {order.is_paid && (
-                                    <div className="absolute top-16 right-4 bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-full text-xs font-black tracking-widest shadow-sm">
-                                        PAID VIA GCASH
-                                    </div>
-                                )}
-                                <div className='flex justify-between mb-3'>
-                                    <div className='flex'>
-                                        <Square fill='orange' strokeWidth={0} />
-                                        <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
-                                    </div>
-                                    <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
-                                    <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
-                                </div>
-
-                                {/* THE WARNING BANNER */}
-                                {hasActionRequired && (
-                                    <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm font-bold flex items-center justify-center animate-pulse">
-                                        ⚠️ Waiting for customer to update items
-                                    </div>
-                                )}
-
-                                <div>
-                                    <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
-                                        <div className='flex gap-2'>
-                                            <Wallet />
-                                            <p className='font-semibold'>{order.payment_method}</p>
+            {role !== "rider" && (
+                <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-orange-500 snap-start w-full md:w-1/2 xl:w-1/4">
+                    <div className='flex items-center gap-2'>
+                        <h2 className="font-bold text-orange-500 mb-4 tracking-wider text-sm">PENDING ({pendingOrders.length})</h2>
+                        <button
+                            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                            className={`mb-3 flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all ${notificationsEnabled
+                                ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                }`}
+                        >
+                            {notificationsEnabled ? (
+                                <>
+                                    <Bell size={18} />
+                                    Alerts ON
+                                </>
+                            ) : (
+                                <>
+                                    <BellOff size={18} />
+                                    Alerts OFF
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    <div className="space-y-4">
+                        {pendingOrders.map((order) => {
+                            const hasActionRequired = order.order_items?.some(item => item.status === 'action_required');
+                            return (
+                                <div key={order.id} className="relative border border-orange-500 shadow-sm p-4 rounded-xl">
+                                    {/* The PAID Badge */}
+                                    {order.is_paid && (
+                                        <div className="absolute top-16 right-4 bg-green-100 text-green-700 border border-green-300 px-3 py-1 rounded-full text-xs font-black tracking-widest shadow-sm">
+                                            PAID VIA GCASH
                                         </div>
-                                        {order.order_type === "delivery" ? (<div className='flex gap-2'>
-                                            <div className='flex gap-2 items-center'>
-                                                <MapPin />
-                                                <p>{order.delivery_address}</p>
-                                            </div>
-                                            <button
-                                                onClick={() => setViewLocation({
-                                                    lat: order.delivery_lat,
-                                                    lng: order.delivery_long,
-                                                    name: `${order.first_name} ${order.last_name}`
-                                                })}
-                                                className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
-                                            >
-                                                View Map
-                                            </button>
-                                        </div>) : (<div className='flex gap-2'>
-                                            <HandPlatter />
-                                            <p>Pick-up {order.pickup_time}</p>
-                                        </div>)}
-                                        <div className='flex gap-2'>
-                                            <Phone />
-                                            <p>{order.contact}</p>
+                                    )}
+                                    <div className='flex justify-between mb-3'>
+                                        <div className='flex'>
+                                            <Square fill='orange' strokeWidth={0} />
+                                            <p className="font-bold text-gray-800">{order.first_name} {order.last_name}</p>
                                         </div>
-                                        <div className='flex gap-2'>
-                                            <Coins />
-                                            <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
-                                        </div>
-                                        <div hidden={order.order_type === "pickup"}>
-                                            <button onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
-                                            <div hidden={showedNote !== order.id}>{order.customer_note}</div>
-                                        </div>
-                                    </div>
-                                    <div className='mt-2'>
-                                        <p className='text-md font-semibold'>ORDERS</p>
-                                        {(order.order_items || [])
-                                            .filter((item) => item.status !== 'action_required')
-                                            .map((item, index) => (
-                                                <div className='flex justify-between border-b py-2 gap-2' key={index}>
-                                                    <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
-                                                    <p className='flex-grow'>{item.product.name}</p>
-                                                    <p className='font-semibold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
-                                                    <SquareX
-                                                        className='h-8 w-8'
-                                                        strokeWidth={1}
-                                                        fill='red'
-                                                        onClick={() => {
-                                                            setItemToRemove(item);
-                                                            setOrderIdItemToRemove(order.id);
-                                                            setIsDeletingItem(true);
-                                                        }}
-                                                    />
-                                                </div>
-
-                                            ))}
-                                        {order.order_type === "delivery" && (
-                                            <div className='flex justify-between ml-10 py-2'>
-                                                <p>Delivery Fee</p>
-                                                <p className='font-semibold'>₱49</p>
-                                            </div>
+                                        <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</p>
+                                        {role === "owner" && (
+                                            <X className='cursor-pointer hover:bg-kae-dark hover:text-kae-light rounded-full transition-colors duration-300' onClick={() => setOrderToDelete(order)} />
                                         )}
+
+                                    </div>
+
+                                    {/* THE WARNING BANNER */}
+                                    {hasActionRequired && (
+                                        <div className="bg-red-100 border border-red-300 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm font-bold flex items-center justify-center animate-pulse">
+                                            ⚠️ Waiting for customer to update items
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <div className='flex flex-col gap-2 border-t border-orange-500 py-2'>
+                                            <div className='flex gap-2'>
+                                                <Wallet />
+                                                <p className='font-semibold'>{order.payment_method}</p>
+                                            </div>
+                                            {order.order_type === "delivery" ? (<div className='flex gap-2'>
+                                                <div className='flex gap-2 items-center'>
+                                                    <MapPin />
+                                                    <p>{order.delivery_address}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setViewLocation({
+                                                        lat: order.delivery_lat,
+                                                        lng: order.delivery_long,
+                                                        name: `${order.first_name} ${order.last_name}`
+                                                    })}
+                                                    className="cursor-pointer hover:text-kae-light hover:bg-blue-600 rounded-lg transition-colors duration-300 text-blue-600 font-bold text-sm px-3 py-2"
+                                                >
+                                                    View Map
+                                                </button>
+                                            </div>) : (<div className='flex gap-2'>
+                                                <HandPlatter />
+                                                <p>Pick-up {order.pickup_time}</p>
+                                            </div>)}
+                                            <div className='flex gap-2'>
+                                                <Phone />
+                                                <p>{order.contact}</p>
+                                            </div>
+                                            <div className='flex gap-2'>
+                                                <Coins />
+                                                <p className='font-bold text-xl'>₱{calculateTotal(order)}</p>
+                                            </div>
+                                            <div hidden={order.order_type === "pickup"}>
+                                                <button onClick={() => toggleCustomerNote(order.id)}>{showedNote === order.id ? "Hide note" : "Show note"}</button>
+                                                <div hidden={showedNote !== order.id}>{order.customer_note}</div>
+                                            </div>
+                                        </div>
+                                        <div className='mt-2'>
+                                            <p className='text-md font-semibold'>ORDERS</p>
+                                            {(order.order_items || [])
+                                                .filter((item) => item.status !== 'action_required')
+                                                .map((item, index) => (
+                                                    <div className='flex justify-between border-b py-2 gap-2' key={index}>
+                                                        <p className='px-2 bg-kae-dark text-kae-light rounded-full h-max content-center'>{item.quantity}x</p>
+                                                        <p className='flex-grow'>{item.product.name}</p>
+                                                        <p className='font-semibold'>₱{((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}</p>
+                                                        <SquareX
+                                                            className='h-8 w-8'
+                                                            strokeWidth={1}
+                                                            fill='red'
+                                                            onClick={() => {
+                                                                setItemToRemove(item);
+                                                                setOrderIdItemToRemove(order.id);
+                                                                setIsDeletingItem(true);
+                                                            }}
+                                                        />
+                                                    </div>
+
+                                                ))}
+                                            {order.order_type === "delivery" && (
+                                                <div className='flex justify-between ml-10 py-2'>
+                                                    <p>Delivery Fee</p>
+                                                    <p className='font-semibold'>₱49</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className='flex gap-2'>
+                                        <button
+                                            onClick={() => updateOrderStatus(order.id, 'cooking')}
+                                            disabled={hasActionRequired}
+                                            className={`w-full mt-3 font-bold py-2 rounded-lg transition-colors duration-300 ${hasActionRequired ? 'bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400' : 'bg-orange-400 text-kae-light hover:bg-orange-600'}`}
+                                        >
+                                            START COOKING
+                                        </button>
                                     </div>
                                 </div>
-                                <div className='flex gap-2'>
-                                    <button onClick={() => setEditingOrder(order)}
-                                        className='hover:text-kae-light hover:bg-orange-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-orange-500 border-1 border-orange-500 font-bold py-2 px-4 rounded-lg transition-colors'>
-                                        EDIT
-                                    </button>
-                                    <button
-                                        onClick={() => updateOrderStatus(order.id, 'cooking')}
-                                        disabled={hasActionRequired}
-                                        className={`w-full mt-3 font-bold py-2 rounded-lg transition-colors duration-300 ${hasActionRequired ? 'bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400' : 'bg-orange-400 text-kae-light hover:bg-orange-600'}`}
-                                    >
-                                        START COOKING
-                                    </button>
-                                </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* COOKING COLUMN */}
-            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-purple-600 snap-start w-full md:w-1/2 xl:w-1/4">
-                <h2 className="font-bold text-purple-600 mb-4 tracking-wider text-sm">COOKING ({cookingOrders.length})</h2>
-                <div className="space-y-4">
-                    {cookingOrders.map((order) => (
-                        renderOrderCard(order, {
-                            label: getCookingAction(order).label,
-                            className: "w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
-                            onClick: () => updateOrderStatus(order.id, getCookingAction(order).nextStatus),
-                        }, {
-                            squareFill: "purple", className: 'hover:text-kae-light hover:bg-purple-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-purple-500 border-1 border-purple-500 font-bold py-2 px-4 rounded-lg transition-colors',
-                            primaryClassname: "hover:bg-purple-800 w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
-                        })
-                    ))}
+            {role !== "rider" && (
+                <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-purple-600 snap-start w-full md:w-1/2 xl:w-1/4">
+                    <h2 className="font-bold text-purple-600 mb-4 tracking-wider text-sm">COOKING ({cookingOrders.length})</h2>
+                    <div className="space-y-4">
+                        {cookingOrders.map((order) => (
+                            renderOrderCard(order, {
+                                label: getCookingAction(order).label,
+                                className: "w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
+                                onClick: () => updateOrderStatus(order.id, getCookingAction(order).nextStatus),
+                            }, {
+                                squareFill: "purple", className: 'hover:text-kae-light hover:bg-purple-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-purple-500 border-1 border-purple-500 font-bold py-2 px-4 rounded-lg transition-colors',
+                                primaryClassname: "hover:bg-purple-800 w-full mt-3 bg-purple-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
+                            })
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
+
 
             {/* PREPARED COLUMN */}
-            <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-blue-500 snap-start w-full md:w-1/2 xl:w-1/4">
-                <h2 className="font-bold text-blue-500 mb-4 tracking-wider text-sm">PREPARED ({preparedOrders.length})</h2>
-                <div className="space-y-4">
-                    {preparedOrders.map((order) => (
-                        renderOrderCard(order, {
-                            label: 'SEND TO DELIVERY',
-                            className: "w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
-                            onClick: () => updateOrderStatus(order.id, 'delivering')
+            {role !== "rider" && (
+                <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-blue-500 snap-start w-full md:w-1/2 xl:w-1/4">
+                    <h2 className="font-bold text-blue-500 mb-4 tracking-wider text-sm">PREPARED ({preparedOrders.length})</h2>
+                    <div className="space-y-4">
+                        {preparedOrders.map((order) => (
+                            renderOrderCard(order, {
+                                label: 'SEND TO DELIVERY',
+                                className: "w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors",
+                                onClick: () => updateOrderStatus(order.id, 'delivering')
 
-                        }, {
-                            squareFill: "blue", className: 'hover:text-kae-light hover:bg-blue-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-blue-500 border-1 border-blue-500 font-bold py-2 px-4 rounded-lg transition-colors',
-                            primaryClassname: "hover:bg-blue-800 w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
-                        })
-                    ))}
+                            }, {
+                                squareFill: "blue", className: 'hover:text-kae-light hover:bg-blue-500 transition-colors duration-300 cursor-pointer mt-3 bg-kae-light text-blue-500 border-1 border-blue-500 font-bold py-2 px-4 rounded-lg transition-colors',
+                                primaryClassname: "hover:bg-blue-800 w-full mt-3 bg-blue-600 text-kae-light font-bold py-2 rounded-lg transition-colors duration-300"
+                            })
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
+
 
             {/* DELIVERING COLUMN */}
             <div className="flex-shrink-0 bg-white rounded-lg shadow-sm p-4 border-t-4 border-green-500 snap-start w-full md:w-1/2 xl:w-1/4">
@@ -764,6 +754,7 @@ export default function OrdersPage() {
                     ))}
                 </div>
             </div>
+
             {orderToDelete && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl flex flex-col items-center text-center">
@@ -796,15 +787,6 @@ export default function OrdersPage() {
                         </div>
                     </div>
                 </div>
-            )}
-            {/* THE EDIT OVERLAY */}
-            {editingOrder && (
-                <EditOrderModal
-                    order={editingOrder}
-                    catalog={catalog}
-                    onClose={() => setEditingOrder(null)}
-                    onConfirm={handleEditOrder}
-                />
             )}
             {/* Map Overlay */}
             {viewLocation && (
