@@ -224,6 +224,12 @@ export async function loginAdmin(prevState: any, formData: FormData) {
 }
 
 export async function updateOrderAction(orderId: string, newStatus: string) {
+
+    const user = await getAuthenticatedUser();
+    if (user?.role === "rider") {
+        return { success: false }
+    }
+
     const supabase = await createServerClient(true);
 
     const { data, error } = await supabase
@@ -300,7 +306,14 @@ export async function editOrderItemsAction(orderId: string, newItems: { productI
 }
 
 export async function addCategoryAction(name: string) {
+
     const supabase = await createServerClient(true);
+    const user = await getAuthenticatedUser();
+
+    if (user?.role !== "owner") {
+        return { success: false }
+    }
+
     const { data, error } = await supabase
         .from('product_category')
         .insert([{ name }])
@@ -325,7 +338,14 @@ export async function upsertProductAction(productData: any) {
 }
 
 export async function toggleProductAvailabilityAction(productId: string, isAvailable: boolean) {
+
     const supabase = await createServerClient(true);
+    const user = await getAuthenticatedUser();
+
+    if (user?.role !== "owner") {
+        return { success: false }
+    }
+
     const { error } = await supabase
         .from('product')
         .update({ is_available: !isAvailable })
@@ -367,6 +387,7 @@ export async function toggleStoreStatusAction(newStatus: boolean) {
 }
 
 export async function archiveOrder(orderId: string) {
+
     const supabase = await createServerClient();
 
     const { error } = await supabase
@@ -381,8 +402,15 @@ export async function archiveOrder(orderId: string) {
 }
 
 export async function deleteMenuItem(product: Product | null) {
-    if (!product) return
+
     const supabase = await createServerClient(true);
+    const user = await getAuthenticatedUser();
+
+    if (user?.role !== "owner") {
+        return { success: false }
+    }
+
+    if (!product) return
 
     const { error } = await supabase
         .from("product")
@@ -463,7 +491,11 @@ export async function logout() {
 //Delete Category
 export async function deleteCategory(categoryId: string) {
     const supabase = await createServerClient();
+    const user = await getAuthenticatedUser();
 
+    if (user?.role !== "owner") {
+        return { success: false }
+    }
     try {
         const { error: deleteError } = await supabase
             .from('product_category')
