@@ -3,7 +3,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Coins, Download, Han
 import { useEffect, useState, useMemo } from "react";
 import { Order } from "../orders/page";
 import { createClient } from "@/../lib/supabase";
-import { permaDeleteOrder } from "@/app/actions";
+import { archiveOrder } from "@/app/actions";
 import { useRouter } from "next/navigation";
 
 export interface OrderItem {
@@ -266,7 +266,7 @@ export default function HistoryPage() {
 
         setOrderToDelete(null);
 
-        const result = await permaDeleteOrder(targetId);
+        const result = await archiveOrder(targetId);
 
         if (result?.error) {
             setOrders(previousOrders);

@@ -326,19 +326,18 @@ export async function toggleStoreStatusAction(newStatus: boolean) {
     return { success: true };
 }
 
-export async function permaDeleteOrder(orderId: string | null) {
-    if (!orderId) return;
+export async function archiveOrder(orderId: string) {
+    const supabase = await createServerClient();
 
-    const supabase = await createServerClient(true);
     const { error } = await supabase
-        .from("orders")
-        .delete()
-        .eq("id", orderId)
+        .from('orders')
+        .update({ is_archived: true })
+        .eq('id', orderId);
 
-    if (error) {
-        return { success: false, error: error }
-    }
-    return { success: true }
+    if (error) return { success: false, error: error };
+
+    revalidatePath('/history'); // Refresh the page
+    return { success: true };
 }
 
 export async function deleteMenuItem(product: Product | null) {
