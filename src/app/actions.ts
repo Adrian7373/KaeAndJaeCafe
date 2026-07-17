@@ -443,3 +443,25 @@ export async function deleteCategory(categoryId: string) {
         return { success: false, error: error.message };
     }
 }
+
+// Get user ROLE
+export async function getCurrentUser() {
+    const supabase = await createServerClient();
+
+    // 1. Get the authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return null;
+
+    // 2. Fetch their specific role from the profiles table
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    return {
+        id: user.id,
+        email: user.email,
+        role: profile?.role || 'rider' // Default to lowest privilege for safety
+    };
+}
