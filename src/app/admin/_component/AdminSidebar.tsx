@@ -139,7 +139,7 @@ export default function AdminSideBar({ role }: AdminSidebarProps) {
 
                     {/* Vertical Divider */}
                     <div className="w-px h-8 bg-kae-dark/20 mx-2 block"></div>
-                    {role === "admin" && (
+                    {role === "owner" && (
                         <StoreStatusToggle />
                     )}
 
@@ -197,7 +197,7 @@ export default function AdminSideBar({ role }: AdminSidebarProps) {
                         <p>{userFeedback}</p>
                     </div>
                 )}
-                {role === "admin" && (
+                {role === "owner" && (
                     <StoreStatusToggle isMobile={true} />
                 )}
                 <button onClick={logoutUser} className="cursor-pointer hover:bg-red-500 hover:text-kae-light transition-colors duraion-300 rounded-full text-red-500 font-black flex text-sm justify-center gap-2 items-center px-2 mx-4 py-3 mb-2">
