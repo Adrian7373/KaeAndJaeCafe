@@ -1,6 +1,5 @@
 "use server";
 import { createServerClient } from "../../lib/supabase-server";
-import { CartItem } from "../../context/CartContext";
 import z, { success } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -174,15 +173,24 @@ export async function placeOrder(prevState: any, formData: FormData): Promise<an
 }
 
 export async function loginAdmin(prevState: any, formData: FormData) {
+    const role = formData.get("role");
     const password = formData.get("password") as string;
-    const email = process.env.ADMIN_EMAIL;
+    let email = "";
+
+    if (role === "admin") {
+        email = process.env.ADMIN_EMAIL || "";
+    } else if (role === "cashier") {
+        email = process.env.CASHIER_EMAIL || "";
+    } else if (role === "rider") {
+        email = process.env.RIDER_EMAIL || "";
+    }
 
     if (!email) {
         return { error: "Server configuration error" }
     }
 
     const supabase = await createServerClient(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password
     })
@@ -191,7 +199,27 @@ export async function loginAdmin(prevState: any, formData: FormData) {
         return { error: "Invalid password" }
     }
 
-    redirect("/admin/dashboard")
+    const userId = data.user.id
+    const { data: authenticatedRole, error: roleError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+
+    if (!authenticatedRole) {
+        const { error } = await supabase.auth.signOut();
+
+        if (error) {
+            return { error: `Failed to logout user` + error }
+        }
+        redirect("/login")
+    }
+
+    if (authenticatedRole.role === "rider") {
+        redirect("/admin/orders")
+    } else {
+        redirect("/admin/dashboard")
+    }
 
 }
 
@@ -213,6 +241,11 @@ export async function updateOrderAction(orderId: string, newStatus: string) {
 
 export async function cancelOrderAction(orderId: string) {
     const supabase = await createServerClient(true);
+    const user = await getAuthenticatedUser();
+
+    if (user?.role !== "owner") {
+        return { success: false }
+    }
 
     const { data, error } = await supabase
         .from('orders')
@@ -316,6 +349,13 @@ export async function getStoreStatusAction() {
 
 // Flip the switch
 export async function toggleStoreStatusAction(newStatus: boolean) {
+
+    const user = await getAuthenticatedUser();
+
+    if (user?.role !== "owner") {
+        return { success: false }
+    }
+
     const supabase = await createServerClient(true);
     const { error } = await supabase
         .from('store_settings')
@@ -459,9 +499,31 @@ export async function getCurrentUser() {
         .eq('id', user.id)
         .single();
 
+    const role = profile as unknown as { role: string };
+
+    if (!profile) {
+        const { error } = await supabase.auth.signOut();
+        redirect("/login")
+    }
+
     return {
         id: user.id,
         email: user.email,
-        role: profile?.role || 'rider' // Default to lowest privilege for safety
+        role: role.role || 'rider' // Default to lowest privilege for safety
+    };
+}
+
+//Authentication and role recognition action
+export async function getAuthenticatedUser() {
+    const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    // We assume you have set the role in app_metadata via set_claim
+    return {
+        id: user.id,
+        email: user.email,
+        role: user.app_metadata.role || 'rider'
     };
 }
