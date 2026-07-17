@@ -1,10 +1,10 @@
 "use client";
 
-import { Menu, Store, X } from "lucide-react";
+import { LogOut, Menu, Store, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getStoreStatusAction, toggleStoreStatusAction } from "@/app/actions";
+import { getStoreStatusAction, toggleStoreStatusAction, logout } from "@/app/actions";
 
 export default function AdminSideBar() {
     const pathname = usePathname();
@@ -12,6 +12,8 @@ export default function AdminSideBar() {
     const [isAcceptingOrders, setIsAcceptingOrders] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [userFeedback, setUserFeedback] = useState("");
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -46,6 +48,16 @@ export default function AdminSideBar() {
             setIsAcceptingOrders(!newStatus); // Revert on fail
         }
     };
+
+    const logoutUser = async () => {
+        setIsLoggingOut(true);
+
+        const response = await logout();
+
+        if (response.error) {
+            setUserFeedback(response.error)
+        }
+    }
 
     // Reusable Toggle Button Component to avoid code duplication
     const StoreStatusToggle = ({ isMobile = false }: { isMobile?: boolean }) => (
@@ -107,6 +119,10 @@ export default function AdminSideBar() {
 
                     {/* Desktop Store Status Toggle */}
                     <StoreStatusToggle />
+                    <button className="text-red-500 font-black flex text-sm justify-center items-center px-2">
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                    </button>
                 </div>
             </nav>
 
@@ -149,10 +165,20 @@ export default function AdminSideBar() {
                             </Link>
                         );
                     })}
-                </div>
 
+                </div>
                 {/* Mobile Store Status Toggle */}
+                {userFeedback && (
+                    <div className="p-4 font-semibold">
+                        <p>{userFeedback}</p>
+                    </div>
+                )}
                 <StoreStatusToggle isMobile={true} />
+                <button onClick={logoutUser} className="cursor-pointer hover:bg-red-500 hover:text-kae-light transition-colors duraion-300 rounded-full text-red-500 font-black flex text-sm justify-center gap-2 items-center px-2 mx-4 py-3 mb-2">
+                    {isLoggingOut ? <div className="rounded-full border-red-600 border-t-transparent animate-spin w-5 h-5 border-2"></div> : <LogOut className="h-4 w-4" />}
+                    Logout
+                </button>
+
             </div>
         </header>
     );

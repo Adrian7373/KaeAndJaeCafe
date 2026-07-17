@@ -406,3 +406,16 @@ export async function ReplaceOrderItem(itemToReplaceId: string, newProductId: st
     }
     return { success: true }
 }
+
+//Logout action
+export async function logout() {
+    const supabase = await createServerClient();
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+        return { error: `Failed to logout user` + error }
+    }
+
+    redirect('/login');
+}
