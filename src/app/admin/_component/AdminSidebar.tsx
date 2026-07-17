@@ -6,7 +6,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getStoreStatusAction, toggleStoreStatusAction, logout } from "@/app/actions";
 
-export default function AdminSideBar() {
+interface AdminSidebarProps {
+    role?: string | undefined;
+}
+
+interface Tab {
+    name: string,
+    href: string
+}
+
+export default function AdminSideBar({ role }: AdminSidebarProps) {
     const pathname = usePathname();
 
     const [isAcceptingOrders, setIsAcceptingOrders] = useState(true);
@@ -24,12 +33,26 @@ export default function AdminSideBar() {
         fetchStatus();
     }, []);
 
-    const tabs = [
-        { name: "Dashboard", href: "/admin/dashboard" },
-        { name: "Orders", href: "/admin/orders" },
-        { name: "Menu Management", href: "/admin/manage_menu" },
-        { name: "Order History", href: "/admin/history" }
-    ];
+    let tabs: Tab[] = []
+
+    if (role === "rider") {
+        tabs = [
+            { name: "Orders", href: "/admin/orders" },
+        ];
+    } else if (role === "cashier") {
+        tabs = [
+            { name: "Dashboard", href: "/admin/dashboard" },
+            { name: "Orders", href: "/admin/orders" },
+            { name: "Order History", href: "/admin/history" }
+        ];
+    } else if (role === "owner") {
+        tabs = [
+            { name: "Dashboard", href: "/admin/dashboard" },
+            { name: "Orders", href: "/admin/orders" },
+            { name: "Menu Management", href: "/admin/manage_menu" },
+            { name: "Order History", href: "/admin/history" }
+        ];
+    }
 
     const toggleMenu = () => {
         setIsOpen(!isOpen);
@@ -116,9 +139,10 @@ export default function AdminSideBar() {
 
                     {/* Vertical Divider */}
                     <div className="w-px h-8 bg-kae-dark/20 mx-2 block"></div>
+                    {role === "admin" && (
+                        <StoreStatusToggle />
+                    )}
 
-                    {/* Desktop Store Status Toggle */}
-                    <StoreStatusToggle />
                     <button onClick={logoutUser} className="cursor-pointer hover:bg-red-500 hover:text-kae-light transition-colors duraion-300 rounded-full text-red-500 font-black flex text-sm justify-center gap-2 items-center px-2 mx-4 py-3 mb-2">
                         {isLoggingOut ? <div className="rounded-full border-red-600 border-t-transparent animate-spin w-5 h-5 border-2"></div> : <LogOut className="h-4 w-4" />}
                         Logout
@@ -173,7 +197,9 @@ export default function AdminSideBar() {
                         <p>{userFeedback}</p>
                     </div>
                 )}
-                <StoreStatusToggle isMobile={true} />
+                {role === "admin" && (
+                    <StoreStatusToggle isMobile={true} />
+                )}
                 <button onClick={logoutUser} className="cursor-pointer hover:bg-red-500 hover:text-kae-light transition-colors duraion-300 rounded-full text-red-500 font-black flex text-sm justify-center gap-2 items-center px-2 mx-4 py-3 mb-2">
                     {isLoggingOut ? <div className="rounded-full border-red-600 border-t-transparent animate-spin w-5 h-5 border-2"></div> : <LogOut className="h-4 w-4" />}
                     Logout
