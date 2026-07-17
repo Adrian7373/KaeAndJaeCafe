@@ -5,6 +5,7 @@ import z, { success } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { Product } from "./admin/manage_menu/page";
+import { revalidatePath } from "next/cache";
 
 
 const checkOutSchema = z.object({
@@ -418,4 +419,28 @@ export async function logout() {
     }
 
     redirect('/login');
+}
+
+//Delete Category
+export async function deleteCategory(categoryId: string) {
+    const supabase = await createServerClient();
+
+    try {
+        const { error: deleteError } = await supabase
+            .from('product_category')
+            .delete()
+            .eq('id', categoryId);
+
+        if (deleteError) {
+            throw new Error(`Failed to delete category: ${deleteError.message}`);
+        }
+
+        // Refresh the manage menu page so the category disappears
+        revalidatePath('/manage_menu');
+        return { success: true };
+
+    } catch (error: any) {
+        console.error("DELETE_CATEGORY_ERROR:", error);
+        return { success: false, error: error.message };
+    }
 }
