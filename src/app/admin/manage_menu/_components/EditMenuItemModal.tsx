@@ -39,8 +39,8 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
     };
 
     const handleSaveClick = async () => {
-        if (!name || !price || !categoryId) {
-            alert("Name, Price, and Category are required.");
+        if (!name || !price) {
+            alert("Name and Price are required.");
             return;
         }
 
@@ -52,7 +52,7 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
             price: parseFloat(price),
             discount_price: discountPrice ? parseFloat(discountPrice) : null,
             est_prep_time: prepTime,
-            category_id: categoryId,
+            category_id: categoryId || null,
 
         };
 

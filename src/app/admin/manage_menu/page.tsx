@@ -20,6 +20,7 @@ export interface Product {
     est_prep_time: string,
     product_category?: {
         id: string
+        name: string
     }
 }
 
@@ -77,7 +78,7 @@ export default function MenuManagementPage() {
         const fetchMenuData = async () => {
             const [catRes, prodRes] = await Promise.all([
                 supabase.from("product_category").select("name, id"),
-                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(id)").eq("is_archived", false)
+                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(id, name)").eq("is_archived", false)
             ]);
 
             if (catRes.data) {
@@ -271,6 +272,7 @@ export default function MenuManagementPage() {
                         <div className="flex flex-col gap-2">
                             <p className="font-semibold text-lg md:text-xl">{product.name}</p>
                             <div className="flex flex-col gap-1 md:text-lg">
+                                <p>Category: {product.product_category?.name || "None"}</p>
                                 <p>Price: ₱{product.price}</p>
                                 <p>Discount Price: ₱{product.discount_price}</p>
                                 <p>Preparation Time: {product.est_prep_time} mins</p>
