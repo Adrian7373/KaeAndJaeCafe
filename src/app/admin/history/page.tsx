@@ -19,6 +19,7 @@ export interface HistoricalOrder {
     order_type: string;
     first_name: string;
     last_name: string;
+    delivery_fee: number;
     payment_method: string;
     order_items: OrderItem[];
 }
@@ -64,14 +65,14 @@ export default function HistoryPage() {
 
     const [selectedOrder, setSelectedOrder] = useState<HistoricalOrder | null>(null);
 
-    const calculateOrderTotal = (orderItems: OrderItem[] | undefined, orderType: string) => {
+    const calculateOrderTotal = (orderItems: OrderItem[] | undefined, orderType: string, deliveryFee?: number) => {
         const subtotal = (orderItems ?? []).reduce((total, item) => {
             return total + Number(item.quantity) * Number(item.price_at_checkout);
         }, 0);
         if (orderType === "delivery") {
-            return subtotal + 49
+            return subtotal + (Number(deliveryFee) || 0); // <-- USE DYNAMIC FEE
         }
-        return subtotal
+        return subtotal;
     };
 
     const handleExportCSV = async () => {
@@ -124,7 +125,7 @@ export default function HistoryPage() {
                 const date = new Date(order.created_at).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
                 const customer = `${order.first_name} ${order.last_name}`;
 
-                const total = calculateOrderTotal(order.order_items, order.order_type);
+                const total = calculateOrderTotal(order.order_items, order.order_type, order.delivery_fee);
 
                 const items = order.order_items?.map((item: any) =>
                     `${item.quantity}x ${item.product.name}`
@@ -181,7 +182,7 @@ export default function HistoryPage() {
             let query = supabase
                 .from("orders")
                 .select(`
-                    id, created_at, status, order_type, first_name, last_name, payment_method,
+                    id, created_at, status, order_type, first_name, delivery_fee, last_name, payment_method,
                     order_items ( quantity, price_at_checkout, product ( name, price ) )
                 `, { count: "exact" })
                 .in("status", ["success", "cancelled"]);
@@ -379,7 +380,7 @@ export default function HistoryPage() {
                                             </div>
                                             <div className="flex gap-1">
                                                 <Coins />
-                                                <p>₱{calculateOrderTotal(order.order_items, order.order_type)}</p>
+                                                <p>₱{calculateOrderTotal(order.order_items, order.order_type, order.delivery_fee).toFixed(2)}</p>
                                             </div>
                                         </div>
                                         <div
@@ -400,9 +401,9 @@ export default function HistoryPage() {
                                                     </div>
                                                 ))}
                                                 {order.order_type === "delivery" && (
-                                                    <div className="flex justify-between py-2">
-                                                        <p>Delivery fee</p>
-                                                        <p className="font-bold">₱49</p>
+                                                    <div className="flex justify-between py-2 border-t border-gray-100">
+                                                        <p className="text-gray-700 font-medium">Delivery fee</p>
+                                                        <p className="font-bold text-gray-800">₱{Number(order.delivery_fee || 0).toFixed(2)}</p>
                                                     </div>
                                                 )}
                                             </div>
