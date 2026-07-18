@@ -318,6 +318,16 @@ export default function OrdersPage() {
                         )}
                     </div>
                 </div>
+                {role === 'rider' && order.order_type === 'delivery' && order.delivery_lat && order.delivery_long && (
+                    <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${order.delivery_lat},${order.delivery_long}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors min-w-[140px]"
+                    >
+                        <MapPin size={18} /> Navigate
+                    </a>
+                )}
                 {role !== "rider" && (
                     <div className='flex gap-2'>
                         <button

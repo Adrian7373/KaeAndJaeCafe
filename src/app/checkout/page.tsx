@@ -327,5 +327,5 @@ export function determineDeliveryFee(customerLat: number, customerLng: number) {
     if (distanceKm <= 4) return 59;
     if (distanceKm <= 4.5) return 65;
     if (distanceKm <= 5) return 69;
-    return 75;                      // Very far / Max fee
+    return 84;                      // Very far / Max fee
 }
