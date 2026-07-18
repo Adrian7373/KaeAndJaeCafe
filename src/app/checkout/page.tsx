@@ -23,6 +23,7 @@ export default function CheckoutPage() {
     const [locationError, setLocationError] = useState("");
     const [isLocating, setIsLocating] = useState(false);
     const [deliveryFee, setDeliveryFee] = useState(0);
+    const [isOutOfRange, setIsOutOfRange] = useState(false);
 
     // --- FORM STATES ---
     const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
@@ -47,12 +48,18 @@ export default function CheckoutPage() {
 
     {/* Delivery fee calculation */ }
     const handleLocationSelected = (lat: number, lng: number) => {
-        // 1. Update the map pin location
         setCoordinates({ lat, lng });
 
-        // 2. Calculate and set the new fee
         const calculatedFee = determineDeliveryFee(lat, lng);
-        setDeliveryFee(calculatedFee);
+
+        // Check if they are out of range
+        if (calculatedFee === -1) {
+            setIsOutOfRange(true);
+            setDeliveryFee(0);
+        } else {
+            setIsOutOfRange(false);
+            setDeliveryFee(calculatedFee);
+        }
     };
 
 
@@ -74,7 +81,13 @@ export default function CheckoutPage() {
                 setCoordinates(actualCoords);
 
                 const initialFee = determineDeliveryFee(actualCoords.lat, actualCoords.lng);
-                setDeliveryFee(initialFee);
+                if (initialFee === -1) {
+                    setIsOutOfRange(true);
+                    setDeliveryFee(0);
+                } else {
+                    setIsOutOfRange(false);
+                    setDeliveryFee(initialFee);
+                }
 
                 setIsLocationVerified(true);
                 setIsLocating(false);
@@ -230,8 +243,14 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* Floating Checkout Footer */}
-                        {/* Floating Checkout Footer */}
                         <div className="fixed flex flex-col justify-center gap-3 bottom-0 inset-x-0 mx-auto w-full max-w-2xl px-4 py-4 bg-white border-t sm:border-x border-gray-200 z-45 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] sm:rounded-t-2xl">
+
+                            {isDelivery && isOutOfRange && (
+                                <div className="bg-red-100 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 shadow-sm text-center">
+                                    ⚠️ You are outside our 10km delivery zone. Please move the pin closer or select Pick-Up.
+                                </div>
+                            )}
+
                             {state?.error && (
                                 <div className="bg-red-100 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 shadow-sm animate-in fade-in slide-in-from-bottom-2">
                                     ⚠️ {state.error}
@@ -244,14 +263,18 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="flex justify-between font-medium">
                                     <p>Delivery Fee</p>
-                                    <p>{cart.length === 0 || !isDelivery ? "₱0" : `₱${deliveryFee}`}</p>
+                                    <p>
+                                        {!isDelivery ? "₱0"
+                                            : isOutOfRange ? <span className="text-red-500 font-bold">Out of Range</span>
+                                                : `₱${deliveryFee}`}
+                                    </p>
                                 </div>
                                 <div className="flex justify-between font-black text-kae-dark text-lg pt-1 border-t border-gray-200 mt-1">
                                     <p>Total</p>
-                                    <p>{cart.length === 0 ? "₱0" : isDelivery ? `₱${totalPrice + deliveryFee}` : `₱${totalPrice}`}</p>
+                                    <p>{cart.length === 0 ? "₱0" : (isDelivery && !isOutOfRange) ? `₱${totalPrice + deliveryFee}` : `₱${totalPrice}`}</p>
                                 </div>
                             </div>
-                            <button disabled={cart.length === 0 || isPending} type="submit" className={`flex justify-center gap-2 items-center px-6 py-4 text-white font-bold text-xl rounded-xl transition-all ${cart.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-kae-dark hover:bg-gray-800 shadow-lg active:scale-95"}`}>
+                            <button disabled={cart.length === 0 || isPending || (isDelivery && isOutOfRange)} type="submit" className={`flex justify-center gap-2 items-center px-6 py-4 text-white font-bold text-xl rounded-xl transition-all ${cart.length === 0 || (isDelivery && isOutOfRange) ? "bg-gray-400 cursor-not-allowed" : "bg-kae-dark hover:bg-gray-800 shadow-lg active:scale-95"}`}>
                                 {isPending && <div className="rounded-full border-white border-t-transparent animate-spin w-5 h-5 border-2"></div>}
                                 Place Order
                             </button>
@@ -290,6 +313,8 @@ export function determineDeliveryFee(customerLat: number, customerLng: number) {
     const CAFE_LNG = 121.035926;
 
     const distanceKm = getDistanceFromLatLonInKm(CAFE_LAT, CAFE_LNG, customerLat, customerLng);
+
+    if (distanceKm > 7) return -1;
 
     // Dynamic brackets (Adjust these numbers to what the cafe wants)
     if (distanceKm <= 0.5) return 25;  // Near (Near base fee)
