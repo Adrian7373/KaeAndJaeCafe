@@ -50,7 +50,8 @@ export default function AdminSideBar({ role }: AdminSidebarProps) {
             { name: "Dashboard", href: "/admin/dashboard" },
             { name: "Orders", href: "/admin/orders" },
             { name: "Menu Management", href: "/admin/manage_menu" },
-            { name: "Order History", href: "/admin/history" }
+            { name: "Order History", href: "/admin/history" },
+            { name: "Settings", href: "/admin/settings" }
         ];
     }
 

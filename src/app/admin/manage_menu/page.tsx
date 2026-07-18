@@ -260,7 +260,7 @@ export default function MenuManagementPage() {
                 <div className="flex px-4 gap-2 justify-center lg:pt-24 2xl:pt-30">
                     <DeleteCategoryModal categories={categories} />
                     <button onClick={() => setIsAddingCategory(true)} className="hover:bg-green-600 hover:text-kae-light transition-colors duration-300 cursor-pointer bg-transparent px-2 py-4 my-5 flex content-center justify-center items-center text-green-600 rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Category</button>
-                    <button onClick={() => setItemToEdit({})} className="cursor-pointer hover:bg-green-800 transition-colors duration-300 bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600 lg:my-0"><Plus /> Add new Item</button>
+                    <button onClick={() => setItemToEdit({})} className="cursor-pointer hover:bg-green-800 transition-colors duration-300 bg-green-600 px-6 py-4 my-5 flex content-center justify-center items-center text-kae-light rounded-xl border-1 border-green-600 lg:my-0 gap-3"><Plus /> Add new Item</button>
                 </div>
             </div>
             {/* Menu Catalog */}
