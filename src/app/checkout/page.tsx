@@ -6,6 +6,7 @@ import { useCart } from "../../../context/CartContext";
 import { useRouter } from "next/navigation";
 import { placeOrder } from "../actions";
 import dynamic from "next/dynamic";
+import { createClient } from "../../../lib/supabase";
 
 const LocationMap = dynamic(() => import("./_components/MapPicker"), {
     ssr: false,
@@ -17,6 +18,9 @@ const LocationMap = dynamic(() => import("./_components/MapPicker"), {
 });
 
 export default function CheckoutPage() {
+
+    const supabase = createClient();
+
     // --- LOCATION STATES ---
     const [hardwareGPS, setHardwareGPS] = useState<{ lat: number; lng: number; accuracy: number } | null>(null);
     const [isLocationVerified, setIsLocationVerified] = useState(false);
@@ -24,6 +28,12 @@ export default function CheckoutPage() {
     const [isLocating, setIsLocating] = useState(false);
     const [deliveryFee, setDeliveryFee] = useState(0);
     const [isOutOfRange, setIsOutOfRange] = useState(false);
+
+    const [cityBrgy, setCityBrgy] = useState("");
+    const [street, setStreet] = useState("");
+    const [isFetchingAddress, setIsFetchingAddress] = useState(false);
+
+    const [storeSettings, setStoreSettings] = useState<any>(null);
 
     // --- FORM STATES ---
     const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
@@ -46,21 +56,69 @@ export default function CheckoutPage() {
         }
     }, [state?.success, state?.orderId, state?.checkoutUrl, router]);
 
+    {/* Reverse Geocoding */ }
+    const fetchAddressFromCoords = async (lat: number, lng: number) => {
+        setIsFetchingAddress(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+
+            if (data && data.address) {
+                const { road, village, suburb, city, town, county, quarter } = data.address;
+
+                // 1. Set Street (Fallback to empty string if not found)
+                setStreet(road || "");
+
+                // 2. Set City & Barangay
+                // Nominatim often maps Philippine Barangays to 'village' or 'suburb'
+                const brgy = village || suburb || quarter || "";
+                const cityName = city || town || county || "";
+
+                if (brgy && cityName) {
+                    setCityBrgy(`${cityName}, ${brgy}`);
+                } else {
+                    setCityBrgy(cityName || brgy || "");
+                }
+
+                console.log(data.address)
+
+            }
+        } catch (error) {
+            console.error("Geocoding failed:", error);
+            // If it fails, we just leave the inputs blank for the user to type manually
+        } finally {
+            setIsFetchingAddress(false);
+        }
+    };
+
     {/* Delivery fee calculation */ }
     const handleLocationSelected = (lat: number, lng: number) => {
         setCoordinates({ lat, lng });
-
-        const calculatedFee = determineDeliveryFee(lat, lng);
-
-        // Check if they are out of range
-        if (calculatedFee === -1) {
-            setIsOutOfRange(true);
-            setDeliveryFee(0);
-        } else {
-            setIsOutOfRange(false);
-            setDeliveryFee(calculatedFee);
-        }
+        fetchAddressFromCoords(lat, lng);
     };
+
+    // Fetch settings
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const { data } = await supabase.from('store_settings').select('*').eq('id', 1).single();
+            if (data) setStoreSettings(data);
+        };
+        fetchSettings();
+    }, [supabase]);
+
+    // Automatically recalculate the fee whenever coordinates or settings change
+    useEffect(() => {
+        if (coordinates.lat !== 0 && storeSettings) {
+            const calculatedFee = determineDeliveryFee(coordinates.lat, coordinates.lng, storeSettings);
+            if (calculatedFee === -1) {
+                setIsOutOfRange(true);
+                setDeliveryFee(0);
+            } else {
+                setIsOutOfRange(false);
+                setDeliveryFee(calculatedFee);
+            }
+        }
+    }, [coordinates, storeSettings]);
 
 
     // --- GEOLOCATION ENFORCER ---
@@ -79,16 +137,7 @@ export default function CheckoutPage() {
                 const actualCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
                 setHardwareGPS(actualCoords);
                 setCoordinates(actualCoords);
-
-                const initialFee = determineDeliveryFee(actualCoords.lat, actualCoords.lng);
-                if (initialFee === -1) {
-                    setIsOutOfRange(true);
-                    setDeliveryFee(0);
-                } else {
-                    setIsOutOfRange(false);
-                    setDeliveryFee(initialFee);
-                }
-
+                fetchAddressFromCoords(actualCoords.lat, actualCoords.lng);
                 setIsLocationVerified(true);
                 setIsLocating(false);
             },
@@ -117,10 +166,24 @@ export default function CheckoutPage() {
                 </nav>
             </header>
 
-            <div className="mt-14 px-4 py-5 flex flex-col gap-4 justify-center w-full max-w-2xl">
+            <div className="mt-18 px-4 py-5 flex flex-col gap-4 justify-center w-full max-w-2xl">
 
-                {/* --- THE GPS LOCK UX --- */}
-                {!isLocationVerified ? (
+                {/* --- STORE CLOSED BLOCKER --- */}
+                {storeSettings && storeSettings.is_accepting_orders === false ? (
+                    <div className="bg-red-50 border border-red-200 p-6 rounded-xl flex flex-col items-center text-center gap-4 mt-10 shadow-sm">
+                        <AlertTriangle className="text-red-500 w-12 h-12" />
+                        <h2 className="text-xl font-black text-red-800">Cafe is Closed</h2>
+                        <p className="text-sm text-red-700 font-medium">
+                            We are currently not accepting online orders. Please check back later!
+                        </p>
+                        <button
+                            onClick={() => router.back()}
+                            className="mt-4 bg-kae-dark text-white px-8 py-3 rounded-lg font-bold shadow-md"
+                        >
+                            BACK TO MENU
+                        </button>
+                    </div>
+                ) : !isLocationVerified ? (
                     <div className="bg-red-50 border border-red-200 p-6 rounded-xl flex flex-col items-center text-center gap-4 mt-10">
                         <AlertTriangle className="text-red-500 w-10 h-10" />
                         <p className="text-sm text-red-700 font-bold">
@@ -189,11 +252,11 @@ export default function CheckoutPage() {
                                 />
 
                                 <div className="relative mt-2">
-                                    <input required name="cityBrgy" id="cityBrgy" type="text" placeholder="City, Barangay" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                                    <input onChange={(e) => setCityBrgy(e.target.value)} value={cityBrgy} required name="cityBrgy" id="cityBrgy" type="text" placeholder="City, Barangay" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                                     <label htmlFor="cityBrgy" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">City, Barangay</label>
                                 </div>
                                 <div className="relative">
-                                    <input required name="street" id="street" type="text" placeholder="street" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
+                                    <input onChange={(e) => setStreet(e.target.value)} value={street} required name="street" id="street" type="text" placeholder="street" className="border-gray-500 rounded-xl peer border-1 w-full px-4 text-lg pb-2 pt-6 placeholder-transparent transition-colors focus:border-kae-purple bg-transparent" />
                                     <label htmlFor="street" className="absolute left-4 top-2 text-xs font-bold text-gray-400 transition-all pointer-events-none peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:font-normal peer-focus:top-2 peer-focus:text-xs peer-focus:font-bold peer-focus:text-kae-purple">Purok, Street, House no.</label>
                                 </div>
                                 <div className="relative">
@@ -307,25 +370,24 @@ function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon
 }
 
 // Determines pricing brackets based on the distance
-export function determineDeliveryFee(customerLat: number, customerLng: number) {
-    // Set this to your exact Cafe coordinates in Cabanatuan
+export function determineDeliveryFee(customerLat: number, customerLng: number, settings: any) {
+    // Fallback if settings haven't loaded from Supabase yet
+    if (!settings) return 0;
+
     const CAFE_LAT = 15.486781;
     const CAFE_LNG = 121.035926;
-
     const distanceKm = getDistanceFromLatLonInKm(CAFE_LAT, CAFE_LNG, customerLat, customerLng);
 
-    if (distanceKm > 7) return -1;
+    // 1. Check Max Radius dynamically
+    if (distanceKm > settings.max_radius) return -1;
 
-    // Dynamic brackets (Adjust these numbers to what the cafe wants)
-    if (distanceKm <= 0.5) return 25;  // Near (Near base fee)
-    if (distanceKm <= 1) return 29;  // Mid-distance
-    if (distanceKm <= 1.5) return 35;
-    if (distanceKm <= 2) return 39;
-    if (distanceKm <= 2.5) return 45;
-    if (distanceKm <= 3) return 49;
-    if (distanceKm <= 3.5) return 55;
-    if (distanceKm <= 4) return 59;
-    if (distanceKm <= 4.5) return 65;
-    if (distanceKm <= 5) return 69;
-    return 84;                      // Very far / Max fee
+    // 2. Loop through dynamic brackets
+    for (const rate of settings.delivery_rates) {
+        if (distanceKm <= rate.distance) {
+            return rate.price;
+        }
+    }
+
+    // 3. Fallback max fee
+    return settings.max_fee;
 }
