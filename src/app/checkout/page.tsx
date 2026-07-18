@@ -22,7 +22,7 @@ export default function CheckoutPage() {
     const [isLocationVerified, setIsLocationVerified] = useState(false);
     const [locationError, setLocationError] = useState("");
     const [isLocating, setIsLocating] = useState(false);
-
+    const [deliveryFee, setDeliveryFee] = useState(0);
 
     // --- FORM STATES ---
     const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
@@ -45,6 +45,15 @@ export default function CheckoutPage() {
         }
     }, [state?.success, state?.orderId, state?.checkoutUrl, router]);
 
+    {/* Delivery fee calculation */ }
+    const handleLocationSelected = (lat: number, lng: number) => {
+        // 1. Update the map pin location
+        setCoordinates({ lat, lng });
+
+        // 2. Calculate and set the new fee
+        const calculatedFee = determineDeliveryFee(lat, lng);
+        setDeliveryFee(calculatedFee);
+    };
 
 
     // --- GEOLOCATION ENFORCER ---
@@ -63,6 +72,10 @@ export default function CheckoutPage() {
                 const actualCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
                 setHardwareGPS(actualCoords);
                 setCoordinates(actualCoords);
+
+                const initialFee = determineDeliveryFee(actualCoords.lat, actualCoords.lng);
+                setDeliveryFee(initialFee);
+
                 setIsLocationVerified(true);
                 setIsLocating(false);
             },
@@ -159,7 +172,7 @@ export default function CheckoutPage() {
                                 <LocationMap
                                     hardwareGPS={hardwareGPS!}
                                     currentPin={coordinates}
-                                    onLocationSelect={(lat, lng) => setCoordinates({ lat, lng })}
+                                    onLocationSelect={handleLocationSelected}
                                 />
 
                                 <div className="relative mt-2">
@@ -231,11 +244,11 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="flex justify-between font-medium">
                                     <p>Delivery Fee</p>
-                                    <p>{cart.length === 0 || !isDelivery ? "₱0" : "₱49"}</p>
+                                    <p>{cart.length === 0 || !isDelivery ? "₱0" : `₱${deliveryFee}`}</p>
                                 </div>
                                 <div className="flex justify-between font-black text-kae-dark text-lg pt-1 border-t border-gray-200 mt-1">
                                     <p>Total</p>
-                                    <p>{cart.length === 0 ? "₱0" : isDelivery ? `₱${totalPrice + 49}` : `₱${totalPrice}`}</p>
+                                    <p>{cart.length === 0 ? "₱0" : isDelivery ? `₱${totalPrice + deliveryFee}` : `₱${totalPrice}`}</p>
                                 </div>
                             </div>
                             <button disabled={cart.length === 0 || isPending} type="submit" className={`flex justify-center gap-2 items-center px-6 py-4 text-white font-bold text-xl rounded-xl transition-all ${cart.length === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-kae-dark hover:bg-gray-800 shadow-lg active:scale-95"}`}>
@@ -243,9 +256,51 @@ export default function CheckoutPage() {
                                 Place Order
                             </button>
                         </div>
+                        <input
+                            type="hidden"
+                            name="delivery_fee"
+                            value={deliveryFee}
+                        />
                     </form>
                 )}
             </div>
         </div>
     );
+}
+
+// Calculates straight-line distance in Kilometers
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371; // Radius of the earth in km
+    const deg2rad = (deg: number) => deg * (Math.PI / 180);
+
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+// Determines pricing brackets based on the distance
+export function determineDeliveryFee(customerLat: number, customerLng: number) {
+    // Set this to your exact Cafe coordinates in Cabanatuan
+    const CAFE_LAT = 15.486781;
+    const CAFE_LNG = 121.035926;
+
+    const distanceKm = getDistanceFromLatLonInKm(CAFE_LAT, CAFE_LNG, customerLat, customerLng);
+
+    // Dynamic brackets (Adjust these numbers to what the cafe wants)
+    if (distanceKm <= 0.5) return 25;  // Near (Near base fee)
+    if (distanceKm <= 1) return 29;  // Mid-distance
+    if (distanceKm <= 1.5) return 35;
+    if (distanceKm <= 2) return 39;
+    if (distanceKm <= 2.5) return 45;
+    if (distanceKm <= 3) return 49;
+    if (distanceKm <= 3.5) return 55;
+    if (distanceKm <= 4) return 59;
+    if (distanceKm <= 4.5) return 65;
+    if (distanceKm <= 5) return 69;
+    return 75;                      // Very far / Max fee
 }
