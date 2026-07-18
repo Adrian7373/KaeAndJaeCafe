@@ -318,8 +318,14 @@ export default function OrdersPage() {
                         )}
                     </div>
                 </div>
-                <div className='flex gap-2'>
-                    {role !== "rider" && (
+                {role !== "rider" && (
+                    <div className='flex gap-2'>
+                        <button
+                            onClick={() => handleInstantPrint(order)}
+                            className="mt-3 hover:text-white hover:bg-gray-800 transition-colors duration-300 cursor-pointer bg-kae-light text-gray-800 border-1 border-gray-800 font-bold py-2 px-4 rounded-lg"
+                        >
+                            PRINT
+                        </button>
                         <button
                             onClick={actionButton.onClick}
                             disabled={hasActionRequired}
@@ -327,10 +333,11 @@ export default function OrdersPage() {
                         >
                             {actionButton.label}
                         </button>
-                    )}
+                    </div>
+                )}
 
-                </div>
             </div>
+
         );
     };
 
@@ -553,6 +560,66 @@ export default function OrdersPage() {
     };
 
     if (loading) return <div className="p-8 text-center font-bold text-gray-500">Loading live orders...</div>;
+
+    // 1. Helper to format the receipt text safely for a 58mm layout
+    const formatReceiptText = (order: Order) => {
+        // Divider line for 58mm (usually ~32 characters wide)
+        const divider = "--------------------------------";
+
+        // Format order items line by line
+        const itemsText = (order.order_items || [])
+            .filter((item) => item.status !== 'action_required')
+            .map((item) => {
+                const name = item.product.name.substring(0, 16); // Limit name to prevent row wrapping
+                const qty = `${item.quantity}x`;
+                const price = `P${((item.price_at_checkout ?? item.product.discount_price ?? 0) * item.quantity).toFixed(2)}`;
+
+                // Calculate spaces to push price to the right margin
+                const leftPart = `${qty} ${name}`;
+                const spacesCount = Math.max(1, 32 - leftPart.length - price.length);
+                const spaces = " ".repeat(spacesCount);
+
+                return `${leftPart}${spaces}${price}`;
+            })
+            .join("\n");
+
+        // Add extra newlines at the bottom so the paper feeds out past the tear bar
+        return `
+           KAE CAFE           
+${divider}
+Order ID: ${order.id.substring(0, 8).toUpperCase()}
+Date: ${new Date(order.created_at).toLocaleDateString()}
+Time: ${new Date(order.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+Customer: ${order.first_name} ${order.last_name}
+Type: ${order.order_type.toUpperCase()}
+Method: ${order.payment_method.toUpperCase()}
+${divider}
+ITEMS:
+${itemsText}
+${order.order_type === "delivery" ? `Delivery Fee             P49.00` : ''}
+${divider}
+TOTAL AMOUNT:          P${calculateTotal(order).toFixed(2)}
+${divider}
+   Thank you for your order!   
+   
+   
+   
+`.trim();
+    };
+
+    // 2. Click Handler that fires the RawBT URL Scheme
+    const handleInstantPrint = (order: Order) => {
+        try {
+            const text = formatReceiptText(order);
+            const encodedText = encodeURIComponent(text);
+
+            // Fires intent scheme to invoke the RawBT app instantly
+            window.location.href = `rawbt://print?text=${encodedText}`;
+        } catch (error) {
+            console.error("Printing failed:", error);
+            alert("Could not process receipt layout data.");
+        }
+    };
 
     return (
         <div className="flex flex-row w-full pt-20 2xl:pt-27 bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
