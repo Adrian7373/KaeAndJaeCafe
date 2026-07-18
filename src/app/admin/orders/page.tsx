@@ -32,6 +32,7 @@ export interface Order {
     last_name: string;
     contact: string;
     delivery_address: string;
+    delivery_fee: number;
     payment_method: string;
     pickup_time: string;
     delivery_lat: number;
@@ -155,16 +156,14 @@ export default function OrdersPage() {
 
     const calculateTotal = (order: Order) => {
         const subtotal = (order.order_items || []).reduce((total, item) => {
-
             const unitPrice = item.price_at_checkout ?? item.product.discount_price ?? 0;
-
             return total + (unitPrice * item.quantity);
-
         }, 0);
+
         if (order.order_type === 'delivery') {
-            return subtotal + 49;
+            return subtotal + (Number(order.delivery_fee) || 0);
         }
-        return subtotal
+        return subtotal;
     };
 
     const handleDeleteOrder = async () => {
@@ -310,10 +309,11 @@ export default function OrdersPage() {
                                 </div>
                             ))
                         }
+                        {/* Find the delivery fee UI div and swap it with this: */}
                         {order.order_type === "delivery" && (
                             <div className='flex justify-between ml-10 py-2'>
                                 <p>Delivery Fee</p>
-                                <p className='font-semibold'>₱49</p>
+                                <p className='font-semibold'>₱{(order.delivery_fee || 0).toFixed(2)}</p>
                             </div>
                         )}
                     </div>
@@ -353,7 +353,7 @@ export default function OrdersPage() {
             const { data, error } = await supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, is_paid, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, pickup_time, contact, delivery_address, payment_method,
+                    id, created_at, status, is_paid, order_type, customer_note, first_name, last_name, delivery_lat, delivery_long, delivery_fee, pickup_time, contact, delivery_address, payment_method,
                     order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
                 `)
                 .eq('id', orderId)
@@ -393,7 +393,7 @@ export default function OrdersPage() {
             let query = supabase
                 .from('orders')
                 .select(`
-                    id, created_at, status, is_paid, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, contact, delivery_address,payment_method,
+                    id, created_at, status, is_paid, order_type, customer_note, first_name,last_name,pickup_time, delivery_lat, delivery_long, delivery_fee, contact, delivery_address,payment_method,
           order_items ( id, quantity, product ( name, discount_price, id ), price_at_checkout, status )
         `)
                 .in('status', ['pending', 'prepared', 'cooking', 'delivering'])
@@ -596,7 +596,8 @@ Method: ${order.payment_method.toUpperCase()}
 ${divider}
 ITEMS:
 ${itemsText}
-${order.order_type === "delivery" ? `Delivery Fee             P49.00` : ''}
+// Find the delivery fee line and swap it with this:
+${order.order_type === "delivery" ? `Delivery Fee             P${(order.delivery_fee || 0).toFixed(2)}` : ''}
 ${divider}
 TOTAL AMOUNT:          P${calculateTotal(order).toFixed(2)}
 ${divider}
@@ -739,10 +740,11 @@ ${divider}
                                                     </div>
 
                                                 ))}
+                                            {/* Find the delivery fee UI div and swap it with this: */}
                                             {order.order_type === "delivery" && (
                                                 <div className='flex justify-between ml-10 py-2'>
                                                     <p>Delivery Fee</p>
-                                                    <p className='font-semibold'>₱49</p>
+                                                    <p className='font-semibold'>₱{(order.delivery_fee || 0).toFixed(2)}</p>
                                                 </div>
                                             )}
                                         </div>

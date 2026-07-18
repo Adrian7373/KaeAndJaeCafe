@@ -202,7 +202,7 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
                                 {delivery_fee !== 0 && (
                                     <div className="flex gap-2 items-center pl-8 py-2">
                                         <p>Delivery fee</p>
-                                        <p className="flex-grow text-right">₱49</p>
+                                        <p className="flex-grow text-right">₱{delivery_fee}</p>
                                     </div>
                                 )}
                             </div>
