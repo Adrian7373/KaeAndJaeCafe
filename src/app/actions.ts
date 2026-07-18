@@ -18,7 +18,8 @@ const checkOutSchema = z.object({
     paymentType: z.string(),
     latitude: z.string().optional(),
     longitude: z.string().optional(),
-    notes: z.string().optional()
+    notes: z.string().optional(),
+    delivery_fee: z.string().optional()
     /*cartData:z.array(z.object({
         id:z.string(),
         name:z.string(),
@@ -54,7 +55,7 @@ export async function placeOrder(prevState: any, formData: FormData): Promise<an
     const cartArray = JSON.parse(rawCart);
 
     const cartTotal = cartArray.reduce((total: number, item: any) => total + (item.discount_price * item.qty), 0);
-    const deliveryFee = normalizedOrderType === "delivery" ? 49 : 0;
+    const deliveryFee = normalizedOrderType === "delivery" ? cleanData.delivery_fee : 0;
     const totalAmount = cartTotal + deliveryFee;
 
     const supabase = await createServerClient(true);
