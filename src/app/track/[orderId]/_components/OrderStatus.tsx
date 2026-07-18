@@ -7,6 +7,7 @@ import TrackingClientFeatures from "./TrackingClientFeatures";
 import { DeleteOrderItem, ReplaceOrderItem } from "@/app/actions";
 import MenuCatalog from "@/app/order/_components/MenuCatalog";
 import { Product, Category } from "@/app/order/_components/MenuCatalog";
+import OrderProgress from "./OrderProgress";
 
 
 export interface Order {
@@ -142,38 +143,7 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
                     <div className="flex flex-col justify-center border-1 border-gray-400 rounded-t-3xl px-6 py-4 gap-5 bg-kae-light xl:order-1 xl:rounded-3xl">
                         <p className={`text-center ${isShowingDetails && "hidden"} font-semibold`}>Track your order</p>
 
-                        <div className={`flex flex-col gap-5 ${isShowingDetails && "hidden"}`}>
-                            <div className="flex justify-between">
-                                <div className="flex gap-2">
-                                    <Store />
-                                    <p>Order Accepted</p>
-                                </div>
-                                <CircleCheck className={isStepComplete(1) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
-                            </div>
-                            <div className="flex justify-between">
-                                <div className="flex gap-2">
-                                    <Hamburger />
-                                    <p>Order Ready</p>
-                                </div>
-                                <CircleCheck className={isStepComplete(2) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
-                            </div>
-                            {!isPickupOrder && (
-                                <div className="flex justify-between">
-                                    <div className="flex gap-2">
-                                        <Bike />
-                                        <p>Order Picked up</p>
-                                    </div>
-                                    <CircleCheck className={isStepComplete(3) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
-                                </div>
-                            )}
-                            <div className="flex justify-between">
-                                <div className="flex gap-2">
-                                    <CircleCheckBig />
-                                    <p>{isPickupOrder ? "Order Picked up" : "Order Delivered"}</p>
-                                </div>
-                                <CircleCheck className={isStepComplete(isPickupOrder ? 3 : 4) ? "block" : "hidden"} fill="bg-kae-dark" color="white" />
-                            </div>
-                        </div>
+                        <OrderProgress status={status} orderType={orderType} />
 
                         <div className={`${!isShowingDetails && "hidden"} flex flex-col gap-4`}>
                             <p className="text-center">Your Order</p>
