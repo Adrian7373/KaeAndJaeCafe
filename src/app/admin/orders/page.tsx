@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { createClient } from '@/../lib/supabase';
 import { useRouter } from 'next/navigation';
 import { cancelOrderAction, updateOrderAction, editOrderItemsAction, RemoveOrderItem } from '@/app/actions';
-import { Bell, BellOff, Coins, HandPlatter, MapPin, Phone, Square, SquareX, Wallet, X } from 'lucide-react';
+import { Bell, BellOff, Coins, HandPlatter, MapPin, Phone, Square, SquareX, Wallet, X, WifiOff } from 'lucide-react';
 import EditOrderModal from './_components/EditOrderModal';
 import LocationViewModal from './_components/LocationViewModal';
 import RemoveItemModal from './_components/RemoveItemModal';
@@ -74,6 +74,7 @@ export default function OrdersPage() {
     const [itemToRemove, setItemToRemove] = useState<OrderItem | null>(null);
     const [orderIdItemToRemove, setOrderIdItemToRemove] = useState("");
     const [isDeletingItem, setIsDeletingItem] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState<'CONNECTING' | 'SUBSCRIBED' | 'DISCONNECTED'>('CONNECTING');
 
     // Helper to filter orders by column in the UI
     const pendingOrders = orders.filter((o) => o.status === 'pending');
@@ -544,7 +545,13 @@ export default function OrdersPage() {
                     });
                 }
             )
-            .subscribe();
+            .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') {
+                    setConnectionStatus('SUBSCRIBED');
+                } else if (status === 'TIMED_OUT' || status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+                    setConnectionStatus('DISCONNECTED');
+                }
+            });
 
         return () => {
             supabase.removeChannel(orderChannel);
@@ -634,6 +641,12 @@ ${divider}
 
     return (
         <div className="flex flex-row w-full pt-20 2xl:pt-27 bg-gray-50 overflow-x-auto snap-x snap-mandatory scroll-smooth">
+            {connectionStatus === 'DISCONNECTED' && (
+                <div className="fixed top-24 left-0 w-full bg-red-600 text-white px-4 py-2 text-center font-bold flex items-center justify-center gap-2 z-40 shadow-md animate-in slide-in-from-top-2">
+                    <WifiOff size={18} />
+                    <p>Live connection lost. Reconnecting...</p>
+                </div>
+            )}
 
             {/* PENDING COLUMN */}
             {role !== "rider" && (

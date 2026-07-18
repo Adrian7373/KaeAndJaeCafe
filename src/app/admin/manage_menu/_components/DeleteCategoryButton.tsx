@@ -49,7 +49,7 @@ export default function DeleteCategoryModal({ categories }: DeleteCategoryModalP
             {/* The Main Trigger Button */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold transition-all hover:bg-red-500 hover:text-white active:scale-95"
+                className="flex items-center gap-2 px-4 py-2 my-5 lg:my-0 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold transition-all hover:bg-red-500 hover:text-white active:scale-95"
             >
                 <Trash2 size={20} />
                 Delete a Category
