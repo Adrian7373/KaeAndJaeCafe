@@ -40,7 +40,7 @@ export interface MenuCatalogProps {
     categories: Category[]
     mode?: 'default' | 'replacement'
     onSelectReplacement?: (product: Product) => void
-    addOns: AddOn[]
+    addOns: AddOn[] | []
 }
 
 

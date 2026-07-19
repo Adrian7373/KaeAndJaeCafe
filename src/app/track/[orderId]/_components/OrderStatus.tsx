@@ -246,6 +246,7 @@ export default function OrderStatus({ orderStatus, availableProducts, availableC
                                 isStoreOpen={true}
                                 mode="replacement"
                                 onSelectReplacement={handleSelectReplacement}
+                                addOns={[]}
                             />
                         </div>
                     </div>
