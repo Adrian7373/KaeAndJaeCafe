@@ -5,6 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { useCart } from "../../../../context/CartContext";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import CartAddOns from "./CartAddOns";
+
+export interface AddOn {
+    id: string,
+    name: string,
+    discount_price: number,
+    image_path: string,
+    image_url: string
+}
 
 export interface Product {
     imageUrl: string;
@@ -31,10 +40,11 @@ export interface MenuCatalogProps {
     categories: Category[]
     mode?: 'default' | 'replacement'
     onSelectReplacement?: (product: Product) => void
+    addOns: AddOn[]
 }
 
 
-export default function MenuCatalog({ products, isStoreOpen, categories, mode = "default", onSelectReplacement }: MenuCatalogProps) {
+export default function MenuCatalog({ products, isStoreOpen, categories, mode = "default", onSelectReplacement, addOns }: MenuCatalogProps) {
 
     const { cart, addToCart, isOpen, incrementItem, decrementItem, toggleCart } = useCart();
     const [activeTab, setActiveTab] = useState('All Items');
@@ -246,7 +256,7 @@ export default function MenuCatalog({ products, isStoreOpen, categories, mode = 
                                 ))
                             )}
                         </div>
-
+                        <CartAddOns addOns={addOns} />
                         <div className="flex flex-col justify-center gap-3 mt-auto pt-4 bg-kae-light border-t border-gray-200">
                             {!isStoreOpen && (
                                 <p className="text-center text-sm font-bold text-red-500">The store is currently closed. Please check again later.</p>
