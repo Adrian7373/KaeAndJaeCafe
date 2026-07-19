@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { Product } from "./_components/MenuCatalog";
 import { getStoreStatusAction } from "../actions";
 import { Category } from "./_components/MenuCatalog";
+import { AddOn } from "./_components/MenuCatalog";
 
 export default async function OrderPage() {
 
@@ -45,10 +46,23 @@ export default async function OrderPage() {
         .from("product_category")
         .select("*");
 
+    const { data: addOns } = await supabase
+        .from("product")
+        .select("id, name, discount_price, image_path")
+        .eq("is_addon", true)
+        .limit(5);
+
+    const addOnsWithUrls = addOns?.map((product) => ({
+        ...product,
+        image_url: supabase.storage
+            .from("product_images")
+            .getPublicUrl(product.image_path).data.publicUrl
+    }));
+
     return (
         <>
             <OrderNavBar />
-            <MenuCatalog products={menuProducts} isStoreOpen={isStoreOpen} categories={categories as unknown as Category[]} />
+            <MenuCatalog products={menuProducts} isStoreOpen={isStoreOpen} categories={categories as unknown as Category[]} addOns={addOnsWithUrls as unknown as AddOn[]} />
             <ActiveOrderBanner serverOrderId={activeOrderId} />
             <Footer />
         </>
