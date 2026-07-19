@@ -19,6 +19,9 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
     const [prepTime, setPrepTime] = useState(product.est_prep_time || "");
     const [categoryId, setCategoryId] = useState(product.product_category?.id || "");
 
+    // NEW: Add-on State
+    const [isAddon, setIsAddon] = useState(product.is_addon || false);
+
     // Image States
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(product.image_url || null);
@@ -53,7 +56,7 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
             discount_price: discountPrice ? parseFloat(discountPrice) : null,
             est_prep_time: prepTime,
             category_id: categoryId || null,
-
+            is_addon: isAddon, // <-- NEW: Included in save payload
         };
 
         await onSave(updatedData, imageFile);
@@ -163,6 +166,25 @@ export default function ProductFormModal({ product, categories, onClose, onSave 
                             className="w-full border border-gray-200 rounded-xl p-3 outline-none focus:border-purple-500 font-medium"
                             placeholder="e.g. 15"
                         />
+                    </div>
+
+                    {/* NEW: Checkout Add-on Toggle */}
+                    <div>
+                        <label className="flex items-center justify-between cursor-pointer p-4 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors">
+                            <div>
+                                <p className="font-bold text-gray-800 text-sm">Checkout Add-on</p>
+                                <p className="text-xs text-gray-500 mt-0.5">Show this item as a quick add-on in the cart</p>
+                            </div>
+                            <div className="relative flex items-center">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={isAddon}
+                                    onChange={(e) => setIsAddon(e.target.checked)}
+                                />
+                                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                            </div>
+                        </label>
                     </div>
                 </div>
 

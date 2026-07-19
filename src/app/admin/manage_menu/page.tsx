@@ -20,6 +20,7 @@ export interface Product {
     discount_price: string,
     is_available: boolean,
     est_prep_time: string,
+    is_addon?: boolean,
     product_category?: {
         id: string
         name: string
@@ -84,7 +85,7 @@ export default function MenuManagementPage() {
         const fetchMenuData = async () => {
             const [catRes, prodRes] = await Promise.all([
                 supabase.from("product_category").select("name, id"),
-                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, est_prep_time, product_category(id, name)").eq("is_archived", false)
+                supabase.from("product").select("id, name, image_path, price, discount_price, is_available, is_addon, est_prep_time, product_category(id, name)").eq("is_archived", false)
             ]);
 
             if (catRes.data) {
@@ -133,16 +134,25 @@ export default function MenuManagementPage() {
     }
 
     const visibleProducts = products.filter((product) => {
-
-        const matchesCategory = activeCategoryId === "all" || String(product.product_category?.id) === String(activeCategoryId);
-
         const hasSearchText = textToSearch && textToSearch.trim() !== "";
 
+        // 1. If searching, prioritize the search text
         if (hasSearchText) {
-            return product.name.toLowerCase().includes(textToSearch.toLowerCase());
+            const matchesSearch = product.name.toLowerCase().includes(textToSearch.toLowerCase());
+            // If they are searching WHILE in the Add-ons tab, only show matching add-ons
+            if (activeCategoryId === "addons") {
+                return product.is_addon === true && matchesSearch;
+            }
+            return matchesSearch;
         }
 
-        return matchesCategory;
+        // 2. If no search text, check if the virtual "Add-ons" category is selected
+        if (activeCategoryId === "addons") {
+            return product.is_addon === true;
+        }
+
+        // 3. Otherwise, do your normal category check
+        return activeCategoryId === "all" || String(product.product_category?.id) === String(activeCategoryId);
     });
 
     const closeEditModal = () => {
@@ -252,6 +262,7 @@ export default function MenuManagementPage() {
                         }
                     }} value={activeCategoryId ?? "all"}>
                         <option value="all">All items</option>
+                        <option value="addons">Add-ons</option>
                         {categories.map((category) => (
                             <option key={category.id} value={category.id}>{category.name}</option>
                         ))}
@@ -275,6 +286,11 @@ export default function MenuManagementPage() {
                                 sizes="(max-width: 768px) 100vw, 300px"
                                 className="object-cover"
                             />
+                            {product.is_addon && (
+                                <div className="absolute top-2 right-2 bg-kae-purple text-white text-xs font-black px-2.5 py-1 rounded-lg shadow-md z-10 flex items-center gap-1">
+                                    <Plus size={14} strokeWidth={3} /> ADD-ON
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col gap-2">
                             <p className="font-semibold text-lg md:text-xl">{product.name}</p>
