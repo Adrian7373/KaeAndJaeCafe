@@ -5,6 +5,7 @@ import { Save, Plus, Trash2, Loader2, Maximize, Minimize } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useAuth } from "../../../../context/AuthContext";
 import { useRouter } from "next/navigation";
+import ChangePasswordSection from "./_components/ChangePasswordSection";
 
 const LiveRadiusMap = dynamic(() => import("./_components/AdminRadiusMap"), {
     ssr: false,
@@ -178,6 +179,7 @@ export default function SettingsPage() {
                             </span>
                         )}
                     </div>
+                    <ChangePasswordSection />
                 </div>
 
                 {/* RIGHT COLUMN: The Live Map */}
