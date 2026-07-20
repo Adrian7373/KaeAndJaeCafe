@@ -1,5 +1,5 @@
 "use server";
-import { createServerClient } from "../../lib/supabase-server";
+import { createAdminClient, createServerClient } from "../../lib/supabase-server";
 import z, { success } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -559,4 +559,60 @@ export async function getAuthenticatedUser() {
         email: user.email,
         role: user.app_metadata.role || 'rider'
     };
+}
+
+export async function changeRolePasswordAction(targetRole: string, newPassword: string) {
+    try {
+        // 1. Verify the person requesting this is actually an Admin/Owner
+        const standardSupabase = await createServerClient();
+        const { data: { user } } = await standardSupabase.auth.getUser();
+
+        if (!user) return { success: false, error: "Unauthorized" };
+
+        const { data: profile } = await standardSupabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+        if (profile?.role !== "admin" && profile?.role !== "owner") {
+            return { success: false, error: "Only owners can change passwords." };
+        }
+
+        // 2. Map the role to the correct account email
+        // Adjust these emails to match whatever you actually registered in Supabase Auth!
+        const roleEmails: Record<string, string> = {
+            rider: process.env.RIDER_EMAIL || "",
+            cashier: process.env.CASHIER_EMAIL || "",
+            admin: process.env.ADMIN_EMAIL || ""
+        };
+
+        const targetEmail = roleEmails[targetRole];
+        if (!targetEmail) return { success: false, error: "Invalid role selected." };
+
+        // 3. Initialize the ADMIN Supabase Client (Bypasses RLS)
+        // You MUST have NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env.local
+        const adminAuthClient = createAdminClient();
+
+        // 4. Fetch the target user's UUID using their email
+        const { data: usersData, error: userError } = await adminAuthClient.auth.admin.listUsers();
+        if (userError) throw userError;
+
+        const targetUser = usersData.users.find(u => u.email === targetEmail);
+        if (!targetUser) return { success: false, error: `Account for ${targetRole} not found.` };
+
+        // 5. Update their password
+        const { error: updateError } = await adminAuthClient.auth.admin.updateUserById(
+            targetUser.id,
+            { password: newPassword }
+        );
+
+        if (updateError) throw updateError;
+
+        return { success: true };
+
+    } catch (error: any) {
+        console.error("Password update error:", error);
+        return { success: false, error: error.message || "An unexpected error occurred." };
+    }
 }
