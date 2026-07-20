@@ -602,7 +602,7 @@ export default function OrdersPage() {
 
 
         return `
-KAE CAFE           
+KAE AND JAE CAFE           
 ${divider}
 Order ID: ${order.id.substring(0, 8).toUpperCase()}
 Date: ${new Date(order.created_at).toLocaleDateString()}
@@ -631,7 +631,7 @@ ${divider}
             const encodedText = encodeURIComponent(text);
 
             // Fires intent scheme to invoke the RawBT app instantly
-            window.location.href = `rawbt://print?text=${encodedText}`;
+            window.location.href = `rawbt:${encodedText}`;
         } catch (error) {
             console.error("Printing failed:", error);
             alert("Could not process receipt layout data.");
