@@ -32,7 +32,7 @@ export default async function OrderPage() {
         const { data: { publicUrl } } = supabase
             .storage
             .from("product_images")
-            .getPublicUrl(item.image_path);
+            .getPublicUrl(item.image_path || "");
 
         return {
             ...item,
@@ -56,7 +56,7 @@ export default async function OrderPage() {
         ...product,
         image_url: supabase.storage
             .from("product_images")
-            .getPublicUrl(product.image_path).data.publicUrl
+            .getPublicUrl(product.image_path || "").data.publicUrl
     }));
 
     return (
