@@ -600,9 +600,9 @@ export default function OrdersPage() {
             })
             .join("\n");
 
-        // Add extra newlines at the bottom so the paper feeds out past the tear bar
+
         return `
-           KAE CAFE           
+KAE CAFE           
 ${divider}
 Order ID: ${order.id.substring(0, 8).toUpperCase()}
 Date: ${new Date(order.created_at).toLocaleDateString()}
@@ -613,7 +613,6 @@ Method: ${order.payment_method.toUpperCase()}
 ${divider}
 ITEMS:
 ${itemsText}
-// Find the delivery fee line and swap it with this:
 ${order.order_type === "delivery" ? `Delivery Fee             P${(order.delivery_fee || 0).toFixed(2)}` : ''}
 ${divider}
 TOTAL AMOUNT:          P${calculateTotal(order).toFixed(2)}
