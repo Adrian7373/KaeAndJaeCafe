@@ -11,7 +11,6 @@ import { Category } from "./_components/MenuCatalog";
 import { AddOn } from "./_components/MenuCatalog";
 
 export default async function OrderPage() {
-
     const supabase = await createServerClient();
 
     const cookieStore = await cookies();
