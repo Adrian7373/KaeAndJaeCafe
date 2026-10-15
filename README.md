@@ -83,7 +83,19 @@ A full-stack e-commerce and store management platform tailored for Kae & Jae Caf
 
 **Cross-Device Synchronization:** Ensures that if a cashier accepts an order on a tablet, the admin dashboard on a desktop reflects that accepted status immediately, preventing duplicate processing or missed orders.
 
----
+## Snapshots
 
+<img width="1919" height="912" alt="Screenshot 2026-10-15 213516" src="https://github.com/user-attachments/assets/adad41a2-fc25-4c8d-a2c7-52a9c28780a1" />
+<img width="1916" height="914" alt="Screenshot 2026-10-15 213535" src="https://github.com/user-attachments/assets/77989a24-a475-40ca-b9de-ca8cb8b8835b" />
+<img width="1919" height="912" alt="Screenshot 2026-10-15 213607" src="https://github.com/user-attachments/assets/ac657c93-92b0-4099-95ce-13ecb828e788" />
+<img width="1919" height="910" alt="Screenshot 2026-10-15 213712" src="https://github.com/user-attachments/assets/0813ba57-47d5-4a55-9774-41ca23dc70ee" />
+<img width="1919" height="911" alt="Screenshot 2026-10-15 213801" src="https://github.com/user-attachments/assets/e0d1133b-7d6b-407d-b740-a30a9ca7aca1" />
+<img width="1919" height="912" alt="Screenshot 2026-10-15 214307" src="https://github.com/user-attachments/assets/f22aa632-2adf-4f23-b1c4-c586667b732a" />
+<img width="1918" height="910" alt="Screenshot 2026-10-15 214329" src="https://github.com/user-attachments/assets/29575a8f-71e8-4b63-8abe-d6798ce99229" />
+<img width="1919" height="908" alt="Screenshot 2026-10-15 214416" src="https://github.com/user-attachments/assets/4dd97034-8e5e-431b-9e99-c4478fdd225a" />
+<img width="1919" height="911" alt="Screenshot 2026-10-15 214526" src="https://github.com/user-attachments/assets/a803a5cf-2382-455e-aa63-44ce37ccb358" />
+<img width="1919" height="909" alt="Screenshot 2026-10-15 214550" src="https://github.com/user-attachments/assets/af9fdca0-9c04-4d9e-9db7-69e3db6dad71" />
+
+---
 
 *Developed by Adrian Gabriel Ablaza*
