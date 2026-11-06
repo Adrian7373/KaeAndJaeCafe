@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Keep tooling folders out of Tailwind's class scan (large, and files can be locked by other tools) */
+@source not "../../.agents";
+@source not "../../.claude";
+@source not "../../public";
+
 @theme {
   --breakpoint-3xl: 1920px;
   /* The Core Brand Colors */

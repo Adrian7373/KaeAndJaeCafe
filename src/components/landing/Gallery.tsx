@@ -1,5 +1,7 @@
 "use client";
 
+import Morph from "./Morph";
+
 import { useRef } from "react";
 import { useRafScroll } from "./hooks";
 import Reveal from "./Reveal";
@@ -32,10 +34,10 @@ export default function Gallery() {
       <div className="mx-auto max-w-[1920px]">
         <Reveal>
           <p className="mb-4 font-label text-xs tracking-[0.2em] uppercase">Gallery</p>
-          <h2 className="ed-display max-w-4xl text-5xl leading-[1.02] md:text-7xl">
+          <h2 className="ed-display max-w-4xl text-5xl leading-[1.02] md:text-7xl"><Morph>
             Straight from the <span className="ed-italic text-accent">cart,</span> <span className="ed-caps">still</span> steaming{" "}
             <span className="ed-hangul text-kae-gochujang dark:text-kae-gold">따끈</span>.
-          </h2>
+          </Morph></h2>
         </Reveal>
         <div className="mt-14 grid auto-rows-[15rem] grid-cols-1 gap-4 md:auto-rows-[14rem] md:grid-cols-4 xl:auto-rows-[17rem]">
           {shots.map((s, i) => (

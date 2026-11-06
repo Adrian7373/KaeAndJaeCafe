@@ -1,5 +1,7 @@
 "use client";
 
+import Morph from "@/components/landing/Morph";
+
 import Link from "next/link";
 
 const word = "Kae".split("");
@@ -31,11 +33,11 @@ export default function Footer() {
     <footer className="overflow-hidden border-t-2 border-kae-pink bg-kae-dark text-kae-cream">
       {/* Closing line */}
       <div className="mx-auto max-w-[1920px] px-4 pt-20 md:px-10 md:pt-28 2xl:px-30">
-        <p className="ed-display max-w-5xl pb-2 text-4xl leading-[1.12] sm:text-5xl md:text-7xl">
+        <p className="ed-display max-w-5xl pb-2 text-4xl leading-[1.12] sm:text-5xl md:text-7xl"><Morph>
           See you <span className="ed-italic text-kae-pink">soon</span> at Camp Tinio{" "}
           <span className="ed-caps text-kae-gold">Mon to Sat</span>{" "}
           <span className="ed-hangul text-kae-gold">또 봐요</span>
-        </p>
+        </Morph></p>
 
         <div className="mt-20 grid gap-10 border-t border-kae-cream/25 pt-10 font-body text-base sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-2">

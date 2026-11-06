@@ -102,8 +102,9 @@ export default function Reviews() {
   useRafScroll((_, vh) => {
     const el = stage.current;
     if (!el) return;
-    const r = el.getBoundingClientRect();
-    const d = (r.top + r.height / 2 - vh / 2) / vh; // -1..1 around center
+    // Measure the untransformed wrapper, otherwise the tilt feeds back into its own input
+    const r = (el.parentElement ?? el).getBoundingClientRect();
+    const d = Math.max(-1.5, Math.min(1.5, (r.top + r.height / 2 - vh / 2) / vh)); // about -1..1 around center
     el.style.transform = `rotate(${(d * -5).toFixed(2)}deg) translate3d(0, ${(d * 24).toFixed(1)}px, 0)`;
     if (mark.current) mark.current.style.transform = `translate3d(${(d * -60).toFixed(0)}px, ${(d * 80).toFixed(0)}px, 0)`;
   });
@@ -111,7 +112,7 @@ export default function Reviews() {
   const r = reviews[active];
 
   return (
-    <div className="relative mt-14 grid items-center gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <div className="relative mt-14 grid grid-cols-[minmax(0,1fr)] items-center gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <span
         ref={mark}
         aria-hidden
@@ -121,7 +122,7 @@ export default function Reviews() {
       </span>
 
       {/* Photo stack */}
-      <div className="mx-auto w-full max-w-[22rem] lg:max-w-none">
+      <div className="mx-auto w-full min-w-0 max-w-[22rem] lg:max-w-none">
         <div ref={stage} className="relative aspect-[4/5] will-change-transform">
           <div aria-hidden className="absolute inset-0 rotate-[7deg] rounded-[2rem] border-2 border-rule bg-kae-pink" />
           <div aria-hidden className="absolute inset-0 -rotate-[5deg] rounded-[2rem] border-2 border-rule bg-kae-gold" />
