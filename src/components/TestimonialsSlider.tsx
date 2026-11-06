@@ -26,7 +26,7 @@ const SliderButtons = () => {
                 onClick={() => swiper.slidePrev()}
                 className="absolute left-0 top-1/2 -translate-y-1/2 z-50 cursor-pointer p-2"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-kae-purple">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-accent">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
             </button>
@@ -36,7 +36,7 @@ const SliderButtons = () => {
                 onClick={() => swiper.slideNext()}
                 className="absolute right-0 top-1/2 -translate-y-1/2 z-50 cursor-pointer p-2"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-kae-purple">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-10 h-10 text-accent">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
             </button>
@@ -67,10 +67,10 @@ export default function TestimonialSlider() {
                                 <div className="text-xl mb-4 flex justify-center">
                                     <img className='rounded-full object-cover border-1 w-48 h-48' src={review.photoPath} alt={`Picture of ${review.name}`} />
                                 </div>
-                                <p className='text-center font-bold text-kae-purple mb-2 text-2xl'>
+                                <p className='text-center font-bold text-accent mb-2 text-2xl'>
                                     {review.name}
                                 </p>
-                                <p className="text-kae-dark font-rounded text-lg mb-6 italic text-center">
+                                <p className="text-ink font-display text-xl mb-6 italic text-center">
                                     {review.text}
                                 </p>
                             </div>

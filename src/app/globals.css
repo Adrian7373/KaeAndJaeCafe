@@ -18,10 +18,141 @@
 
   --font-libertinus-serif: var(--font-libertinus-serif);
   --font-roboto: var(--font-roboto);
+
+  /* Editorial palette (food-driven accents) */
+  --color-kae-cream: #fff4e0; /* paper / warm page background */
+  --color-kae-gochujang: #d9382a; /* hot, spicy red: sauces, sale, urgency */
+  --color-kae-gold: #f5b021; /* crispy fried gold: highlights, ratings */
+  --color-kae-scallion: #3f7d3a; /* fresh green: success, "available" */
+  --color-kae-pink-soft: #f9d6e6; /* tinted pink surface */
+  --color-kae-purple-soft: #ecdcf5; /* tinted purple surface */
+
+  /* Editorial type families (mixed together inside single sentences) */
+  --font-display: var(--font-fraunces-src), Georgia, serif;
+  --font-body: var(--font-archivo-src), system-ui, sans-serif;
+  --font-label: var(--font-dm-mono-src), ui-monospace, monospace;
+  --font-hangul: var(--font-black-han-src), "Malgun Gothic", sans-serif;
 }
 
 @layer components {
   .menu-label {
     @apply font-libertinus-serif text-kae-light text-lg font-medium 2xl:text-2xl;
   }
+}
+
+/* ---- Editorial inline type: switch families mid-sentence, keep one baseline ---- */
+@layer components {
+  .ed-display {
+    font-family: var(--font-display);
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  /* italic serif: the expressive voice */
+  .ed-italic {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+  }
+  /* small caps sans: sized down so cap-height matches the serif x-height */
+  .ed-caps {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: 0.5em;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    vertical-align: 0.28em;
+  }
+  /* mono tag: prices, weights, numerals */
+  .ed-mono {
+    font-family: var(--font-label);
+    font-size: 0.55em;
+    letter-spacing: 0.02em;
+    vertical-align: 0.2em;
+  }
+  /* Korean: heavy hangul, scaled slightly down to match latin weight */
+  .ed-hangul {
+    font-family: var(--font-hangul);
+    font-weight: 400;
+    font-size: 0.86em;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+  .ed-script {
+    font-family: var(--font-pacifico);
+    font-weight: 400;
+  }
+}
+
+/* ---- Landing theme tokens: light = cream paper, dark = design-system purples only ---- */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --paper: #fff4e0; /* kae-cream */
+  --paper-alt: #fcf4f8; /* kae-light */
+  --ink: #2d0545; /* kae-dark */
+  --ink-soft: rgb(45 5 69 / 0.75);
+  --accent: #5c0a8a; /* kae-purple */
+  --rule: #2d0545;
+  --card: #ffffff;
+  --band: #5c0a8a;
+  --on-band: #fff4e0;
+  --band-accent: #ee9bc1;
+  --hero: #ee9bc1; /* kae-pink */
+  --hero-disc: #5c0a8a;
+}
+
+.dark {
+  --paper: #2d0545; /* kae-dark */
+  --paper-alt: #5c0a8a; /* kae-purple */
+  --ink: #fff4e0; /* kae-cream */
+  --ink-soft: rgb(255 244 224 / 0.78);
+  --accent: #ee9bc1; /* kae-pink */
+  --rule: #ee9bc1;
+  --card: #5c0a8a;
+  --band: #ee9bc1;
+  --on-band: #2d0545;
+  --band-accent: #5c0a8a;
+  --hero: #2d0545;
+  --hero-disc: #5c0a8a;
+}
+
+.dark body {
+  background: #2d0545;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-alt: var(--paper-alt);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-rule: var(--rule);
+  --color-card: var(--card);
+  --color-band: var(--band);
+  --color-on-band: var(--on-band);
+  --color-band-accent: var(--band-accent);
+  --color-hero: var(--hero);
+  --color-hero-disc: var(--hero-disc);
+}
+
+@layer base {
+  html {
+    --swiper-pagination-color: var(--accent);
+    --swiper-pagination-bullet-inactive-color: var(--ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@keyframes capIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
