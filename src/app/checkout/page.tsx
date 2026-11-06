@@ -19,8 +19,6 @@ const LocationMap = dynamic(() => import("./_components/MapPicker"), {
 
 export default function CheckoutPage() {
 
-    const supabase = createClient();
-
     // --- LOCATION STATES ---
     const [hardwareGPS, setHardwareGPS] = useState<{ lat: number; lng: number; accuracy: number } | null>(null);
     const [isLocationVerified, setIsLocationVerified] = useState(false);
@@ -99,12 +97,15 @@ export default function CheckoutPage() {
 
     // Fetch settings
     useEffect(() => {
+        // Create the client inside the effect so it only runs in the browser,
+        // never during build-time prerendering.
+        const supabase = createClient();
         const fetchSettings = async () => {
             const { data } = await supabase.from('store_settings').select('*').eq('id', 1).single();
             if (data) setStoreSettings(data);
         };
         fetchSettings();
-    }, [supabase]);
+    }, []);
 
     // Automatically recalculate the fee whenever coordinates or settings change
     useEffect(() => {
