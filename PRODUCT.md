@@ -34,7 +34,7 @@ Mobile kitchen at Zone 3, Camp Tinio, Cabanatuan City. Open Monday to Saturday, 
 ## Evidence on Hand
 - Real photos: public/gallery-1..7.jpg, public/about-photo.jpg, menu category illustrations in public/*.svg, logo at public/logo.svg.
 - Hero images in public/hero/ are AI-generated (Higgsfield) cutouts made at the owner's request; they are not photographs of the actual dishes.
-- Testimonials in the slider are placeholder entries (one reviewer repeated five times); no verified customer reviews, ratings or prices exist to cite.
+- Reviewer photos in public/reviews/ were supplied by the owner; the review texts on the landing page are invented placeholders and must be replaced with real customer quotes. No verified ratings or prices exist to cite.
 - Do not fabricate customers, ratings, prices or testimonials.
 
 ## Product Principles

@@ -1,4 +1,4 @@
-import TestimonialSlider from "@/components/TestimonialsSlider";
+import Reviews from "@/components/landing/Reviews";
 import Footer from "@/components/Footer";
 import LandingNav from "@/components/landing/LandingNav";
 import Hero from "@/components/landing/Hero";
@@ -27,9 +27,7 @@ export default function Home() {
               What the <span className="ed-italic text-accent">regulars</span> <span className="ed-caps">are</span> saying.
             </h2>
           </Reveal>
-          <div className="mt-10">
-            <TestimonialSlider />
-          </div>
+          <Reviews />
         </div>
       </section>
 
