@@ -52,23 +52,43 @@ export default function Morph({ children }: { children: ReactNode }) {
     let active = false;
     let raf = 0;
 
+    const written: number[] = [];
+    let moved = false;
+    let sigma = 0;
+    const centers: number[] = [];
+
     const tick = () => {
       raf = 0;
-      const fs = parseFloat(getComputedStyle(el).fontSize) || 48;
-      const sigma = fs * 1.1;
+      // 1) Read every position first (one layout pass), 2) then write. Interleaving the two
+      //    forces a full re-layout per letter, which is what made Chrome stutter.
+      if (!sigma) sigma = (parseFloat(getComputedStyle(el).fontSize) || 48) * 1.1;
+      const n = letters.length;
+      for (let i = 0; i < n; i++) {
+        const r = letters[i].getBoundingClientRect();
+        centers[i * 2] = r.left + r.width / 2;
+        centers[i * 2 + 1] = r.top + r.height / 2;
+      }
       let moving = false;
-      letters.forEach((l, i) => {
-        const r = l.getBoundingClientRect();
-        const dx = ptr.x - (r.left + r.width / 2);
-        const dy = ptr.y - (r.top + r.height / 2);
+      for (let i = 0; i < n; i++) {
+        const dx = ptr.x - centers[i * 2];
+        const dy = ptr.y - centers[i * 2 + 1];
         const f = Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
         const target = active ? 400 + 500 * f : rest![i];
-        cur[i] += (target - cur[i]) * 0.18;
-        if (Math.abs(target - cur[i]) > 0.6) moving = true;
-        l.style.fontWeight = String(Math.round(cur[i]));
-      });
-      if (moving || active) raf = requestAnimationFrame(tick);
-      else letters.forEach((l) => (l.style.fontWeight = ""));
+        cur[i] += (target - cur[i]) * 0.2;
+        if (Math.abs(target - cur[i]) > 1.5) moving = true;
+        const q = Math.round(cur[i] / 8) * 8; // fewer distinct weights = fewer glyph re-rasters
+        if (q !== written[i]) {
+          letters[i].style.fontWeight = String(q);
+          written[i] = q;
+        }
+      }
+      const again = moving || (active && moved);
+      moved = false;
+      if (again) raf = requestAnimationFrame(tick);
+      else if (!active) {
+        letters.forEach((l) => (l.style.fontWeight = ""));
+        written.length = 0;
+      }
     };
 
     const onMove = (e: PointerEvent) => {
@@ -82,6 +102,7 @@ export default function Morph({ children }: { children: ReactNode }) {
         rest.forEach((w, i) => (cur[i] = w));
       }
       active = inside;
+      moved = true;
       if (rest && !raf && (inside || cur.some((w, i) => Math.abs(w - rest![i]) > 0.6))) raf = requestAnimationFrame(tick);
     };
 
