@@ -39,8 +39,8 @@ export default function CursorRing() {
 
     const loop = () => {
       raf = requestAnimationFrame(loop);
-      rx += (x - rx) * 0.2;
-      ry += (y - ry) * 0.2;
+      rx += (x - rx) * 0.1;
+      ry += (y - ry) * 0.1;
       scale += (target - scale) * 0.2;
       el.style.transform = `translate3d(${rx - 20}px, ${ry - 20}px, 0) scale(${scale})`;
     };
