@@ -1,5 +1,7 @@
 "use client";
 
+import Morph from "./Morph";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useStickyProgress } from "./hooks";
@@ -99,11 +101,11 @@ export default function Hero() {
         <div className="pointer-events-none relative z-30 mx-auto flex h-full w-full max-w-[1920px] flex-col justify-start px-4 pt-24 pb-24 md:justify-center md:px-10 md:pt-20 md:pb-10 2xl:px-30">
           <div ref={headline} className="pointer-events-auto max-w-[40rem] will-change-transform md:max-w-[44%] lg:max-w-[40rem]">
             <p className="mb-4 font-label text-xs tracking-[0.2em] uppercase">Camp Tinio, Cabanatuan City · Mon to Sat 10 AM to 6 PM</p>
-            <h1 className="ed-display text-[2.7rem] leading-[1.02] sm:text-6xl md:text-[4.1rem] xl:text-[5.4rem] 2xl:text-[6.4rem]">
+            <h1 className="ed-display text-[2.7rem] leading-[1.02] sm:text-6xl md:text-[4.1rem] xl:text-[5.4rem] 2xl:text-[6.4rem]"><Morph>
               Crunch <span className="ed-italic text-accent dark:text-kae-pink">first,</span>{" "}
               <span className="ed-caps">questions</span> later{" "}
               <span className="ed-hangul text-kae-gochujang dark:text-kae-gold">바삭!</span>
-            </h1>
+            </Morph></h1>
             <p className="mt-6 max-w-md text-base leading-relaxed text-ink-soft md:text-lg">
               Fried chicken meals, Korean street snacks and sweet drinks, made to order from our mobile kitchen.
             </p>

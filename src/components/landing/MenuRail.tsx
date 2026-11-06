@@ -1,5 +1,7 @@
 "use client";
 
+import Morph from "./Morph";
+
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useStickyProgress } from "./hooks";
@@ -55,10 +57,10 @@ export default function MenuRail() {
         <div ref={track} className="flex w-max items-center gap-6 px-4 will-change-transform md:gap-8 md:px-10 2xl:px-30">
           <div className="w-[82vw] shrink-0 md:w-[34rem]">
             <p className="mb-4 font-label text-xs tracking-[0.2em] uppercase">Menu · {items.length} categories</p>
-            <h2 className="ed-display text-5xl leading-[1.02] md:text-7xl">
+            <h2 className="ed-display text-5xl leading-[1.02] md:text-7xl"><Morph>
               Pick your <span className="ed-italic text-accent">craving,</span> <span className="ed-caps">then</span> keep{" "}
               <span className="ed-hangul text-kae-gochujang dark:text-kae-gold">스크롤</span>.
-            </h2>
+            </Morph></h2>
             <p className="mt-6 max-w-sm text-ink-soft">Snacks, sweets and street food, plus rice meals and chicken. Everything is cooked when you order.</p>
           </div>
 

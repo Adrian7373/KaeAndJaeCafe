@@ -1,5 +1,7 @@
 "use client";
 
+import Morph from "./Morph";
+
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import Reveal from "./Reveal";
@@ -35,10 +37,10 @@ export default function Visit() {
               </span>
             )}
           </p>
-          <h2 className="ed-display text-5xl leading-[1.02] md:text-7xl">
+          <h2 className="ed-display text-5xl leading-[1.02] md:text-7xl"><Morph>
             Find the <span className="ed-italic text-accent">cart,</span> <span className="ed-caps">or</span> message{" "}
             <span className="ed-hangul text-kae-gochujang dark:text-kae-gold">안녕</span> first.
-          </h2>
+          </Morph></h2>
           <ul className="mt-10 space-y-5 text-lg">
             {[
               [MapPin, "Zone 3, Camp Tinio, Cabanatuan City, Philippines, 3100"],
