@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { loginAdmin } from "@/app/actions";
 import { Eye, EyeOff } from "lucide-react";
+import LegalConsent from "@/components/legal/LegalConsent";
 
 export default function LoginForm() {
     const [state, formAction, isPending] = useActionState(loginAdmin, null);
@@ -44,6 +45,7 @@ export default function LoginForm() {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
             </div>
+            <LegalConsent />
             <button disabled={isPending} type="submit" className="text-md bg-kae-dark text-kae-light px-6 py-2 rounded-xl">Proceed</button>
             {state?.error && (
                 <div className="border-1 border-red-500 bg-red-300 px-4 py-2 rounded-xl">

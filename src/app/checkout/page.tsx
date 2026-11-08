@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { placeOrder } from "../actions";
 import dynamic from "next/dynamic";
 import { createClient } from "../../../lib/supabase";
+import LegalConsent from "@/components/legal/LegalConsent";
 
 const LocationMap = dynamic(() => import("./_components/MapPicker"), {
     ssr: false,
@@ -338,7 +339,8 @@ export default function CheckoutPage() {
                                     <p>{cart.length === 0 ? "₱0" : (isDelivery && !isOutOfRange) ? `₱${totalPrice + deliveryFee}` : `₱${totalPrice}`}</p>
                                 </div>
                             </div>
-                            <button disabled={cart.length === 0 || isPending || (isDelivery && isOutOfRange)} type="submit" className={`flex justify-center gap-2 items-center px-6 py-4 text-white font-bold text-xl rounded-xl transition-all ${cart.length === 0 || (isDelivery && isOutOfRange) ? "bg-gray-400 cursor-not-allowed" : "bg-kae-dark hover:bg-gray-800 shadow-lg active:scale-95"}`}>
+                            <LegalConsent includeRefunds />
+                            <button disabled={cart.length === 0 || isPending|| (isDelivery && isOutOfRange)} type="submit" className={`flex justify-center gap-2 items-center px-6 py-4 text-white font-bold text-xl rounded-xl transition-all ${cart.length === 0 || (isDelivery && isOutOfRange) ? "bg-gray-400 cursor-not-allowed" : "bg-kae-dark hover:bg-gray-800 shadow-lg active:scale-95"}`}>
                                 {isPending && <div className="rounded-full border-white border-t-transparent animate-spin w-5 h-5 border-2"></div>}
                                 Place Order
                             </button>

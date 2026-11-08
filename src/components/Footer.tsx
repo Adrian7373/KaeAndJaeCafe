@@ -3,6 +3,7 @@
 import Morph from "@/components/landing/Morph";
 
 import Link from "next/link";
+import { legalLinks } from "@/components/legal/LegalPage";
 
 const word = "Kae".split("");
 const word2 = "Jae".split("");
@@ -99,6 +100,16 @@ export default function Footer() {
 
       <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-4 px-4 pb-8 pt-6 font-label text-xs tracking-widest uppercase md:px-10 2xl:px-30">
         <p>© 2026 Kae and Jae Cafe</p>
+        <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          {legalLinks.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} className={link}>
+                {l.label}
+                <span className={underline} />
+              </Link>
+            </li>
+          ))}
+        </ul>
         <a href="#home" className={link}>
           Back to top ↑<span className={underline} />
         </a>

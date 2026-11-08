@@ -38,6 +38,10 @@ type ActionState = {
 }
 
 export async function placeOrder(prevState: any, formData: FormData): Promise<any> {
+    if (formData.get("agreeTerms") !== "on" || formData.get("agreePrivacy") !== "on") {
+        return { success: false, error: "Please agree to the Terms and Conditions and the Privacy Policy to place your order." };
+    }
+
     const rawData = Object.fromEntries(formData.entries());
     const validatedFields = checkOutSchema.safeParse(rawData);
 
@@ -177,6 +181,10 @@ export async function loginAdmin(prevState: any, formData: FormData) {
     const role = formData.get("role");
     const password = formData.get("password") as string;
     let email = "";
+
+    if (formData.get("agreeTerms") !== "on" || formData.get("agreePrivacy") !== "on") {
+        return { error: "Please agree to the Terms and Conditions and the Privacy Policy to continue." };
+    }
 
     if (role === "admin") {
         email = process.env.ADMIN_EMAIL || "";

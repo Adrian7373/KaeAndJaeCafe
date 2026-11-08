@@ -1,6 +1,7 @@
 "use client";
 
 import Morph from "./Morph";
+import Link from "next/link";
 
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -73,6 +74,9 @@ export default function Visit() {
             <input id="c-email" className={field} type="email" name="email" placeholder="you@example.com" />
             <label className="font-label text-xs tracking-widest uppercase" htmlFor="c-msg">Message</label>
             <textarea id="c-msg" className={`${field} h-36 resize-none`} name="message" placeholder="Hi! Do you cater for events?" />
+            <p className="font-body text-xs text-ink-soft">
+              By sending a message you agree to our <Link href="/privacy" className="font-bold underline">Privacy Policy</Link>.
+            </p>
             <button className="mt-2 self-start rounded-full bg-ink px-7 py-3 font-body text-sm font-bold text-paper transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_var(--accent)] active:translate-y-0 active:shadow-none">
               Send message
             </button>
