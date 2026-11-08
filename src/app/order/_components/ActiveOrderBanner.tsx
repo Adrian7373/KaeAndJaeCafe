@@ -19,15 +19,16 @@ export default function ActiveOrderBanner({ serverOrderId }: { serverOrderId?: s
     if (!orderId) return null;
 
     return (
-        <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+        <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 md:bottom-6 md:justify-start md:px-12 2xl:px-30">
             <Link
                 href={`/track/${orderId}`}
-                className="pointer-events-auto flex items-center gap-3 bg-kae-pink text-white px-6 py-4 rounded-full shadow-2xl hover:scale-105 transition-transform"
+                className="pointer-events-auto flex items-center gap-3 rounded-full border-2 border-kae-dark bg-kae-gold px-5 py-3 font-body text-sm font-bold text-kae-dark shadow-[4px_4px_0_0_var(--color-kae-dark)] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_var(--color-kae-dark)] active:translate-y-0"
             >
-                <div className="w-3 h-3 bg-kae-purple rounded-full animate-ping absolute"></div>
-                <div className="w-3 h-3 bg-kae-purple rounded-full relative"></div>
-                <span className="font-bold tracking-wide">View Active Order</span>
-                <span>→</span>
+                <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-kae-gochujang opacity-70 motion-reduce:animate-none" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-kae-gochujang" />
+                </span>
+                Track your order
             </Link>
         </div>
     );

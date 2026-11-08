@@ -1,9 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useCart } from "../../../../context/CartContext";
-import { createClient } from "../../../../lib/supabase";
-import Image from "next/image";
 import { AddOn } from "./MenuCatalog";
 
 interface CartAddOnProps {
@@ -13,52 +10,43 @@ interface CartAddOnProps {
 export default function CartAddOns({ addOns }: CartAddOnProps) {
     const { cart, addToCart } = useCart();
 
-    // Optional: Filter out add-ons that are already in the cart
     const availableAddons = addOns.filter(
         (addon) => !cart.some((cartItem) => cartItem.id === addon.id)
     );
 
-    console.log(addOns)
     if (availableAddons.length === 0) return null;
 
     return (
-        <div className="w-full py-4 border-t border-gray-100 mt-4">
-            <p className="text-sm font-bold text-gray-800 mb-3 px-1">You might also like...</p>
+        <div className="border-t-2 border-dashed border-kae-dark/30 pt-4">
+            <p className="ed-italic mb-3 text-xl text-kae-dark">Add something on the side</p>
 
-            {/* Horizontal Scroll Container */}
-            <div className="flex gap-3 overflow-x-auto pb-4 snap-x hide-scrollbar">
+            <ul className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {availableAddons.map((item) => (
-                    <div
+                    <li
                         key={item.id}
-                        className="snap-start shrink-0 w-[140px] bg-white border border-gray-200 rounded-xl p-2 flex flex-col gap-2 shadow-sm"
+                        className="flex w-36 shrink-0 snap-start flex-col overflow-hidden rounded-xl border-2 border-kae-dark bg-white"
                     >
-                        <div className="w-full h-20 relative rounded-lg overflow-hidden bg-gray-50">
-                            {/* Replace with standard <img> if not using next/image */}
-                            <Image
-                                src={item.image_url || "/placeholder-snack.jpg"}
-                                alt={item.name}
-                                fill
-                                className="object-cover"
-                            />
+                        <div className="h-20 w-full bg-kae-pink-soft">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
                         </div>
-
-                        <div className="flex flex-col grow justify-between">
-                            <p className="text-xs font-bold leading-tight text-gray-700 line-clamp-2">
-                                {item.name}
-                            </p>
-                            <div className="flex items-center justify-between mt-2">
-                                <p className="text-sm font-black text-kae-dark">₱{item.discount_price}</p>
+                        <div className="flex grow flex-col justify-between gap-2 p-2.5">
+                            <p className="line-clamp-2 text-sm leading-tight font-bold text-kae-dark">{item.name}</p>
+                            <div className="flex items-center justify-between">
+                                <span className="font-label text-sm text-kae-dark">₱{item.discount_price}</span>
                                 <button
-                                    onClick={() => addToCart({ ...item, qty: 1 })}
-                                    className="bg-kae-purple/10 text-kae-purple hover:bg-kae-purple hover:text-white p-1.5 rounded-full transition-colors active:scale-95"
+                                    type="button"
+                                    onClick={() => addToCart({ ...item, imageUrl: item.image_url, price: item.discount_price, qty: 1 })}
+                                    aria-label={`Add ${item.name}`}
+                                    className="rounded-full bg-kae-purple p-1.5 text-kae-cream transition hover:bg-kae-pink hover:text-kae-dark active:scale-95"
                                 >
                                     <Plus size={16} strokeWidth={3} />
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </li>
                 ))}
-            </div>
+            </ul>
         </div>
     );
 }

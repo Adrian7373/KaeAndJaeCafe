@@ -67,7 +67,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         })
     }
 
-    const addToCart = (product: any) => {
+    const addToCart = (product: any, event?: React.MouseEvent) => {
         setCart((prevCart) => {
             const existingItem = prevCart.find((item) => item.id === product.id);
             if (existingItem) {
@@ -80,7 +80,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 
         if (event && cartIconRef.current) {
-            const buttonRect = (event.target as HTMLElement).getBoundingClientRect();
+            const buttonRect = (event.currentTarget as HTMLElement).getBoundingClientRect();
             const cartRect = cartIconRef.current.getBoundingClientRect();
 
             const newFlyer = {

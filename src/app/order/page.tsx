@@ -39,8 +39,6 @@ export default async function OrderPage() {
         } as unknown as Product;
     }) || [];
 
-    console.log(menuProducts);
-
     const { data: categories, error: catError } = await supabase
         .from("product_category")
         .select("*");
